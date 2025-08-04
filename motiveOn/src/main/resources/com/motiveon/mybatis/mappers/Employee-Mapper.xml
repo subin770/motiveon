@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Employee-Mapper">
+
+  
+    <select id="selectEmployeeByEno" parameterType="int" resultType="employee">
+    	select *
+    	from employee
+    	where eno = #{eno}
+    	
+    </select>
+
+  
+    <select id="selectEmployeeList" resultType="employee">
+    	select * 
+    	from employee
+      
+    </select>
+
+  
+    <insert id="insertEmployee" parameterType="employee">
+       insert into 
+       employee ( eno, dno, birth, email, name, photo, ppscode, job, phone, enabled, pwd, signtype, signpath, condition )
+	   VALUES ( #{eno},  #{dno}, #{birth}, #{email}, #{name}, #{photo}, #{ppscode},#{job}, #{phone}, #{enabled}, #{pwd}, #{signtype}, #{signpath},#{condition})
+    </insert>
+
+    
+    <update id="updateEmployee" parameterType="employee">
+        update employee
+        set
+            dno = #{dno},
+            birth = #{birth},
+            email = #{email},
+            name = #{name},
+            photo = #{photo},
+            ppscode = #{ppscode},
+            job = #{job},
+            phone = #{phone},
+            enabled = #{enabled},
+            pwd = #{pwd},
+            signtype = #{signtype},
+            signpath = #{signpath},
+            condition = #{condition}
+        WHERE eno = #{eno}
+    </update>
+
+   
+    <delete id="deleteEmployee" parameterType="int">
+    	delete 
+    	from employee
+    	where  eno = #{eno}
+    </delete>
+    
+    
+<!--     <insert id="insertAuthorities" >
+insert into auth_detail(mem_id,role_id)
+values (#{mem_id},#{role_id})
+</insert>
+
+<delete id="deleteAllAuthorityById" >
+delete
+from auth_detail
+where mem_id = #{mem_id} and role_id!='student'
+</delete>
+
+<select id="selectAuthoritiesById" resultType="str">
+select role
+from auth_detail
+where role
+     -->
+    
+
+</mapper>

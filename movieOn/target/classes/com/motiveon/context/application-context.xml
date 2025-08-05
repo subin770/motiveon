@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+	<!-- DAO 등록 -->
+	<bean id="employeeDAO" 
+	      class="com.motiveon.dao.EmployeeDAOImpl"
+		  c:session-ref="sqlSession" />
+	<bean id="menuDAO" 
+	      class="com.motiveon.dao.MenuDAOImpl"
+		  c:session-ref="sqlSession" />
+	
+	<bean id="calendarDAO"
+	      class="com.motiveon.dao.CalendarDAOImpl"
+	      c:session-ref="sqlSession" />
+	
+	
+	
+	
+	<!-- Service 등록 -->
+	<bean id="calendarService"
+	      class="com.motiveon.service.CalendarServiceImpl"
+	      c:calendarDAO-ref="calendarDAO" />
+
+	<bean id="menuService"
+		  class="com.motiveon.service.MenuServiceImpl" 
+		  c:menuDAO-ref="menuDAO" />
+		
+	<bean id="employeeService"
+		  class="com.motiveon.service.EmployeeServiceImpl"
+		  c:employeeDAO-ref="employeeDAO" />
+</beans>

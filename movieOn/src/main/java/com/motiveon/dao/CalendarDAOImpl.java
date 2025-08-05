@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.motiveon.dto.CalendarVO;
@@ -13,7 +14,12 @@ import com.motiveon.dto.EmployeeVO;
 @Repository
 public class CalendarDAOImpl implements CalendarDAO {
 
+	
+	@Autowired
 	private SqlSession session;
+	
+	private static final String NAMESPACE = "Calendar-Mapper";
+
 
 	public CalendarDAOImpl(SqlSession session) {
 		this.session = session;
@@ -32,8 +38,9 @@ public class CalendarDAOImpl implements CalendarDAO {
 
 	@Override
 	public void insertCalendar(CalendarVO calendar) throws SQLException {
-		session.update("Calendar-Mapper.insertCalendar", calendar);
+	    session.insert(NAMESPACE + ".insertCalendar", calendar);
 	}
+
 
 	@Override
 	public void updateCalendar(CalendarVO calendar) throws SQLException {
@@ -45,10 +52,7 @@ public class CalendarDAOImpl implements CalendarDAO {
 		session.delete("Calendar-Mapper.deleteCalendar", ccode);
 	}
 
-	@Override
-	public int selectCalendarSeqNext() throws SQLException {
-		return session.selectOne("Calendar-Mapper.selectCalendarSeqNext");
-	}
+	
 
 	@Override
 	public List<EmployeeVO> selectEnoByCcode(String ccode) throws SQLException {
@@ -69,5 +73,13 @@ public class CalendarDAOImpl implements CalendarDAO {
 	public List<Integer> selectAllEmployee() throws SQLException {
 		return session.selectList("Calendar-Mapper.selectAllEmployee");
 	}
+
+
+	@Override
+	public List<CalendarVO> selectSearchCalendarList() throws Exception {
+	    return session.selectList(NAMESPACE + "selectSearchCalendarList");
+	}
+
+	
 
 }

@@ -1,6 +1,9 @@
 package com.motiveon.service;
 
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +19,7 @@ import com.motiveon.dto.EmployeeVO;
 @Service
 public class CalendarServiceImpl implements CalendarService {
 
+	@Autowired
 	private CalendarDAO calendarDAO;
 
 	public CalendarServiceImpl(CalendarDAO calendarDAO) {
@@ -23,9 +27,38 @@ public class CalendarServiceImpl implements CalendarService {
 	}
 
 	@Override
-	public List<CalendarVO> getCalendarList(Criteria cri, int eno) throws SQLException {
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+	public void regist(CalendarVO calendar) throws Exception {
+		
+		registCalendar(calendar); 
+	}
 
+	@Override
+	public void registCalendar(CalendarVO calendar) throws SQLException {
+		// 일정 코드 수동 생성
+		String ccode = calendarDAO.selectCcode();
+		calendar.setCcode(ccode);
+		
+		calendar.setSdate(parseDate(calendar.getStart()));
+	    calendar.setEdate(parseDate(calendar.getEnd()));
+
+		// insert
+		calendarDAO.insertCalendar(calendar);
+	}
+	
+	private Date parseDate(String datetime) {
+	    try {
+	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+	        return sdf.parse(datetime);
+	    } catch (ParseException e) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
+
+
+	@Override
+	public List<CalendarVO> getCalendarList(Criteria cri, int eno) throws SQLException {
+		Map<String, Object> paramMap = new HashMap<>();
 		paramMap.put("eno", eno);
 		paramMap.put("catecode1", cri.getCatecode1());
 		paramMap.put("catecode2", cri.getCatecode2());
@@ -53,15 +86,6 @@ public class CalendarServiceImpl implements CalendarService {
 	}
 
 	@Override
-	public void registCalendar(CalendarVO calendar) throws SQLException {
-		String ccode = calendarDAO.selectCcode();
-
-		calendar.setCcode(ccode);
-		// insert
-		calendarDAO.insertCalendar(calendar);
-	}
-
-	@Override
 	public void modify(CalendarVO calendar) throws SQLException {
 		calendarDAO.updateCalendar(calendar);
 	}
@@ -69,7 +93,6 @@ public class CalendarServiceImpl implements CalendarService {
 	@Override
 	public void remove(String ccode) throws SQLException {
 		calendarDAO.deleteCalendar(ccode);
-
 	}
 
 	@Override
@@ -87,4 +110,8 @@ public class CalendarServiceImpl implements CalendarService {
 		return calendarDAO.selectAllEmployee();
 	}
 
+	@Override
+	public List<CalendarVO> getAllCalendar() throws Exception {
+		return calendarDAO.selectSearchCalendarList();
+	}
 }

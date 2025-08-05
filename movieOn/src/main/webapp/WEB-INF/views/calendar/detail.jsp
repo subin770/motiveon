@@ -66,8 +66,8 @@
     }
   }
 
-  // 페이지 진입 시 자동 모달 표시
+ /*  // 페이지 진입 시 자동 모달 표시
   $(document).ready(function() {
     $('#detailModal').modal('show');
-  });
+  }); */
 </script>

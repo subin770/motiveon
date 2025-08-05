@@ -17,24 +17,52 @@ public class CalendarVO {
 	private Date sdate;
 	private Date edate;
 	private int eno;
-	private String catedetail;
 	private String color = "";
-	
-	
-	public String getColor() {
-		return color;
+	private String catedetail = "";
+
+	private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+
+	// 날짜 변환 로직을 start, end 세터 안 포함
+	public void setStart(String start) {
+		this.start = start;
+		try {
+			this.sdate = formatter.parse(start);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public void setColor(String color) {
-		this.color = color;
+	public void setEnd(String end) {
+		this.end = end;
+		try {
+			this.edate = formatter.parse(end);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public String getCatedetail() {
-		return catedetail;
+	public String getStart() {
+		return start;
 	}
 
-	public void setCatedetail(String catedetail) {
-		this.catedetail = catedetail;
+	public String getEnd() {
+		return end;
+	}
+
+	public Date getSdate() {
+		return sdate;
+	}
+
+	public Date getEdate() {
+		return edate;
+	}
+
+	public void setSdate(Date sdate) {
+		this.sdate = sdate;
+	}
+
+	public void setEdate(Date edate) {
+		this.edate = edate;
 	}
 
 	public String getCcode() {
@@ -69,22 +97,6 @@ public class CalendarVO {
 		this.content = content;
 	}
 
-	public String getStart() {
-		return start;
-	}
-
-	public void setStart(String start) {
-		this.start = start;
-	}
-
-	public String getEnd() {
-		return end;
-	}
-
-	public void setEnd(String end) {
-		this.end = end;
-	}
-
 	public int getEno() {
 		return eno;
 	}
@@ -93,40 +105,24 @@ public class CalendarVO {
 		this.eno = eno;
 	}
 
-
-	public Date getSdate() {
-		return sdate;
+	public String getColor() {
+		return color;
 	}
 
-	public void setSdate(String sdate) {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-		System.out.println(sdate);
-		try {
-			this.sdate = sdf.parse(sdate);
-			System.out.println(this.sdate);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+	public void setColor(String color) {
+		this.color = (color == null) ? "" : color;
 	}
 
-	public Date getEdate() {
-		return edate;
+	public String getCatedetail() {
+		return catedetail;
 	}
 
-	public void setEdate(String edate) {
-		System.out.println(edate);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-		try {
-			this.edate = sdf.parse(edate);
-			System.out.println(this.edate);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+	public void setCatedetail(String catedetail) {
+		this.catedetail = (catedetail == null) ? "" : catedetail;
 	}
 
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
 	}
-
 }

@@ -4,148 +4,158 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="Calendar-Mapper">
-	<resultMap type="calendar" id="calendarMap">
-		<result property="start" column="sdate" />
-		<result property="end" column="edate" />
-	</resultMap>
-<sql id="catecode">
-		<if test="catecode1 == '1'.toString()">
-			and ccode in (select ccode
-			from calendar
-			where eno = #{eno}
-			and catecode = 1
-			and title like '%'||#{keyword}||'%')
-			<if test="catecode2 == '2'.toString()">
-				or ccode in (select ccode
-				from calendar a, employee b ,(select a.dno
-				from employee a, department b
-				where a.dno = b.dno
-				and a.eno = #{eno}) c
-				where a.eno = b.eno
-				and b.dno = c.dno
-				and a.catecode = 2
-				and title like '%'||#{keyword}||'%')
-			</if>
-			<if test="catecode3 == '3'.toString()">
-				or catecode = 3
-				and title like '%'||#{keyword}||'%'
-			</if>
-		</if>
-		<if test="catecode2 == '2'.toString()">
-			and ccode in (select ccode
-			from calendar a, employee b ,(select a.dno
-			from employee a, department b
-			where a.dno = b.dno
-			and a.eno = #{eno}) c
-			where a.eno = b.eno
-			and b.dno = c.dno
-			and a.catecode = 2
-			and title like '%'||#{keyword}||'%')
-			<if test="catecode3 == '3'.toString()">
-				or catecode = 3
-				and title like '%'||#{keyword}||'%'
-			</if>
-		</if>
-		<if test="catecode3 == '3'.toString()">
-			and catecode = 3
-			and title like '%'||#{keyword}||'%'
-		</if>
-		<if
-			test="catecode1 == '4'.toString() and catecode2 == '4'.toString() and catecode3 == '4'.toString()">
-			and catecode = 4
-		</if>
-	</sql>
-  
-	
 
-	<!-- 목록 조회 -->
-	<select id="selectSearchCalendarList" resultMap="calendarMap">
-		select
-		ccode
-		,catecode
-		,title
-		,content
-		,TO_char(sdate, 'YYYY-MM-DD"T"HH24:MI:SS') sdate
-		,TO_char(edate, 'YYYY-MM-DD"T"HH24:MI:SS') edate
-		,eno
-		,color
-		,catedetail
-		from calendar
-		where ccode is not null
-	
-	</select>
+  <!-- resultMap -->
+  <resultMap type="calendar" id="calendarMap">
+    <result property="start" column="sdate" />
+    <result property="end" column="edate" />
+  </resultMap>
 
-	<!-- 일정 단건 조회 -->
-	<select id="selectCalendarByCcode" resultMap="calendarMap">
-		SELECT
-		ccode
-		,catecode
-		,title
-		,content
-		,TO_char(sdate,'YYYY-MM-DD"T"HH24:MI:SS') sdate
-		,TO_char(edate,'YYYY-MM-DD"T"HH24:MI:SS') edate
-		,eno
-		,color
-		,catedetail
-		from calendar
-		where ccode = #{ccode}
-		
-	</select>
+  <!--  검색 필터 조건 조각 -->
+  <sql id="catecode">
+    <if test="catecode1 == '1'.toString()">
+      AND ccode IN (
+        SELECT ccode FROM calendar
+        WHERE eno = #{eno}
+        AND catecode = 1
+        AND title LIKE '%' || #{keyword} || '%'
+      )
+      <if test="catecode2 == '2'.toString()">
+        OR ccode IN (
+          SELECT ccode
+          FROM calendar a, employee b, (
+            SELECT a.dno FROM employee a, department b
+            WHERE a.dno = b.dno AND a.eno = #{eno}
+          ) c
+          WHERE a.eno = b.eno
+          AND b.dno = c.dno
+          AND a.catecode = 2
+          AND title LIKE '%' || #{keyword} || '%'
+        )
+      </if>
+      <if test="catecode3 == '3'.toString()">
+        OR catecode = 3 AND title LIKE '%' || #{keyword} || '%'
+      </if>
+    </if>
+
+    <if test="catecode2 == '2'.toString()">
+      AND ccode IN (
+        SELECT ccode
+        FROM calendar a, employee b, (
+          SELECT a.dno FROM employee a, department b
+          WHERE a.dno = b.dno AND a.eno = #{eno}
+        ) c
+        WHERE a.eno = b.eno
+        AND b.dno = c.dno
+        AND a.catecode = 2
+        AND title LIKE '%' || #{keyword} || '%'
+      )
+      <if test="catecode3 == '3'.toString()">
+        OR catecode = 3 AND title LIKE '%' || #{keyword} || '%'
+      </if>
+    </if>
+
+    <if test="catecode3 == '3'.toString()">
+      AND catecode = 3 AND title LIKE '%' || #{keyword} || '%'
+    </if>
+
+    <if test="catecode1 == '4'.toString() and catecode2 == '4'.toString() and catecode3 == '4'.toString()">
+      AND catecode = 4
+    </if>
+  </sql>
+
+  <!--  일정 목록 조회 -->
+  <select id="selectSearchCalendarList" resultMap="calendarMap">
+    SELECT
+      ccode,
+      catecode,
+      title,
+      content,
+      TO_CHAR(sdate, 'YYYY-MM-DD"T"HH24:MI:SS') sdate,
+      TO_CHAR(edate, 'YYYY-MM-DD"T"HH24:MI:SS') edate,
+      eno,
+      color,
+      catedetail
+    FROM calendar
+    WHERE ccode IS NOT NULL
+  </select>
+
+  <!--  일정 단건 조회 -->
+  <select id="selectCalendarByCcode" resultMap="calendarMap">
+    SELECT
+      ccode,
+      catecode,
+      title,
+      content,
+      TO_CHAR(sdate, 'YYYY-MM-DD"T"HH24:MI:SS') sdate,
+      TO_CHAR(edate, 'YYYY-MM-DD"T"HH24:MI:SS') edate,
+      eno,
+      color,
+      catedetail
+    FROM calendar
+    WHERE ccode = #{ccode}
+  </select>
+
+  <!--  일정 등록 -->
+<insert id="insertCalendar" parameterType="calendar">
+  INSERT INTO calendar (
+    ccode, catecode, title, content, space,
+    important, sdate, edate, eno, allday,
+    color, catedetail
+  )
+  VALUES (
+    #{ccode}, #{catecode}, #{title}, #{content}, #{space},
+    #{important}, #{sdate, jdbcType=DATE}, #{edate, jdbcType=DATE}, #{eno},
+    #{allday}, #{color}, #{catedetail}
+  )
+</insert>
 
 
-	<!-- 일정 등록 -->
-	<update id="insertCalendar" parameterType="calendar">
-		insert into calendar (
-		ccode
-		,catecode
-		,title
-		,content
-		,sdate
-		,edate
-		,eno
-		,color
-		,catedetail
-		)
-		values (#{ccode},#{catecode},#{title},#{content},#{sdate},#{edate},#{eno},#{color},#{catedetail})
-	</update>
 
-	<!-- 일정 수정 -->
-	<update id="updateCalendar" parameterType="calendar">
-		update calendar
-		set title=#{title}, content=#{content}, sdate=#{sdate}, edate=#{edate}
-		where ccode=#{ccode}
-	</update>
 
-	<!-- 일정 삭제 -->
-	<update id="deleteCalendar" parameterType="str">
-		delete
-		from calendar
-		where ccode=#{ccode}
-	</update>
 
-	<!-- 일정 고유번호 생성 -->
-	<select id="selectCcode" resultType="str">
-		select 'CA' ||
-		trim(nvl(max(to_char(to_number(substr(ccode,3))+1,'000000')),'000001'))
-		as ccode
-		from calendar union
+  <!-- 일정 수정 -->
+  <update id="updateCalendar" parameterType="calendar">
+    UPDATE calendar
+    SET 
+      title = #{title},
+      content = #{content},
+      sdate = TO_DATE(#{sdate}, 'YYYY-MM-DD"T"HH24:MI'),
+      edate = TO_DATE(#{edate}, 'YYYY-MM-DD"T"HH24:MI')
+    WHERE ccode = #{ccode}
+  </update>
 
-		select nvl(null,'CA000001') as ccode
-		from dual
-		where not exists (select ccode from calendar)
-	</select>
+  <!--  일정 삭제 -->
+  <update id="deleteCalendar" parameterType="str">
+    DELETE FROM calendar
+    WHERE ccode = #{ccode}
+  </update>
 
-	<!-- 내 부서원 eno 전체 조회 -->
-	<select id="selectEnoSameMyDno" resultType="int">
-		select a.eno
-		from employee a, (select a.dno from department a, employee b where a.dno = b.dno and b.eno = #{eno}) b
-		where a.dno = b.dno
-	</select>
+  <!--  일정 고유번호 생성 -->
+  <select id="selectCcode" resultType="str">
+    SELECT 'CA' || 
+      TRIM(NVL(MAX(TO_CHAR(TO_NUMBER(SUBSTR(ccode, 3)) + 1, '000000')), '000001')) 
+    AS ccode
+    FROM calendar
 
-	<!-- 전 사원 eno 조회 -->
-	<select id="selectAllEmployee" resultType="int">
-		select eno
-		from employee
-	</select>
+    UNION
+
+    SELECT NVL(NULL, 'CA000001') AS ccode
+    FROM dual
+    WHERE NOT EXISTS (SELECT ccode FROM calendar)
+  </select>
+
+  <!-- 내 부서원 eno 조회 -->
+  <select id="selectEnoSameMyDno" resultType="int">
+    SELECT a.eno
+    FROM employee a,
+         (SELECT a.dno FROM department a, employee b WHERE a.dno = b.dno AND b.eno = #{eno}) b
+    WHERE a.dno = b.dno
+  </select>
+
+  <!--  전 사원 eno 조회 -->
+  <select id="selectAllEmployee" resultType="int">
+    SELECT eno FROM employee
+  </select>
 
 </mapper>

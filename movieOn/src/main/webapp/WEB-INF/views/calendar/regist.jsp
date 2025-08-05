@@ -2,7 +2,6 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-
 <!-- 일정 등록 모달 -->
 <div class="modal fade" id="eventModal" tabindex="-1" role="dialog"
 	aria-labelledby="eventModalLabel" aria-hidden="true">
@@ -10,8 +9,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title font-weight-bold" id="eventModalLabel">일정 등록</h5>
-				<button type="button" class="close" data-dismiss="modal"
-					aria-label="Close">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>

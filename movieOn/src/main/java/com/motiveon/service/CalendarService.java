@@ -14,6 +14,8 @@ public interface CalendarService {
 
 	CalendarVO getCalendarByCcode(String ccode) throws SQLException;
 
+	void regist(CalendarVO calendar) throws Exception;
+	
 	void registCalendar(CalendarVO calendar) throws SQLException;
 
 	void modify(CalendarVO calendar) throws SQLException;
@@ -26,4 +28,6 @@ public interface CalendarService {
 	
 	List<Integer> getAllEmployee() throws SQLException;
 
+
+	List<CalendarVO> getAllCalendar() throws Exception;
 }

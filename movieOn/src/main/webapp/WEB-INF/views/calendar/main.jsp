@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
             $('#eventModal').modal('show');
         },
         
-        eventClick: function(info) {
+        /* eventClick: function(info) {
             const event = info.event;
 
             $('#detailTitle').text(event.title || '');
@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
             $('#detailType').text(event.extendedProps.type || '');
 
             $('#detailModal').modal('show');
-        },
+        }, */
         
         eventMouseEnter: function(info) {
             const tooltip = document.createElement('div');
@@ -269,11 +269,14 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       } */
       
-      Swal.fire({
-    	  icon: 'warning',
-    	  title: '제목은 필수입니다.',
-    	  confirmButtonText: '확인'
-    	});
+      if (!title) {
+    	  Swal.fire({
+    	    icon: 'warning',
+    	    title: '제목은 필수입니다.',
+    	    confirmButtonText: '확인'
+    	  });
+    	  return; // ← 이거 없으면 계속 AJAX 실행됨!
+    	}
 
 
       if (!type) {
@@ -302,25 +305,25 @@ document.addEventListener('DOMContentLoaded', function () {
         contentType: 'application/json',
         data: JSON.stringify({ title, start, end, content, type }),
         success: function () {
-          calendar.addEvent({
-            title: title,
-            start: start,
-            end: end,
-            extendedProps: {
-              content: content,
-              type: type
-            },
-            backgroundColor: '#007bff',
-            borderColor: '#007bff'
-          });
+        	  calendar.addEvent({
+        	    title: title,
+        	    start: start,
+        	    end: end,
+        	    extendedProps: {
+        	      content: content,
+        	      type: type
+        	    },
+        	    backgroundColor: '#007bff',
+        	    borderColor: '#007bff'
+        	  });
 
-          $('#eventModal').modal('hide');
-          $('#eventTitle').val('');
-          $('#eventStart').val('');
-          $('#eventEnd').val('');
-          $('#eventContent').val('');
-          $('input[name="eventType"]').prop('checked', false);
-        },
+        	  $('#eventModal').modal('hide');
+        	  $('#eventTitle').val('');
+        	  $('#eventStart').val('');
+        	  $('#eventEnd').val('');
+        	  $('#eventContent').val('');
+        	  $('input[name="eventType"]').prop('checked', false);
+        	},
         error: function () {
           alert("등록에 실패했습니다.");
         }

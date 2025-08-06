@@ -68,10 +68,12 @@
 			</div>
 
 			<!-- 등록/취소 버튼 -->
-			<div class="modal-footer justify-content-end">
-				<button type="button" class="btn btn-danger" data-dismiss="modal">취소</button>
-				<button type="submit" class="btn btn-primary">등록</button>
-			</div>
+			<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+  <button type="button" class="btn btn-primary" id="btnSave">등록</button>
+  <button type="button" class="btn btn-primary" id="btnModify" style="display: none;">완료</button>
+</div>
+
 		</div>
 	</div>
 </div>

@@ -85,11 +85,7 @@ public class CalendarServiceImpl implements CalendarService {
 		return calendar;
 	}
 
-	@Override
-	public void modify(CalendarVO calendar) throws SQLException {
-		calendarDAO.updateCalendar(calendar);
-	}
-
+	
 	@Override
 	public void remove(String ccode) throws SQLException {
 		calendarDAO.deleteCalendar(ccode);
@@ -119,6 +115,18 @@ public class CalendarServiceImpl implements CalendarService {
 	public List<CalendarVO> getCalendarList() throws SQLException {
 	    return calendarDAO.selectAllCalendar();
 	}
+
+	@Override
+	public int modify(CalendarVO vo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int modifyCalendar(CalendarVO calendar) throws SQLException {
+	    return calendarDAO.updateCalendar(calendar);
+	}
+
 
 
 

@@ -74,6 +74,23 @@ public class CalendarController {
 	    return calendarService.getCalendarList();
 	}
 
+	@PostMapping("/modify")
+	@ResponseBody
+	public ResponseEntity<String> modifyCalendar(@RequestBody CalendarVO calendar) throws SQLException {
+		
+		System.out.println("수정 전송 sdate: " + calendar.getSdate());
+		System.out.println("수정 전송 edate: " + calendar.getEdate());
+
+	    int result = calendarService.modifyCalendar(calendar); 
+
+	    if (result > 0) {
+	        return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
+	    } else {
+	        return new ResponseEntity<>("FAIL", HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
+
 
 
 

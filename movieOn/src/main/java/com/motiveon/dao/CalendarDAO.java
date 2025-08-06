@@ -15,8 +15,8 @@ public interface CalendarDAO {
 	
 	void insertCalendar(CalendarVO calendar) throws SQLException;
 
-	
-	void updateCalendar(CalendarVO calendar) throws SQLException;
+	public int updateCalendar(CalendarVO calendar) throws SQLException;
+
 
 	void deleteCalendar(String ccode) throws SQLException;
 

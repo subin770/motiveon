@@ -114,4 +114,12 @@ public class CalendarServiceImpl implements CalendarService {
 	public List<CalendarVO> getAllCalendar() throws Exception {
 		return calendarDAO.selectSearchCalendarList();
 	}
+
+	@Override
+	public List<CalendarVO> getCalendarList() throws SQLException {
+	    return calendarDAO.selectAllCalendar();
+	}
+
+
+
 }

@@ -1,8 +1,10 @@
 package com.motiveon.controller;
 
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.motiveon.dto.CalendarVO;
 import com.motiveon.dto.EmployeeVO;
@@ -63,6 +66,12 @@ public class CalendarController {
 	private Date parseDate(String dateStr) throws ParseException {
 	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 	    return sdf.parse(dateStr);
+	}
+
+	@RequestMapping("/list")
+	@ResponseBody
+	public List<CalendarVO> getCalendarList() throws SQLException {  
+	    return calendarService.getCalendarList();
 	}
 
 

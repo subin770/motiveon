@@ -210,17 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
             $('#eventModal').modal('show');
         },
         
-        /* eventClick: function(info) {
-            const event = info.event;
-
-            $('#detailTitle').text(event.title || '');
-            $('#detailStart').text(moment(event.start).format('YYYY-MM-DD HH:mm'));
-            $('#detailEnd').text(moment(event.end).format('YYYY-MM-DD HH:mm'));
-            $('#detailContent').text(event.extendedProps.content || '');
-            $('#detailType').text(event.extendedProps.type || '');
-
-            $('#detailModal').modal('show');
-        }, */
+   
         
         eventMouseEnter: function(info) {
             const tooltip = document.createElement('div');
@@ -248,7 +238,34 @@ document.addEventListener('DOMContentLoaded', function () {
             const tooltip = document.getElementById('calendarTooltip');
             if (tooltip) tooltip.remove();
         },
-        events: []
+        eventClick: function(info) {
+        	  const event = info.event;
+
+        	  $('#detail-title').text(event.title || '');
+        	  $('#detail-category').text('(' + (event.extendedProps.catedetail || '') + ')');
+
+        	  const format = (date) => {
+        	    return moment(date).format("YYYY.MM.DD HH:mm");
+        	  };
+        	  $('#detail-date').text(format(event.start) + ' ~ ' + format(event.end));
+        	  $('#detail-content').text(event.extendedProps.content || '');
+
+        	  $('#btnUpdate').data('ccode', event.extendedProps.ccode);
+        	  $('#btnDelete').data('ccode', event.extendedProps.ccode);
+
+        	  $('#detailModal').modal('show');
+        	},
+        
+        // 새로고침시 캘린더상에서 날아감 방지
+        	events: {
+        		  url: '<%=request.getContextPath()%>/calendar/list',
+        		  method: 'GET',
+        		  failure: function() {
+        		    alert('일정 데이터를 불러오지 못했습니다.');
+        		  }
+        		}
+
+
     });
 
     calendar.render();
@@ -264,12 +281,12 @@ document.addEventListener('DOMContentLoaded', function () {
       const content = $('#eventContent').val().trim();
       const type = $('input[name="eventType"]:checked').val();
 
-      /* if (!title) {
+      if (!title) {
         alert("제목은 필수입니다.");
         return;
-      } */
+      } 
       
-      if (!title) {
+      /* if (!title) {
     	  Swal.fire({
     	    icon: 'warning',
     	    title: '제목은 필수입니다.',
@@ -277,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
     	  });
     	  return; // ← 이거 없으면 계속 AJAX 실행됨!
     	}
-
+ */
 
       if (!type) {
         alert("분류코드를 설정하세요.");
@@ -303,19 +320,27 @@ document.addEventListener('DOMContentLoaded', function () {
         url: '<%=request.getContextPath()%>/calendar/regist',
         method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({ title, start, end, content, type }),
+        data: JSON.stringify({
+        	  title,
+        	  start,
+        	  end,
+        	  content,
+        	  catedetail: type 
+        	}),
+
         success: function () {
-        	  calendar.addEvent({
-        	    title: title,
-        	    start: start,
-        	    end: end,
-        	    extendedProps: {
-        	      content: content,
-        	      type: type
-        	    },
-        	    backgroundColor: '#007bff',
-        	    borderColor: '#007bff'
-        	  });
+        	calendar.addEvent({
+        		  title: title,
+        		  start: start,
+        		  end: end,
+        		  extendedProps: {
+        		    content: content,
+        		    catedetail: type 
+        		  },
+        		  backgroundColor: '#007bff',
+        		  borderColor: '#007bff'
+        		});
+
 
         	  $('#eventModal').modal('hide');
         	  $('#eventTitle').val('');
@@ -324,13 +349,27 @@ document.addEventListener('DOMContentLoaded', function () {
         	  $('#eventContent').val('');
         	  $('input[name="eventType"]').prop('checked', false);
         	},
-        error: function () {
-          alert("등록에 실패했습니다.");
-        }
-      });
-    });
-});
-</script>
+        	 error: function () {
+                 alert("등록에 실패했습니다.");
+             }
+         });
+     });
+
+     // 수정 버튼 클릭 시
+     $('#btnUpdate').click(function () {
+         const ccode = $(this).data('ccode');
+         console.log("수정할 코드:", ccode);
+         // detail → 수정 모달로 전환 기능은 이후 추가
+     });
+
+     // 삭제 버튼 클릭 시
+     $('#btnDelete').click(function () {
+         const ccode = $(this).data('ccode');
+         console.log("삭제할 코드:", ccode);
+         // 삭제 confirm, ajax 처리 이후 추가
+     });
+ });
+ </script>
 <jsp:include page="/WEB-INF/views/calendar/regist.jsp" />
 <jsp:include page="/WEB-INF/views/calendar/detail.jsp" />
 

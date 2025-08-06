@@ -20,25 +20,30 @@ public class CalendarVO {
 	private String color = "";
 	private String catedetail = "";
 
-	private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+	// 공통 날짜 포맷 시도
+	private static final String[] DATE_PATTERNS = {
+		"yyyy-MM-dd'T'HH:mm",       // 프론트에서 입력되는 ISO 포맷
+		"yyyy-MM-dd HH:mm:ss"       // DB 조회 시 내려오는 포맷
+	};
 
-	// 날짜 변환 로직을 start, end 세터 안 포함
+	// 문자열 → Date 파서 (두 가지 포맷 대응)
+	private Date tryParseDate(String value) {
+		for (String pattern : DATE_PATTERNS) {
+			try {
+				return new SimpleDateFormat(pattern).parse(value);
+			} catch (ParseException ignored) {}
+		}
+		return null;
+	}
+
 	public void setStart(String start) {
 		this.start = start;
-		try {
-			this.sdate = formatter.parse(start);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		this.sdate = tryParseDate(start);
 	}
 
 	public void setEnd(String end) {
 		this.end = end;
-		try {
-			this.edate = formatter.parse(end);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		this.edate = tryParseDate(end);
 	}
 
 	public String getStart() {

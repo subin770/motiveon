@@ -6,10 +6,25 @@
 <mapper namespace="Calendar-Mapper">
 
   <!-- resultMap -->
-  <resultMap type="calendar" id="calendarMap">
-    <result property="start" column="sdate" />
-    <result property="end" column="edate" />
-  </resultMap>
+  <resultMap id="calendarMap" type="calendar">
+  <result property="ccode" column="ccode" />
+  <result property="catecode" column="catecode" />
+  <result property="title" column="title" />
+  <result property="content" column="content" />
+  <result property="sdate" column="sdate" />
+  <result property="edate" column="edate" />
+  <result property="start" column="sdate" />       
+  <result property="end" column="edate" />         
+  <result property="eno" column="eno" />
+  <result property="color" column="color" />
+  <result property="catedetail" column="catedetail" />
+</resultMap>
+
+
+<!-- Calendar-Mapper.xml -->
+<select id="selectAllCalendar" resultMap="calendarMap">
+  SELECT * FROM calendar
+</select>
 
   <!--  검색 필터 조건 조각 -->
   <sql id="catecode">
@@ -99,18 +114,19 @@
   <!--  일정 등록 -->
 <insert id="insertCalendar" parameterType="calendar">
   INSERT INTO calendar (
-    ccode, catecode, title, content, space,
-    important, sdate, edate, eno, allday,
+    ccode, catecode, title, content, 
+     sdate, edate, eno, 
     color, catedetail
   )
   VALUES (
-    #{ccode}, #{catecode}, #{title}, #{content}, #{space},
-    #{important}, #{sdate, jdbcType=DATE}, #{edate, jdbcType=DATE}, #{eno},
-    #{allday}, #{color}, #{catedetail}
+    #{ccode}, #{catecode}, #{title}, #{content}, 
+     #{sdate, jdbcType=DATE}, #{edate, jdbcType=DATE}, #{eno},
+     #{color}, #{catedetail}
   )
 </insert>
 
 
+  
 
 
 
@@ -157,5 +173,10 @@
   <select id="selectAllEmployee" resultType="int">
     SELECT eno FROM employee
   </select>
+  
+  
+
+
+  
 
 </mapper>

@@ -30,4 +30,7 @@ public interface CalendarService {
 
 
 	List<CalendarVO> getAllCalendar() throws Exception;
+	 List<CalendarVO> getCalendarList() throws SQLException;
+	
+
 }

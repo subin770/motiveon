@@ -140,10 +140,12 @@
 
 
 	<!-- 일정 삭제 -->
-	<update id="deleteCalendar" parameterType="str">
-		DELETE FROM calendar
-		WHERE ccode = #{ccode}
-	</update>
+	<delete id="deleteCalendar" parameterType="string">
+    DELETE FROM calendar
+    WHERE ccode = #{ccode}
+</delete>
+
+
 
 	<!-- 일정 고유번호 생성 -->
 	<select id="selectCcode" resultType="str">

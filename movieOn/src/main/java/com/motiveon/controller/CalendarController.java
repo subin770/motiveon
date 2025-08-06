@@ -68,11 +68,12 @@ public class CalendarController {
 	    return sdf.parse(dateStr);
 	}
 
-	@RequestMapping("/list")
+	@GetMapping("/list")
 	@ResponseBody
-	public List<CalendarVO> getCalendarList() throws SQLException {  
+	public List<CalendarVO> getCalendarList() throws Exception {
 	    return calendarService.getCalendarList();
 	}
+
 
 	@PostMapping("/modify")
 	@ResponseBody
@@ -89,6 +90,19 @@ public class CalendarController {
 	        return new ResponseEntity<>("FAIL", HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
+	@PostMapping("/delete")
+	@ResponseBody
+	public ResponseEntity<String> delete(@RequestBody CalendarVO calendar) {
+	    try {
+	        System.out.println("삭제 요청: " + calendar.getCcode());
+	        calendarService.delete(calendar.getCcode());
+	        return new ResponseEntity<>("success", HttpStatus.OK);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return new ResponseEntity<>("fail", HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
 
 
 

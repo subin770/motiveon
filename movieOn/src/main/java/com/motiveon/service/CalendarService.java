@@ -18,6 +18,7 @@ public interface CalendarService {
 	
 	void registCalendar(CalendarVO calendar) throws SQLException;
 
+	void delete(String ccode) throws Exception;
 
 	void remove(String ccode) throws SQLException;
 
@@ -32,6 +33,8 @@ public interface CalendarService {
 	 List<CalendarVO> getCalendarList() throws SQLException;
 	 int modify(CalendarVO vo);
 	 public int modifyCalendar(CalendarVO calendar) throws SQLException;
+	 public int removeCalendar(String ccode) throws SQLException;
+
 
 
 }

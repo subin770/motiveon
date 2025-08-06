@@ -17,8 +17,11 @@ public interface CalendarDAO {
 
 	public int updateCalendar(CalendarVO calendar) throws SQLException;
 
+	public int deleteCalendar(String ccode);
 
-	void deleteCalendar(String ccode) throws SQLException;
+	void delete(String ccode) throws Exception;
+
+
 
 	List<EmployeeVO> selectEnoByCcode(String ccode) throws SQLException;
 

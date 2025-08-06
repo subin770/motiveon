@@ -127,6 +127,19 @@ public class CalendarServiceImpl implements CalendarService {
 	    return calendarDAO.updateCalendar(calendar);
 	}
 
+	@Override
+	public int removeCalendar(String ccode) {
+	    return calendarDAO.deleteCalendar(ccode);
+	}
+
+	@Override
+	public void delete(String ccode) throws Exception {
+	    calendarDAO.delete(ccode);
+	}
+
+
+
+
 
 
 

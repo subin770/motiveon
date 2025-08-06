@@ -49,11 +49,10 @@ public class CalendarDAOImpl implements CalendarDAO {
 
 
 	@Override
-	public void deleteCalendar(String ccode) throws SQLException {
-		session.delete("Calendar-Mapper.deleteCalendar", ccode);
+	public int deleteCalendar(String ccode) {
+	    return session.delete("Calendar-Mapper.deleteCalendar", ccode);
 	}
 
-	
 
 	@Override
 	public List<EmployeeVO> selectEnoByCcode(String ccode) throws SQLException {
@@ -87,6 +86,12 @@ public class CalendarDAOImpl implements CalendarDAO {
 	    return session.selectList("Calendar-Mapper.selectAllCalendar");
 	   
 	}
+
+	@Override
+	public void delete(String ccode) throws Exception {
+	    session.delete("Calendar-Mapper.deleteCalendar", ccode);
+	}
+
 
 
 

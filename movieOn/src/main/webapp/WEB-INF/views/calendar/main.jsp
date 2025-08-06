@@ -344,19 +344,52 @@ document.addEventListener('DOMContentLoaded', function () {
         calendar.refetchEvents();
       },
       error: function (xhr) {
-          console.log("수정 실패:", xhr.responseText); // ✅ 여기에 추가!
+          console.log("수정 실패:", xhr.responseText); 
           alert('수정에 실패했습니다.');
       }
     });
   });
 
-  // 삭제 버튼 (추후 구현)
-  $('#btnDelete').click(function () {
-    const ccode = $(this).data('ccode');
-    console.log("삭제할 코드:", ccode);
-    // confirm + ajax 구현 필요
+//삭제 버튼 클릭 시
+  $("#btnDelete").on("click", function () {
+    Swal.fire({
+      title: '일정을 삭제하시겠습니까?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6', // 확인(파란색)
+      cancelButtonColor: '#d33',     // 취소(빨간색)
+      confirmButtonText: '확인',
+      cancelButtonText: '취소'
+    }).then((result) => {
+      if (result.isConfirmed) {
+    	  let ccode = $("#btnDelete").data("ccode");
+
+        
+    	  $.ajax({
+    		    url: "/motiveOn/calendar/delete", // 또는 contextPath 붙이기
+    		    type: "POST",
+    		    contentType: "application/json",
+    		    data: JSON.stringify({ ccode: ccode }),
+    		    success: function (res) {
+    		        Swal.fire("삭제 완료", "일정이 삭제되었습니다.", "success");
+    		        $('#detailModal').modal("hide");
+
+    		        // FullCalendar에서 해당 이벤트 제거
+    		        let calendarApi = $('#calendar').fullCalendar('getCalendar');
+    		        let event = calendarApi.getEventById(ccode);
+    		        if (event) event.remove();
+    		    },
+    		    error: function () {
+    		        Swal.fire("오류", "일정 삭제에 실패했습니다.", "error");
+    		    }
+    		});
+
+      }
+    });
   });
 });
+
+
 </script>
 
 

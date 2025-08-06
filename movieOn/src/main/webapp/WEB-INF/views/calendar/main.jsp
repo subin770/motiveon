@@ -226,8 +226,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     eventClick: function (info) {
       const event = info.event;
+      const catedetail = event.extendedProps.catedetail;
       $('#detail-title').text(event.title || '');
-      $('#detail-category').text('(' + (event.extendedProps.catedetail || '') + ')');
+      $('#detail-category').text('(' + (catedetail || '') + ')');
       $('#detail-date').text(
         moment(event.start).format("YYYY.MM.DD HH:mm") + ' ~ ' +
         moment(event.end).format("YYYY.MM.DD HH:mm")
@@ -300,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
 //상세 → 수정 버튼
   $('#btnUpdate').click(function () {
     const ccode = $(this).data('ccode');
-    const catecode = $(this).data('catecode'); // 여기서 가져옴!
+    const catecode = $(this).data('catecode'); 
 
     const title = $('#detail-title').text();
     const dateRange = $('#detail-date').text().split(' ~ ');
@@ -332,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const content = $('#eventContent').val().trim();
 
   const catecode = $('input[name="eventType"]:checked').val();                 // C/D/P
-  const catedetail = $('input[name="eventType"]:checked').next('label').text(); // 회사일정 등
+  const catedetail = $('input[name="eventType"]:checked').next('label').text(); // 회사일정 등 -- 
 
   if (!title || !catecode || !start || !end || !content) {
     alert("모든 항목을 입력해주세요.");
@@ -359,41 +360,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
 //삭제 버튼 클릭 시
   $("#btnDelete").on("click", function () {
-    Swal.fire({
-      title: '일정을 삭제하시겠습니까?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6', // 확인(파란색)
-      cancelButtonColor: '#d33',     // 취소(빨간색)
-      confirmButtonText: '확인',
-      cancelButtonText: '취소'
-    }).then((result) => {
-      if (result.isConfirmed) {
-    	  let ccode = $("#btnDelete").data("ccode");
+	    const ccode = $(this).data("ccode");
 
-        
-    	  $.ajax({
-    		    url: "/motiveOn/calendar/delete", 
-    		    type: "POST",
-    		    contentType: "application/json",
-    		    data: JSON.stringify({ ccode: ccode }),
-    		    success: function (res) {
-    		        Swal.fire("삭제 완료", "일정이 삭제되었습니다.", "success");
-    		        $('#detailModal').modal("hide");
+	    Swal.fire({
+	        title: "정말 삭제하시겠습니까?",
+	        icon: "warning",
+	        showCancelButton: true,
+	        confirmButtonText: "삭제",
+	        cancelButtonText: "취소"
+	    }).then((result) => {
+	        if (result.isConfirmed) {
+	            $.ajax({
+	                type: "POST",
+	                url: "/motiveOn/calendar/delete",
+	                contentType: "application/json",
+	                data: JSON.stringify({ ccode: ccode }),
+	                success: function (res) {
+	                    if (res === "success") {
+	                        Swal.fire("삭제되었습니다", "", "success");
+	                        
+	                        // 모달 닫기
+	                        $("#detailModal").modal("hide");
 
-    		        // FullCalendar에서 해당 이벤트 제거
-    		        let calendarApi = $('#calendar').fullCalendar('getCalendar');
-    		        let event = calendarApi.getEventById(ccode);
-    		        if (event) event.remove();
-    		    },
-    		    error: function () {
-    		        Swal.fire("오류", "일정 삭제에 실패했습니다.", "error");
-    		    }
-    		});
+	                        // FullCalendar에서 이벤트 새로고침
+	                        calendar.refetchEvents();
+	                    }
+	                },
+	                error: function () {
+	                    Swal.fire("삭제 실패", "관리자에게 문의하세요", "error");
+	                }
+	            });
+	        }
+	    });
+	});
 
-      }
-    });
-  });
+  
+  
 });
 
 

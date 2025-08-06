@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class CalendarVO {
 
 	private String ccode;
-	private int catecode;
+	private String catecode;
 	private String title;
 	private String content;
 	private String start;
@@ -78,11 +78,11 @@ public class CalendarVO {
 		this.ccode = ccode;
 	}
 
-	public int getCatecode() {
+	public String getCatecode() {
 		return catecode;
 	}
 
-	public void setCatecode(int catecode) {
+	public void setCatecode(String catecode) {
 		this.catecode = catecode;
 	}
 

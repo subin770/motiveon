@@ -297,11 +297,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // 상세 → 수정 버튼
+//상세 → 수정 버튼
   $('#btnUpdate').click(function () {
     const ccode = $(this).data('ccode');
+    const catecode = $(this).data('catecode'); // 여기서 가져옴!
+
     const title = $('#detail-title').text();
-    const category = $('#detail-category').text().replace(/[()]/g, '');
     const dateRange = $('#detail-date').text().split(' ~ ');
     const content = $('#detail-content').text();
 
@@ -309,7 +310,9 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#eventStart').val(moment(dateRange[0], 'YYYY.MM.DD HH:mm').format('YYYY-MM-DDTHH:mm'));
     $('#eventEnd').val(moment(dateRange[1], 'YYYY.MM.DD HH:mm').format('YYYY-MM-DDTHH:mm'));
     $('#eventContent').val(content);
-    $(`input[name="eventType"][value="${category}"]`).prop('checked', true);
+
+    $('input[name="eventType"]').prop('checked', false);
+    $(`input[name="eventType"][value="${catecode}"]`).prop('checked', true);
 
     $('#eventModal .modal-title').text('일정 수정');
     $('#btnSave').hide();
@@ -319,36 +322,40 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#eventModal').modal('show');
   });
 
+
   // 수정 완료 버튼
   $('#btnModify').click(function () {
-    const ccode = $(this).data('ccode');
-    const title = $('#eventTitle').val().trim();
-    const start = $('#eventStart').val();
-    const end = $('#eventEnd').val();
-    const content = $('#eventContent').val().trim();
-    const type = $('input[name="eventType"]:checked').val();
+  const ccode = $(this).data('ccode');
+  const title = $('#eventTitle').val().trim();
+  const start = $('#eventStart').val();
+  const end = $('#eventEnd').val();
+  const content = $('#eventContent').val().trim();
 
-    if (!title || !type || !start || !end || !content) {
-      alert("모든 항목을 입력해주세요.");
-      return;
+  const catecode = $('input[name="eventType"]:checked').val();                 // C/D/P
+  const catedetail = $('input[name="eventType"]:checked').next('label').text(); // 회사일정 등
+
+  if (!title || !catecode || !start || !end || !content) {
+    alert("모든 항목을 입력해주세요.");
+    return;
+  }
+
+  $.ajax({
+    url: '<%=request.getContextPath()%>/calendar/modify',
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({ ccode, title, start, end, content, catecode, catedetail }),
+    success: function () {
+      alert("일정이 수정되었습니다.");
+      $('#eventModal').modal('hide');
+      calendar.refetchEvents();
+    },
+    error: function (xhr) {
+      console.log("수정 실패:", xhr.responseText);
+      alert('수정에 실패했습니다.');
     }
-
-    $.ajax({
-      url: '<%=request.getContextPath()%>/calendar/modify',
-      method: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify({ ccode, title, start, end, content, catedetail: type }),
-      success: function () {
-        alert("일정이 수정되었습니다.");
-        $('#eventModal').modal('hide');
-        calendar.refetchEvents();
-      },
-      error: function (xhr) {
-          console.log("수정 실패:", xhr.responseText); 
-          alert('수정에 실패했습니다.');
-      }
-    });
   });
+});
+
 
 //삭제 버튼 클릭 시
   $("#btnDelete").on("click", function () {
@@ -366,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         
     	  $.ajax({
-    		    url: "/motiveOn/calendar/delete", // 또는 contextPath 붙이기
+    		    url: "/motiveOn/calendar/delete", 
     		    type: "POST",
     		    contentType: "application/json",
     		    data: JSON.stringify({ ccode: ccode }),

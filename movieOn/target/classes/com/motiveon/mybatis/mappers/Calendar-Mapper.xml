@@ -120,7 +120,7 @@
 		color, catedetail
 		)
 		VALUES (
-		#{ccode}, #{catecode}, #{title}, #{content},
+		#{ccode},#{catecode, jdbcType=VARCHAR}, #{title}, #{content},
 		#{sdate, jdbcType=DATE}, #{edate, jdbcType=DATE}, #{eno},
 		#{color}, #{catedetail}
 		)
@@ -130,13 +130,17 @@
 
 	<!-- 일정 수정 -->
 	<update id="updateCalendar" parameterType="calendar">
-		UPDATE calendar
-		SET title = #{title},
-		content = #{content},
-		sdate = #{sdate},
-		edate = #{edate}
-		WHERE ccode = #{ccode}
-	</update>
+    UPDATE calendar
+    SET 
+        title = #{title},
+        content = #{content},
+        sdate = #{sdate},
+        edate = #{edate},
+        catecode = #{catecode},
+        catedetail = #{catedetail}
+    WHERE ccode = #{ccode}
+</update>
+
 
 
 	<!-- 일정 삭제 -->

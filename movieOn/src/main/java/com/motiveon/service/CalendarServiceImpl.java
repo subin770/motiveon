@@ -8,7 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
+import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import com.motiveon.command.Criteria;
@@ -122,10 +126,12 @@ public class CalendarServiceImpl implements CalendarService {
 		return 0;
 	}
 
+	// CalendarServiceImpl.java
 	@Override
 	public int modifyCalendar(CalendarVO calendar) throws SQLException {
-	    return calendarDAO.updateCalendar(calendar);
+	    return calendarDAO.updateCalendar(calendar);  
 	}
+
 
 	@Override
 	public int removeCalendar(String ccode) {
@@ -138,7 +144,15 @@ public class CalendarServiceImpl implements CalendarService {
 	}
 
 
+	    @Resource
+	    private SqlSession session;
 
+	    private static final String NAMESPACE = "Calendar-Mapper";
+
+	    @Override
+	    public int updateCalendar(CalendarVO calendar) {
+	        return session.update(NAMESPACE + ".updateCalendar", calendar);
+	    }
 
 
 

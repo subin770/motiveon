@@ -4,7 +4,8 @@
 <!-- 일정 상세 모달 -->
 <div class="modal fade" id="detailModal" tabindex="-1" role="dialog"
 	aria-labelledby="detailModalLabel" aria-hidden="true">
-	<div class="modal-dialog modal-lg" role="document">
+	<div class="modal-dialog" style="max-width: 500px;" role="document">
+
 		<div class="modal-content">
 
 			<!-- 모달 헤더 -->

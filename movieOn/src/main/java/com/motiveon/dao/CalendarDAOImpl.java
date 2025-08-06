@@ -42,10 +42,10 @@ public class CalendarDAOImpl implements CalendarDAO {
 	}
 
 
-	@Override
-	public int updateCalendar(CalendarVO calendar) throws SQLException {
-	    return session.update("Calendar-Mapper.updateCalendar", calendar);
-	}
+	 @Override
+	    public int updateCalendar(CalendarVO calendar) {
+	        return session.update(NAMESPACE + ".updateCalendar", calendar);
+	    }
 
 
 	@Override

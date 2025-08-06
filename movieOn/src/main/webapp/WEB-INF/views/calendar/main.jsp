@@ -129,6 +129,17 @@
     width: 45px;
     padding: 0;
 }
+
+
+ .fc-event {
+    border-radius: 8px !important; /* ← 라운딩 */
+    padding-left: 6px !important;  /* ← 왼쪽 여백 */
+    font-weight: 400;
+  }
+
+  .fc-event-title {
+    padding-left: 6px;
+  }
 </style>
 </head>
 
@@ -194,6 +205,22 @@ document.addEventListener('DOMContentLoaded', function () {
         initialView: 'dayGridMonth',
         headerToolbar: false,
         selectable: true,
+        eventDisplay: 'block',
+        displayEventTime: false,
+        
+        eventDidMount: function(info) {
+        	  const catedetail = info.event.extendedProps.catedetail;
+
+        	  let bgColor = '#8dbad7'; // 기본: 회사일정
+        	  if (catedetail === '부서일정') bgColor = '#f5a29f';
+        	  else if (catedetail === '개인일정') bgColor = '#bbd89d';
+
+        	  info.el.style.backgroundColor = bgColor;
+        	  info.el.style.borderColor = bgColor;
+        	  info.el.style.color = '#fff'; // 텍스트 색상도 필요하면 조정
+        	},
+
+        
         datesSet: function(info) {
             const currentDate = info.view.currentStart;
             const year = currentDate.getFullYear();
@@ -333,6 +360,7 @@ document.addEventListener('DOMContentLoaded', function () {
         		  title: title,
         		  start: start,
         		  end: end,
+        		  color: color,
         		  extendedProps: {
         		    content: content,
         		    catedetail: type 

@@ -12,10 +12,12 @@ import javax.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.motiveon.dto.CalendarVO;
@@ -52,6 +54,7 @@ public class CalendarController {
 	        calendar.setSdate(parseDate(calendar.getStart()));
 	        calendar.setEdate(parseDate(calendar.getEnd()));
 
+
 	        // 3. 등록 서비스 호출
 	        calendarService.registCalendar(calendar);
 	        return new ResponseEntity<>("success", HttpStatus.OK);
@@ -64,9 +67,13 @@ public class CalendarController {
 
 	// 날짜 파싱용 함수 (private으로 아래 추가)
 	private Date parseDate(String dateStr) throws ParseException {
-	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+	    if (dateStr == null || dateStr.isEmpty()) return null;
+
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	    return sdf.parse(dateStr);
 	}
+
+
 
 	@GetMapping("/list")
 	@ResponseBody
@@ -103,7 +110,13 @@ public class CalendarController {
 	    }
 	}
 
-
+	@GetMapping("/search")
+	public String search(@RequestParam("keyword") String keyword, Model model) throws SQLException {
+	    List<CalendarVO> resultList = calendarService.searchCalendar(keyword);
+	    model.addAttribute("resultList", resultList);
+	    model.addAttribute("keyword", keyword);
+	    return "calendar/search";
+	}
 
 
 
@@ -123,10 +136,6 @@ public class CalendarController {
 		return "calendar/detail";
 	}
 
-	@GetMapping("/search")
-	public String search() {
-		return "calendar/search";
-	}
 
 }
 

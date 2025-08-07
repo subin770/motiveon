@@ -22,16 +22,16 @@
 
 				<!-- 일정 제목 + 분류 -->
 				<p class="font-weight-bold" style="font-size: 18px;">
-					<b id="detail-title"></b> <span id="detail-category"></span> <b
-						id="detail-title"></b> <small style="color: #7f8c8d;"> <span
-						id="detail-category"></span>
+					<b id="detail-title"></b> <span id="detail-category"></span> 
+					<b id="detail-title"></b> <small style="color: #7f8c8d;"> 
+					<span id="detail-category"></span>
 					</small>
 
 				</p>
 
 				<!-- 일정 기간 -->
 				<p class="text-muted mb-4" style="font-size: 14px;">
-					<span id="detail-date">2025.08.07 15:05 ~ 2025.08.27 17:09</span>
+					<span id="detail-date"></span>
 				</p>
 
 				<!-- 내용 영역 -->

@@ -80,83 +80,97 @@
 		</if>
 	</sql>
 
-	<!-- 일정 목록 조회 -->
-	<select id="selectSearchCalendarList" resultMap="calendarMap">
-		SELECT
-		ccode,
-		catecode,
-		title,
-		content,
-		TO_CHAR(sdate, 'YYYY-MM-DD"T"HH24:MI:SS') sdate,
-		TO_CHAR(edate, 'YYYY-MM-DD"T"HH24:MI:SS') edate,
-		eno,
-		color,
-		catedetail
-		FROM calendar
-		WHERE ccode IS NOT NULL
-	</select>
+	<!-- 전체 일정 목록 -->
+   
+<select id="selectSearchCalendarList" resultMap="calendarMap">
+  SELECT
+    ccode,
+    catecode,
+    title,
+    content,
+    sdate,
+    edate,
+   
+    TO_CHAR(sdate, 'YYYY-MM-DD HH24:MI:SS') AS start,
+    TO_CHAR(edate, 'YYYY-MM-DD HH24:MI:SS') AS end,
+    eno,
+    color,
+    catedetail
+  FROM calendar
+  WHERE ccode IS NOT NULL
+</select>
 
-	<!-- 일정 단건 조회 -->
-	<select id="selectCalendarByCcode" resultMap="calendarMap">
-		SELECT
-		ccode,
-		catecode,
-		title,
-		content,
-		TO_CHAR(sdate, 'YYYY-MM-DD"T"HH24:MI:SS') sdate,
-		TO_CHAR(edate, 'YYYY-MM-DD"T"HH24:MI:SS') edate,
-		eno,
-		color,
-		catedetail
-		FROM calendar
-		WHERE ccode = #{ccode}
-	</select>
-
-	<!-- 일정 등록 -->
-	<insert id="insertCalendar" parameterType="calendar">
-		INSERT INTO calendar (
-		ccode, catecode, title, content,
-		sdate, edate, eno,
-		color, catedetail
-		)
-		VALUES (
-		#{ccode},#{catecode, jdbcType=VARCHAR}, #{title}, #{content},
-		#{sdate, jdbcType=DATE}, #{edate, jdbcType=DATE}, #{eno},
-		#{color}, #{catedetail}
-		)
-	</insert>
+<!-- 상세/단건 조회 -->
+<select id="selectCalendarByCcode" resultMap="calendarMap">
+  SELECT
+    ccode,
+    catecode,
+    title,
+    content,
+    sdate,
+    edate,
+    TO_CHAR(sdate, 'YYYY-MM-DD HH24:MI:SS') AS start,
+    TO_CHAR(edate, 'YYYY-MM-DD HH24:MI:SS') AS end,
+    eno,
+    color,
+    catedetail
+  FROM calendar
+  WHERE ccode = #{ccode}
+</select>
 
 
-
-	<!-- 일정 수정 -->
-	<update id="updateCalendar" parameterType="calendar">
-    UPDATE calendar
-    SET 
-        title = #{title},
-        content = #{content},
-        sdate = #{sdate},
-        edate = #{edate},
-        catecode = #{catecode},
-        catedetail = #{catedetail}
-    WHERE ccode = #{ccode}
-</update>
+<!-- 일정 등록 -->
+    <insert id="insertCalendar" parameterType="calendar">
+        INSERT INTO calendar (
+            ccode, catecode, title, content,
+            sdate, edate, eno, color, catedetail
+        ) VALUES (
+            #{ccode}, #{catecode}, #{title}, #{content},
+            #{sdate}, #{edate}, #{eno}, #{color}, #{catedetail}
+        )
+    </insert>
 
 
 
-	<!-- 일정 삭제 -->
-	<delete id="deleteCalendar" parameterType="string">
-    DELETE FROM calendar
-    WHERE ccode = #{ccode}
-</delete>
+
+	 <!-- 일정 수정 -->
+    <update id="updateCalendar" parameterType="calendar">
+        UPDATE calendar
+        SET
+            title = #{title},
+            content = #{content},
+            sdate = #{sdate},
+            edate = #{edate},
+            catecode = #{catecode},
+            catedetail = #{catedetail}
+        WHERE ccode = #{ccode}
+    </update>
+
+
+	 <!-- 일정 삭제 -->
+    <delete id="deleteCalendar" parameterType="string">
+        DELETE FROM calendar
+        WHERE ccode = #{ccode}
+    </delete>
+
+<!-- 일정 검색 -->
+<select id="searchCalendar" parameterType="string" resultType="calendar">
+  SELECT *
+  FROM calendar
+  WHERE LOWER(title) LIKE '%' || LOWER(#{keyword}) || '%'
+</select>
+
+
+
+
 
 
 
 	<!-- 일정 고유번호 생성 -->
 	<select id="selectCcode" resultType="str">
-		SELECT 'CA' ||
-		TRIM(NVL(MAX(TO_CHAR(TO_NUMBER(SUBSTR(ccode, 3)) + 1, '000000')), '000001'))
-		AS ccode
-		FROM calendar
+ SELECT 'CA' ||
+        TRIM(NVL(MAX(TO_CHAR(TO_NUMBER(SUBSTR(ccode, 3)) + 1, '000000')), '000001'))
+        FROM calendar
 
 		UNION
 

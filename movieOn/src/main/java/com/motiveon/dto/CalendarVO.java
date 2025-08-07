@@ -3,131 +3,93 @@ package com.motiveon.dto;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class CalendarVO {
 
-	private String ccode;
-	private String catecode;
-	private String title;
-	private String content;
-	private String start;
-	private String end;
-	private Date sdate;
-	private Date edate;
-	private int eno;
-	private String color = "";
-	private String catedetail = "";
+    private String ccode;
+    private String catecode;
+    private String title;
+    private String content;
 
-	// 공통 날짜 포맷 시도
-	private static final String[] DATE_PATTERNS = {
-		"yyyy-MM-dd'T'HH:mm",       // 프론트에서 입력되는 ISO 포맷
-		"yyyy-MM-dd HH:mm:ss"       // DB 조회 시 내려오는 포맷
-	};
+    // 프런트에서 받는 원본 문자열
+    private String start;
+    private String end;
 
-	// 문자열 → Date 파서 (두 가지 포맷 대응)
-	private Date tryParseDate(String value) {
-		for (String pattern : DATE_PATTERNS) {
-			try {
-				return new SimpleDateFormat(pattern).parse(value);
-			} catch (ParseException ignored) {}
-		}
-		return null;
-	}
+    // DB 바인딩용
+    private Date sdate;
+    private Date edate;
 
-	public void setStart(String start) {
-		this.start = start;
-		this.sdate = tryParseDate(start);
-	}
+    private int eno;
+    private String color = "";
+    private String catedetail = "";
 
-	public void setEnd(String end) {
-		this.end = end;
-		this.edate = tryParseDate(end);
-	}
+    // ---- 문자열 -> Date 변환은 여기서만 ----
+    private static final String[] DATE_PATTERNS = {
+        "yyyy-MM-dd'T'HH:mm",
+        "yyyy-MM-dd HH:mm",
+        "EEE MMM dd HH:mm:ss z yyyy"  // Java Date.toString()
+    };
 
-	public String getStart() {
-		return start;
-	}
+    private Date tryParseDate(String value) {
+        if (value == null || value.isEmpty()) return null;
+        for (String p : DATE_PATTERNS) {
+            try {
+                // 영어 월/요일 대비 위해 ENGLISH 사용
+                SimpleDateFormat sdf = new SimpleDateFormat(p, Locale.ENGLISH);
+                return sdf.parse(value);
+            } catch (ParseException ignored) {}
+        }
+        return null;
+    }
 
-	public String getEnd() {
-		return end;
-	}
+    public void setStart(String start) {
+        this.start = start;
+        this.sdate = tryParseDate(start);
+    }
 
-	public Date getSdate() {
-		return sdate;
-	}
+    public void setEnd(String end) {
+        this.end = end;
+        this.edate = tryParseDate(end);
+    }
 
-	public Date getEdate() {
-		return edate;
-	}
+    public String getStart() { return start; }
+    public String getEnd()   { return end;   }
 
-	public void setSdate(Date sdate) {
-		this.sdate = sdate;
-	}
+    public Date getSdate() { return sdate; }
+    public Date getEdate() { return edate; }
 
-	public void setEdate(Date edate) {
-		this.edate = edate;
-	}
+    // DB -> 객체 바인딩 시 사용
+    public void setSdate(Date sdate) { this.sdate = sdate; }
+    public void setEdate(Date edate) { this.edate = edate; }
 
-	public String getCcode() {
-		return ccode;
-	}
+    public String getCcode() { return ccode; }
+    public void setCcode(String ccode) { this.ccode = ccode; }
 
-	public void setCcode(String ccode) {
-		this.ccode = ccode;
-	}
+    public String getCatecode() { return catecode; }
+    public void setCatecode(String catecode) { this.catecode = catecode; }
 
-	public String getCatecode() {
-		return catecode;
-	}
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-	public void setCatecode(String catecode) {
-		this.catecode = catecode;
-	}
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
 
-	public String getTitle() {
-		return title;
-	}
+    public int getEno() { return eno; }
+    public void setEno(int eno) { this.eno = eno; }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = (color == null) ? "" : color; }
 
-	public String getContent() {
-		return content;
-	}
+    public String getCatedetail() { return catedetail; }
+    public void setCatedetail(String catedetail) { this.catedetail = (catedetail == null) ? "" : catedetail; }
 
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	public int getEno() {
-		return eno;
-	}
-
-	public void setEno(int eno) {
-		this.eno = eno;
-	}
-
-	public String getColor() {
-		return color;
-	}
-
-	public void setColor(String color) {
-		this.color = (color == null) ? "" : color;
-	}
-
-	public String getCatedetail() {
-		return catedetail;
-	}
-
-	public void setCatedetail(String catedetail) {
-		this.catedetail = (catedetail == null) ? "" : catedetail;
-	}
-
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
-	}
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
+    }
 }
+

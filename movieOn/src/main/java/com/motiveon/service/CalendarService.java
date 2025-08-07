@@ -36,6 +36,7 @@ public interface CalendarService {
 	 public int removeCalendar(String ccode) throws SQLException;
 
 	 public int updateCalendar(CalendarVO calendar) throws SQLException;
+	 List<CalendarVO> searchCalendar(String keyword) throws SQLException;
 
 
 }

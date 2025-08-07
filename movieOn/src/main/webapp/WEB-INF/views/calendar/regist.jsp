@@ -48,17 +48,15 @@
 					</div>
 				</div>
 
+<!-- 일시 -->
+<div class="form-group row">
+  <label class="col-sm-3 col-form-label">일시</label>
+  <div class="col-sm-9 d-flex">
+    <input type="text" id="eventStart" class="form-control mr-3" style="width: 48%;" required>
+    <input type="text" id="eventEnd" class="form-control" style="width: 48%;" required>
+  </div>
+</div>
 
-				<!-- 일시 -->
-				<div class="form-group row">
-					<label class="col-sm-3 col-form-label">일시</label>
-					<div class="col-sm-9 d-flex">
-						<input type="datetime-local" id="eventStart"
-							class="form-control mr-2" style="width: 48%;" required> <input
-							type="datetime-local" id="eventEnd" class="form-control"
-							style="width: 48%;" required>
-					</div>
-				</div>
 
 				<!-- 내용 -->
 				<div class="form-group row">

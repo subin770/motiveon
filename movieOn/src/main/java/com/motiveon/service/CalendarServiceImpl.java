@@ -12,7 +12,6 @@ import javax.annotation.Resource;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import com.motiveon.command.Criteria;
@@ -51,8 +50,9 @@ public class CalendarServiceImpl implements CalendarService {
 	
 	private Date parseDate(String datetime) {
 	    try {
-	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-	        return sdf.parse(datetime);
+	    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+	    	    return sdf.parse(datetime);
 	    } catch (ParseException e) {
 	        e.printStackTrace();
 	        return null;
@@ -120,11 +120,6 @@ public class CalendarServiceImpl implements CalendarService {
 	    return calendarDAO.selectAllCalendar();
 	}
 
-	@Override
-	public int modify(CalendarVO vo) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
 	// CalendarServiceImpl.java
 	@Override
@@ -153,6 +148,17 @@ public class CalendarServiceImpl implements CalendarService {
 	    public int updateCalendar(CalendarVO calendar) {
 	        return session.update(NAMESPACE + ".updateCalendar", calendar);
 	    }
+
+	    @Override
+	    public List<CalendarVO> searchCalendar(String keyword) throws SQLException {
+	        return session.selectList("Calendar-Mapper.searchCalendar", keyword);
+	    }
+
+		@Override
+		public int modify(CalendarVO vo) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 
 
 

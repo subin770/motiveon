@@ -42,14 +42,16 @@
 	font-weight: bold;
 }
 
+/* 버튼 스타일 */
 #prevBtn, #nextBtn {
-	font-size: 28px !important;
-	font-weight: bold;
-	color: #52586B;
-	background: none;
-	border: none;
-	cursor: pointer;
-	padding: 4px 12px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #52586B;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 10px;
+    line-height: 1;
 }
 
 #customCalendarHeader button {
@@ -63,19 +65,19 @@
 }
 
 #customCalendarHeader {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	margin-top: 30px;
-	margin-bottom: 15px;
+    display: flex;
+    justify-content: center;   /* 가로 중앙 정렬 */
+    align-items: center;       /* 세로 중앙 정렬 */
+    margin-top: 30px;
+    margin-bottom: 15px;
+    gap: 15px;                  /* 버튼 ↔ 제목 간격 */
 }
 
 #customTitle {
-	font-size: 30px !important;
-	font-weight: 600;
-	color: #52586B;
+    font-size: 28px;
+    font-weight: bold;
+    color: #52586B;
 }
-
 .fc-daygrid-day-frame {
 	min-height: 100px;
 	padding: 8px;
@@ -177,7 +179,24 @@
   background: none !important;
   border: none !important;
 }
+/* SweetAlert2 본문 텍스트 스타일 */
+.swal2-html-container {
+  font-weight: bold !important;
+  font-size: 22px !important; /* 크기 조절 */
+}
 
+.swal2-bold-button {
+  font-weight: bold !important;
+  font-size: 16px !important; /* 버튼 글씨 크기 */
+  padding: 8px 20px !important;
+}
+.swal2-delete-button {
+  background-color: #e74c3c !important; /* 빨간색 */
+  color: white !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+  padding: 8px 20px !important;
+}
 
 
 </style>
@@ -384,22 +403,53 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // 등록
+//등록
   $('#btnSave').on('click', function () {
-  const title = $('#eventTitle').val().trim();
-  const startRaw = $('#eventStart').val();
-  const endRaw = $('#eventEnd').val();
-  const start = moment(startRaw, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD HH:mm");
-  const end = moment(endRaw, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD HH:mm");
+    const title = $('#eventTitle').val().trim();
+    const startRaw = $('#eventStart').val();
+    const endRaw = $('#eventEnd').val();
+    const start = moment(startRaw, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD HH:mm");
+    const end = moment(endRaw, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD HH:mm");
 
-  const content = $('#eventContent').val().trim();
-  const type = $('input[name="eventType"]:checked').val();
+    const content = $('#eventContent').val().trim();
+    const type = $('input[name="eventType"]:checked').val();
 
-    if (!title || !type || !start || !end || !content) {
-      alert("모든 항목을 입력해주세요.");
+    // SweetAlert 경고창 공통 함수
+    function showAlert(message) {
+      Swal.fire({
+        icon: 'warning',
+        text: message,
+        confirmButtonText: '확인',
+        confirmButtonColor: '#3A8DFE', // 등록 버튼 색상
+        customClass: {
+          confirmButton: 'swal2-bold-button'
+        }
+      });
+    }
+
+    // 유효성 검사
+    if (!title) {
+      showAlert('제목은 필수입니다.');
+      return;
+    }
+    if (!type) {
+      showAlert('분류코드를 선택하세요.');
+      return;
+    }
+    if (!endRaw) {
+      showAlert('종료 날짜를 선택하세요.');
+      return;
+    }
+    if (moment(end).isSameOrBefore(start)) {
+      showAlert('종료 시간을 시작 시간보다 나중으로 선택하세요.');
+      return;
+    }
+    if (!content) {
+      showAlert('내용을 입력하세요.');
       return;
     }
 
+    // 통과 시 AJAX 등록
     $.ajax({
       url: '<%=request.getContextPath()%>/calendar/regist',
       method: 'POST',
@@ -413,15 +463,33 @@ document.addEventListener('DOMContentLoaded', function () {
         catedetail: toKoreanCategory(type) // 화면 표시용
       }),
       success: function () {
-        alert('일정이 등록되었습니다.');
-        $('#eventModal').modal('hide');
-        calendar.refetchEvents();
+        Swal.fire({
+          icon: 'success',
+          text: '일정이 등록되었습니다.',
+          confirmButtonText: '확인',
+          confirmButtonColor: '#3A8DFE',
+          customClass: {
+            confirmButton: 'swal2-bold-button'
+          }
+        }).then(() => {
+          $('#eventModal').modal('hide');
+          calendar.refetchEvents();
+        });
       },
       error: function () {
-        alert('등록 중 에러가 발생했습니다.');
+        Swal.fire({
+          icon: 'error',
+          text: '등록 중 에러가 발생했습니다.',
+          confirmButtonText: '확인',
+          confirmButtonColor: '#3A8DFE',
+          customClass: {
+            confirmButton: 'swal2-bold-button'
+          }
+        });
       }
     });
   });
+
 
 
   // 수정 준비
@@ -450,7 +518,9 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#eventModal').modal('show');
   });
 
-  // 수정 완료
+  
+  
+//수정 완료
   $('#btnModify').click(function () {
     const ccode = $(this).data('ccode');
     const title = $('#eventTitle').val().trim();
@@ -460,39 +530,129 @@ document.addEventListener('DOMContentLoaded', function () {
     const catecode = $('input[name="eventType"]:checked').val();
     const catedetail = $('input[name="eventType"]:checked').next('label').text();
 
-    if (!title || !catecode || !start || !end || !content) {
-      alert("모든 항목을 입력해주세요.");
+    // 유효성 검사
+    if (!title) {
+      Swal.fire({
+        html: "제목은 필수입니다.",
+        icon: "warning",
+        confirmButtonText: "확인",
+        confirmButtonColor: '#3A8DFE',
+        customClass: {
+          htmlContainer: 'swal2-html-container',
+          confirmButton: 'swal2-bold-button'
+        }
+      });
+      return;
+    }
+    if (!catecode) {
+      Swal.fire({
+        html: "분류코드를 선택하세요.",
+        icon: "warning",
+        confirmButtonText: "확인",
+        confirmButtonColor: '#3A8DFE',
+        customClass: {
+          htmlContainer: 'swal2-html-container',
+          confirmButton: 'swal2-bold-button'
+        }
+      });
+      return;
+    }
+    if (!start || !end) {
+      Swal.fire({
+        html: "시작일과 종료일을 선택하세요.",
+        icon: "warning",
+        confirmButtonText: "확인",
+        confirmButtonColor: '#3A8DFE',
+        customClass: {
+          htmlContainer: 'swal2-html-container',
+          confirmButton: 'swal2-bold-button'
+        }
+      });
+      return;
+    }
+    if (new Date(start) >= new Date(end)) {
+      Swal.fire({
+        html: "종료일은 시작일보다 나중이어야 합니다.",
+        icon: "warning",
+        confirmButtonText: "확인",
+        confirmButtonColor: '#3A8DFE',
+        customClass: {
+          htmlContainer: 'swal2-html-container',
+          confirmButton: 'swal2-bold-button'
+        }
+      });
+      return;
+    }
+    if (!content) {
+      Swal.fire({
+        html: "내용을 입력하세요.",
+        icon: "warning",
+        confirmButtonText: "확인",
+        confirmButtonColor: '#3A8DFE',
+        customClass: {
+          htmlContainer: 'swal2-html-container',
+          confirmButton: 'swal2-bold-button'
+        }
+      });
       return;
     }
 
+    // 수정 처리
     $.ajax({
       url: '<%=request.getContextPath()%>/calendar/modify',
       method: 'POST',
       contentType: 'application/json',
       data: JSON.stringify({ ccode, title, start, end, content, catecode, catedetail }),
       success: function () {
-        alert("일정이 수정되었습니다.");
-        $('#eventModal').modal('hide');
-        calendar.refetchEvents();
+        Swal.fire({
+          html: "일정이 수정되었습니다.",
+          icon: "success",
+          confirmButtonText: "확인",
+          confirmButtonColor: '#3A8DFE',
+          customClass: {
+            htmlContainer: 'swal2-html-container',
+            confirmButton: 'swal2-bold-button'
+          }
+        }).then(() => {
+          $('#eventModal').modal('hide');
+          calendar.refetchEvents();
+        });
       },
       error: function (xhr) {
         console.log("수정 실패:", xhr.responseText);
-        alert('수정에 실패했습니다.');
+        Swal.fire({
+          html: "수정에 실패했습니다.<br>관리자에게 문의하세요.",
+          icon: "error",
+          confirmButtonText: "확인",
+          confirmButtonColor: '#3A8DFE',
+          customClass: {
+            htmlContainer: 'swal2-html-container',
+            confirmButton: 'swal2-bold-button'
+          }
+        });
       }
     });
   });
 
+
+  
+  
   // 삭제
   $("#btnDelete").on("click", function () {
     const ccode = $(this).data("ccode");
 
     Swal.fire({
-      title: "정말 삭제하시겠습니까?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "삭제",
-      cancelButtonText: "취소"
-    }).then((result) => {
+        html: "정말 삭제하시겠습니까?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "삭제",
+        cancelButtonText: "취소",
+        customClass: {
+          htmlContainer: 'swal2-html-container', // 메시지 스타일
+          confirmButton: 'swal2-delete-button',  // 삭제 버튼 스타일
+          cancelButton: 'swal2-bold-button'      // 취소 버튼 스타일
+        }
+      }).then((result) => {
       if (result.isConfirmed) {
         $.ajax({
           type: "POST",
@@ -500,8 +660,17 @@ document.addEventListener('DOMContentLoaded', function () {
           contentType: "application/json",
           data: JSON.stringify({ ccode: ccode }),
           success: function (res) {
-            if (res === "success") {
-              Swal.fire("삭제되었습니다", "", "success");
+        	  if (res === "success") {
+                  Swal.fire({
+                    html: "삭제되었습니다",
+                    icon: "success",
+                    confirmButtonText: "확인",
+                    confirmButtonColor: '#3A8DFE',
+                    customClass: {
+                      htmlContainer: 'swal2-html-container',
+                      confirmButton: 'swal2-bold-button'
+                    }
+                  });
               $("#detailModal").modal("hide");
               calendar.refetchEvents();
             }

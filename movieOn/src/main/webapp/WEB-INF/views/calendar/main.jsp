@@ -199,6 +199,12 @@
 }
 
 
+#detail-category {
+  font-size: 0.85rem; /* 크기 줄임 */
+  color: #555; /* 조금 연한 색 */
+}
+
+
 </style>
 </head>
 

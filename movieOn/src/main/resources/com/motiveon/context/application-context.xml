@@ -17,10 +17,13 @@
 	      class="com.motiveon.dao.CalendarDAOImpl"
 	      c:session-ref="sqlSession" />
 	
+
 	
 	
 	
 	<!-- Service 등록 -->
+
+	
 	<bean id="calendarService"
 	      class="com.motiveon.service.CalendarServiceImpl"
 	      c:calendarDAO-ref="calendarDAO" />

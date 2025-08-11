@@ -14,9 +14,10 @@
 	href="<%=request.getContextPath()%>/resources/bootstrap/plugins/fullcalendar/main.css">
 <link rel="stylesheet"
 	href="<%=request.getContextPath()%>/resources/bootstrap/dist/css/adminlte.min.css">
-	<!-- Flatpickr CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-	
+<!-- Flatpickr CSS -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 
 <style>
 .fc .fc-col-header-cell-c {
@@ -44,14 +45,14 @@
 
 /* 버튼 스타일 */
 #prevBtn, #nextBtn {
-    font-size: 28px;
-    font-weight: bold;
-    color: #52586B;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px 10px;
-    line-height: 1;
+	font-size: 28px;
+	font-weight: bold;
+	color: #52586B;
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 4px 10px;
+	line-height: 1;
 }
 
 #customCalendarHeader button {
@@ -65,19 +66,20 @@
 }
 
 #customCalendarHeader {
-    display: flex;
-    justify-content: center;   /* 가로 중앙 정렬 */
-    align-items: center;       /* 세로 중앙 정렬 */
-    margin-top: 30px;
-    margin-bottom: 15px;
-    gap: 15px;                  /* 버튼 ↔ 제목 간격 */
+	display: flex;
+	justify-content: center; /* 가로 중앙 정렬 */
+	align-items: center; /* 세로 중앙 정렬 */
+	margin-top: 30px;
+	margin-bottom: 15px;
+	gap: 15px; /* 버튼 ↔ 제목 간격 */
 }
 
 #customTitle {
-    font-size: 28px;
-    font-weight: bold;
-    color: #52586B;
+	font-size: 28px;
+	font-weight: bold;
+	color: #52586B;
 }
+
 .fc-daygrid-day-frame {
 	min-height: 100px;
 	padding: 8px;
@@ -169,42 +171,40 @@
 }
 
 .flatpickr-time .flatpickr-am-pm {
-  all: unset !important; /* 내부 스타일 싹 지움 */
-  font-size: 10px !important;
-  font-weight: normal !important;
-  padding: 2px 4px !important;
-  margin-left: 4px !important;
-  line-height: 1 !important;
-  color: #333 !important;
-  background: none !important;
-  border: none !important;
+	all: unset !important; /* 내부 스타일 싹 지움 */
+	font-size: 10px !important;
+	font-weight: normal !important;
+	padding: 2px 4px !important;
+	margin-left: 4px !important;
+	line-height: 1 !important;
+	color: #333 !important;
+	background: none !important;
+	border: none !important;
 }
 /* SweetAlert2 본문 텍스트 스타일 */
 .swal2-html-container {
-  font-weight: bold !important;
-  font-size: 22px !important; /* 크기 조절 */
+	font-weight: bold !important;
+	font-size: 22px !important; /* 크기 조절 */
 }
 
 .swal2-bold-button {
-  font-weight: bold !important;
-  font-size: 16px !important; /* 버튼 글씨 크기 */
-  padding: 8px 20px !important;
-}
-.swal2-delete-button {
-  background-color: #e74c3c !important; /* 빨간색 */
-  color: white !important;
-  font-weight: bold !important;
-  font-size: 16px !important;
-  padding: 8px 20px !important;
+	font-weight: bold !important;
+	font-size: 16px !important; /* 버튼 글씨 크기 */
+	padding: 8px 20px !important;
 }
 
+.swal2-delete-button {
+	background-color: #e74c3c !important; /* 빨간색 */
+	color: white !important;
+	font-weight: bold !important;
+	font-size: 16px !important;
+	padding: 8px 20px !important;
+}
 
 #detail-category {
-  font-size: 0.85rem; /* 크기 줄임 */
-  color: #555; /* 조금 연한 색 */
+	font-size: 0.85rem; /* 크기 줄임 */
+	color: #555; /* 조금 연한 색 */
 }
-
-
 </style>
 </head>
 
@@ -217,7 +217,7 @@
 					<div class="row mb-1 position-relative">
 						<div class="col-md-12">
 							<h3 class="font-weight-bold"
-								style="padding-left: 20px; margin-top: 10px; font-size: 22px;">내일정</h3>
+								style="padding-left: 20px; margin-top: 10px; font-size: 18px;">내 일정</h3>
 							<!-- 검색창 form -->
 							<form id="searchForm" method="GET"
 								action="${pageContext.request.contextPath}/calendar/search">
@@ -274,11 +274,11 @@
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 	<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
-	
-	
 
 
-<script>
+
+
+	<script>
 let calendar;
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -695,7 +695,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </script>
 
-<script>
+	<script>
   document.addEventListener("DOMContentLoaded", function () {
 	  const options = {
 			  enableTime: true,

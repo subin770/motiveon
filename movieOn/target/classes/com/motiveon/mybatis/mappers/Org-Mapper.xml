@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Org-Mapper">
+
+  <!-- 디버그용: 전체 트리 -->
+  <select id="selectOrgTree" resultType="map">
+    SELECT 'd-' || d.dno AS "id",
+           CASE WHEN d.parent_dno IS NULL THEN '#' ELSE 'd-' || d.parent_dno END AS "parent",
+           d.name AS "text",
+           'department' AS "type"
+    FROM department d
+    WHERE d.enabled = 1
+    UNION ALL
+    SELECT 'e-' || e.eno AS "id",
+           'd-' || e.dno AS "parent",
+           e.name || ' ' || NVL(e.job,'') AS "text",
+           'employee' AS "type"
+    FROM employee e
+    WHERE NVL(e.enabled,1) = 1
+  </select>
+
+
+
+  <!-- 루트: 최상위 부서들 -->
+ <!-- 루트: 최상위 부서들 - order_no 기준 -->
+<select id="selectChildrenRoot" resultType="map">
+  SELECT
+    'd-' || d.dno AS "id",
+    '#'          AS "parent",
+    d.name       AS "text",
+    'department' AS "type",
+    CASE
+      WHEN EXISTS (SELECT 1 FROM department cd WHERE cd.enabled=1 AND cd.parent_dno = d.dno)
+        OR EXISTS (SELECT 1 FROM employee   e  WHERE NVL(e.enabled,1)=1 AND e.dno = d.dno)
+      THEN 1 ELSE 0
+    END AS "children"
+  FROM department d
+  WHERE NVL(d.enabled,1) = 1
+    AND d.parent_dno IS NULL
+  ORDER BY d.order_no, d.name
+</select>
+
+<!-- 특정 부서: 부서 먼저, 그 다음 직원 / 각각 order_no로 -->
+<select id="selectChildrenByDept" parameterType="map" resultType="map">
+  SELECT
+    'd-' || d.dno        AS "id",
+    'd-' || d.parent_dno AS "parent",
+    d.name               AS "text",
+    'department'         AS "type",
+    CASE
+      WHEN EXISTS (SELECT 1 FROM department cd WHERE cd.enabled=1 AND cd.parent_dno = d.dno)
+        OR EXISTS (SELECT 1 FROM employee   e  WHERE NVL(e.enabled,1)=1 AND e.dno = d.dno)
+      THEN 1 ELSE 0
+    END AS "children",
+    d.order_no           AS "orderNo"
+  FROM department d
+  WHERE NVL(d.enabled,1) = 1
+    AND d.parent_dno = TO_NUMBER(REPLACE(#{parent}, 'd-',''))
+
+  UNION ALL
+
+  SELECT
+    'e-' || e.eno                  AS "id",
+    'd-' || e.dno                  AS "parent",
+    e.name || ' ' || NVL(e.job,'') AS "text",
+    'employee'                     AS "type",
+    0                              AS "children",
+    e.order_no                     AS "orderNo"
+  FROM employee e
+  WHERE NVL(e.enabled,1) = 1
+    AND e.dno = TO_NUMBER(REPLACE(#{parent}, 'd-',''))
+
+  ORDER BY "type", "orderNo", "text"
+</select>
+
+<!-- 부서: 부모/순서 변경 (order_no = pos + 0.5) -->
+<update id="updateDeptParentAndOrder" parameterType="map">
+  UPDATE department
+     SET parent_dno = #{parentDno,jdbcType=NUMERIC},
+         order_no   = #{orderNo,jdbcType=NUMERIC}
+   WHERE dno = #{dno,jdbcType=NUMERIC}
+</update>
+
+<!-- 직원: 소속부서/순서 변경 (order_no = pos + 0.5) -->
+<update id="updateEmpDeptAndOrder" parameterType="map">
+  UPDATE employee
+     SET dno      = #{dno,jdbcType=NUMERIC},
+         order_no = #{orderNo,jdbcType=NUMERIC}
+   WHERE eno = #{eno,jdbcType=NUMERIC}
+</update>
+
+<!-- 부서: 특정 부모 아래 순서 0..N으로 압축 -->
+<update id="compactDeptOrderForParent" parameterType="map">
+  MERGE INTO department d
+  USING (
+    SELECT d2.dno,
+           ROW_NUMBER() OVER (
+             PARTITION BY NVL(d2.parent_dno, -1)
+             ORDER BY d2.order_no, d2.dno
+           ) - 1 AS rn
+    FROM department d2
+    WHERE NVL(d2.parent_dno, -1) = NVL(#{parentDno,jdbcType=NUMERIC}, -1)
+  ) s
+  ON (d.dno = s.dno)
+  WHEN MATCHED THEN UPDATE SET d.order_no = s.rn
+</update>
+
+<!-- 직원: 특정 부서(dno) 아래 순서 0..N으로 압축 -->
+<update id="compactEmpOrderForParent" parameterType="map">
+  MERGE INTO employee e
+  USING (
+    SELECT e2.eno,
+           ROW_NUMBER() OVER (
+             PARTITION BY e2.dno
+             ORDER BY e2.order_no, e2.eno
+           ) - 1 AS rn
+    FROM employee e2
+    WHERE e2.dno = #{dno,jdbcType=NUMERIC}
+  ) s
+  ON (e.eno = s.eno)
+  WHEN MATCHED THEN UPDATE SET e.order_no = s.rn
+</update>
+
+
+  <insert id="insertDepartment" parameterType="map">
+    <selectKey resultType="long" keyProperty="newDno" order="BEFORE">
+      SELECT DEPT_SEQ.NEXTVAL FROM dual
+    </selectKey>
+    INSERT INTO department (dno, name, parent_dno, order_no, enabled, createdate)
+    VALUES (#{newDno}, #{name}, #{parentDno,jdbcType=NUMERIC}, 9999, 1, SYSDATE)
+  </insert>
+
+  <update id="renameDepartment" parameterType="map">
+    UPDATE department SET name = #{name} WHERE dno = #{dno,jdbcType=NUMERIC}
+  </update>
+
+  <update id="renameEmployee" parameterType="map">
+    UPDATE employee SET name = #{name} WHERE eno = #{eno,jdbcType=NUMERIC}
+  </update>
+
+  <delete id="deleteDepartment" parameterType="string">
+    DELETE FROM department WHERE dno = TO_NUMBER(#{value})
+  </delete>
+
+  <delete id="deleteEmployee" parameterType="string">
+    DELETE FROM employee WHERE eno = TO_NUMBER(#{value})
+  </delete>
+
+  <update id="moveDepartment" parameterType="map">
+    UPDATE department
+       SET parent_dno = #{parentDno,jdbcType=NUMERIC},
+           order_no   = #{orderNo,jdbcType=NUMERIC}
+     WHERE dno = #{dno,jdbcType=NUMERIC}
+  </update>
+
+  <update id="moveEmployee" parameterType="map">
+    UPDATE employee
+       SET dno      = #{dno,jdbcType=NUMERIC},
+           order_no = #{orderNo,jdbcType=NUMERIC}
+     WHERE eno = #{eno,jdbcType=NUMERIC}
+  </update>
+
+</mapper>

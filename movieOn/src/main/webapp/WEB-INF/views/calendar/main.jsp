@@ -409,6 +409,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+
 //등록
   $('#btnSave').on('click', function () {
     const title = $('#eventTitle').val().trim();

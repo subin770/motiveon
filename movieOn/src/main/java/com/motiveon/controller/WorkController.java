@@ -14,7 +14,7 @@ public class WorkController {
 		return "work/main";
 	}
 	
-
+// 목록 
 	@GetMapping("/myWorkList")
 	public String myWorkList() {
 		return "work/myWorkList";
@@ -30,9 +30,26 @@ public class WorkController {
 		return "work/depWorkList";
 	}
 	
-	@GetMapping("/officeMain")
-	public String officeMain() {
-		return "work/officeMain";
+// 업무 등록 상세 수정 
+	@GetMapping("/workRegistForm")
+	public String workRegistForm() {
+		return "work/workRegistForm";
+	}
+	
+	@GetMapping("/workDetail")
+	public String workDetail() {
+		return "work/workDetail";
+	}
+	
+	@GetMapping("/workModifyForm")
+	public String workModifyForm() {
+		return "work/workModifyForm";
+	}
+	
+	
+	@GetMapping("/waitDetail")
+	public String waitDetail() {
+		return "work/waitDetail";
 	}
 
 }

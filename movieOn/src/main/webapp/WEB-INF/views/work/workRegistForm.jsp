@@ -74,6 +74,24 @@ h2, h3, h4, .page-title, .content-header h1 {
 }
 
 
+/* form-table의 th 스타일 지정 */
+.form-table th {
+  background-color: #f3f3f3; /* 배경색 */
+  color: #52586B;            /* 글씨색 */
+  border: 1px solid #ddd;    /* 테두리색 (원하면 변경 가능) */
+  padding: 8px 12px;         /* 안쪽 여백 */
+  text-align: left;          /* 글씨 왼쪽 정렬 */
+  font-weight: 600;          /* 글씨 두께 */
+  width: 100px;              /* 고정 폭 (원하는 경우) */
+}
+
+/* td에도 같은 테두리 적용해서 표 경계 깔끔하게 */
+.form-table td {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+}
+
+
 </style>
 </head>
 
@@ -105,7 +123,7 @@ h2, h3, h4, .page-title, .content-header h1 {
           <tr>
             <th>제목</th>
             <td>
-              <input type="text" class="input-clean" name="wtitle" id="wtitle" placeholder="내용을 입력해주세요." maxlength="150">
+              <input type="text" class="input-clean" name="wtitle" id="wtitle" placeholder="제목을 입력해주세요." maxlength="150">
             </td>
           </tr>
           <tr>
@@ -124,7 +142,7 @@ h2, h3, h4, .page-title, .content-header h1 {
             <td>
               <div class="input-group">
                 <!-- 네이티브 date: 브라우저 아이콘 1개만 표시 -->
-                <input type="date" class="form-control" name="dueDate" id="dueDate" placeholder="연도-월-일">
+                <input type="date" class="form-control" name="dueDate" id="dueDate" placeholder="연도-월-일" style="font-size:14px;">
                 
               </div>
             </td>
@@ -153,7 +171,7 @@ h2, h3, h4, .page-title, .content-header h1 {
       <div class="right-head">조직도</div>
       <div class="right-body">
         <div class="mb-2">
-          <input type="text" class="form-control form-control-sm" id="orgSearch" placeholder="검색(이름/부서)">
+          <input type="text" class="form-control form-control-sm" id="orgSearch" placeholder="검색(이름/부서)" style="font-size:12px;">
         </div>
         <div id="orgTree"></div>
       </div>
@@ -174,7 +192,7 @@ h2, h3, h4, .page-title, .content-header h1 {
 <script>
 /* ===== 폼 위젯 ===== */
 $('#editor').summernote({
-  placeholder: '여기에 내용을 적으세요.',
+  placeholder: '내용을 입력해주세요.',
   height: 260,
   lang: 'ko-KR',
   toolbar: [

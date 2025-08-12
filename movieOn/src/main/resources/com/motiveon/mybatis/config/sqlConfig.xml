@@ -11,6 +11,10 @@
 		<typeAlias type="com.motiveon.dto.EmployeeVO" alias="employee"/>
 		<typeAlias type="com.motiveon.dto.MenuVO" alias="menu"/>
 		<typeAlias type="com.motiveon.dto.CalendarVO" alias="calendar"/>
+		<typeAlias type="com.motiveon.dto.WorkVO" alias="WorkVO"/>
+		<typeAlias type="com.motiveon.dto.WorkManagerVO" alias="workManager"/>
+		<typeAlias type="com.motiveon.dto.WorkReplyVO" alias="workReply"/>
+		
 		
 	</typeAliases>
 	

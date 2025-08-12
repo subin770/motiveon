@@ -3,7 +3,6 @@ package com.motiveon.dto;
 import java.util.Date;
 
 public class WorkVO {
-
 	private String wcode;
 	private String wtitle;
 	private Date wdate;
@@ -67,7 +66,6 @@ public class WorkVO {
 	public void setDno(int dno) {
 		this.dno = dno;
 	}
-	
 	
 	
 }

@@ -1,28 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:c="http://www.springframework.org/schema/c"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                           http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="dataSource"
-		class="org.apache.commons.dbcp2.BasicDataSource"
-		p:driverClassName="${dataSource.driverClassName}"
-		p:url="${dataSource.url}" p:username="${dataSource.username}"
-		p:password="${dataSource.password}" p:maxIdle="2" p:maxTotal="4" />
-	<bean id="sqlSessionFactory"
-		class="org.mybatis.spring.SqlSessionFactoryBean"
-		p:dataSource-ref="dataSource"
-		p:configLocation="classpath:com/motiveon/mybatis/config/sqlConfig.xml"
-		p:mapperLocations="classpath:com/motiveon/mybatis/mappers/**/*-Mapper.xml" />
-	<bean id="sqlSession"
-		class="org.mybatis.spring.SqlSessionTemplate"
-		c:sqlSessionFactory-ref="sqlSessionFactory" />
+    <!-- 데이터소스 설정 -->
+    <bean id="dataSource"
+          class="org.apache.commons.dbcp2.BasicDataSource"
+          p:driverClassName="${dataSource.driverClassName}"
+          p:url="${dataSource.url}"
+          p:username="${dataSource.username}"
+          p:password="${dataSource.password}"
+          p:maxIdle="2"
+          p:maxTotal="4" />
 
-	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-		<property name="basePackage" value="com.motiveon.dao" />
-	</bean>
-	<bean id="transactionManager"
-		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
-		p:dataSource-ref="dataSource" />
+    <!-- MyBatis SqlSessionFactory 설정 -->
+    <bean id="sqlSessionFactory"
+          class="org.mybatis.spring.SqlSessionFactoryBean"
+          p:dataSource-ref="dataSource"
+          p:configLocation="classpath:com/motiveon/mybatis/config/sqlConfig.xml"
+          p:mapperLocations="classpath:com/motiveon/mybatis/mappers/**/*-Mapper.xml" />
+
+    <!-- SqlSessionTemplate 설정 -->
+    <bean id="sqlSession"
+          class="org.mybatis.spring.SqlSessionTemplate"
+          c:sqlSessionFactory-ref="sqlSessionFactory" />
+
+    <!-- ❌ Mapper 자동 스캔 제거 (구현 클래스 사용 시 불필요)
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.motiveon.dao" />
+    </bean>
+    -->
+
+    <!-- 트랜잭션 매니저 설정 -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+          p:dataSource-ref="dataSource" />
+
 </beans>

@@ -26,17 +26,21 @@
 			SELECT 'W' || LPAD(SEQ_WORK.NEXTVAL, 10, '0') FROM DUAL
 		</selectKey>
 		INSERT INTO WORK (
-		WCODE, WTITLE, WDATE, WEND, WOPEN, WALARM, ENO, WSTATUS, DNO
+		WCODE, WTITLE, WDATE, WEND, WOPEN, WALARM, ENO,
+		WSTATUS, DNO
 		) VALUES (
-		#{wcode}, #{wtitle}, SYSDATE, #{wend}, NVL(#{wopen},0), NVL(#{walarm},0),
-		#{eno}, NVL(#{wstatus}, '대기'), #{dno}
+		#{wcode}, #{wtitle}, SYSDATE, #{wend},
+		NVL(#{wopen},0), NVL(#{walarm},0),
+		#{eno}, NVL(#{wstatus}, '대기'),
+		#{dno}
 		)
 	</insert>
 
 	<!-- 2) WORKMANAGER(담당자) 등록: 최초 담당자 WMSTEP=1 -->
 	<insert id="insertWorkManager"
 		parameterType="com.motiveon.dto.WorkVO">
-		INSERT INTO WORKMANAGER (WMSTEP, WCODE, ENO, ISAFTER, ANSWER)
+		INSERT INTO WORKMANAGER (WMSTEP, WCODE, ENO, ISAFTER,
+		ANSWER)
 		VALUES (1, #{wcode}, #{managerEno}, 0, '대기')
 	</insert>
 
@@ -47,16 +51,19 @@
 			SELECT 'WR' || LPAD(SEQ_WORKREPLY.NEXTVAL, 10, '0') FROM DUAL
 		</selectKey>
 		INSERT INTO WORKREPLY (WRNO, WRCONTENT, WRREGDATE, WCODE, ENO)
-		VALUES (#{wrno}, #{content}, SYSDATE, #{wcode}, #{writerEno})
+		VALUES
+		(#{wrno}, #{content}, SYSDATE, #{wcode}, #{writerEno})
 	</insert>
 
 	<!-- 목록: 담당자 1순위 + 직원명 조인 -->
+	<!-- 목록: 담당자 1순위 + 직원명 조인 -->
 	<select id="selectWorkList" resultMap="workMap">
 		SELECT
-		w.WCODE, w.WTITLE, w.WDATE, w.WEND, w.WOPEN, w.WALARM,
+		w.WCODE, w.WTITLE,
+		w.WDATE, w.WEND, w.WOPEN, w.WALARM,
 		w.ENO, w.WSTATUS, w.DNO,
 		m.ENO AS MANAGER_ENO,
-		e.ENAME AS MANAGER_ENAME
+		e.NAME AS MANAGER_ENAME
 		FROM WORK w
 		LEFT JOIN (
 		SELECT WCODE, ENO

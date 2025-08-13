@@ -255,43 +255,6 @@ body{ background:#f4f6f9; color:var(--text); }
         </div>
       </div>
 
-      <!-- ✅ 전체 업무 목록 카드 (등록폼/리스트 연동) -->
-      <div class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span>전체 업무 목록</span>
-          <a href="<%=ctx%>/work/registForm" class="btn btn-primary btn-sm">새 업무</a>
-        </div>
-        <div class="card-body p-3">
-          <table class="table table-bordered table-striped">
-            <thead>
-              <tr>
-                <th style="width:110px;">업무코드</th>
-                <th>제목</th>
-                <th style="width:140px;">담당자</th>
-                <th style="width:130px;">기한</th>
-                <th style="width:150px;">등록일</th>
-                <th style="width:100px;">상태</th>
-              </tr>
-            </thead>
-            <tbody>
-              <c:forEach var="w" items="${list}">
-                <tr>
-                  <td class="text-center">${w.wcode}</td>
-                  <td>${w.wtitle}</td>
-                  <td class="text-center"><c:out value="${empty w.managerName ? w.managerEno : w.managerName}"/></td>
-                  <td class="text-center"><fmt:formatDate value="${w.wend}" pattern="yyyy-MM-dd"/></td>
-                  <td class="text-center"><fmt:formatDate value="${w.wdate}" pattern="yyyy-MM-dd HH:mm"/></td>
-                  <td class="text-center">${w.wstatus}</td>
-                </tr>
-              </c:forEach>
-              <c:if test="${empty list}">
-                <tr><td colspan="6" class="text-center text-muted">등록된 업무가 없습니다.</td></tr>
-              </c:if>
-            </tbody>
-          </table>
-          <!-- 필요하면 여기에도 페이징 붙이기 -->
-        </div>
-      </div>
 
     </div>
   </section>

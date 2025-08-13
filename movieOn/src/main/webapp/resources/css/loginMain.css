@@ -1,0 +1,152 @@
+@charset "UTF-8";
+
+/* 전체 화면 및 초기화 */
+html, body {
+	margin: 0;
+	padding: 0;
+	min-height: 100vh;
+	font-family: 'Arial', sans-serif;
+}
+
+/* 배경 이미지 */
+.login-bg {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	z-index: 0;
+}
+
+/* 반투명 오버레이 */
+.login-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(255, 255, 255, 0.5);
+	z-index: 1;
+}
+
+/* 로그인 박스 컨테이너 */
+.login-box {
+	position: absolute;
+	z-index: 2;
+	width: 50%;
+	max-width: 600px;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background: transparent;
+}
+
+/* 카드 내부 스타일 */
+.login-card-body {
+	background: rgba(255, 255, 255, 0.6);
+	border: none;
+	padding: 32px;
+	border-radius: 12px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 타이틀 */
+.login-card-body h4 {
+	text-align: center;
+	color: #000;
+	margin-bottom: 10px;
+}
+
+/* 구분선 */
+.login-card-body hr {
+	margin-bottom: 20px;
+	border-top: 1px solid rgba(0, 0, 0, 0.2);
+	z-index: 2;
+}
+
+/* 입력창 */
+.login-card-body .form-control {
+	width: 100%;
+	border: 1px solid #ccc;
+	height: 42px;
+	font-size: 14px;
+	padding: 0 12px;
+	margin-bottom: 15px;
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+
+/* 아이콘 피드백 위치 조정 (선택적으로 사용) */
+.form-control-feedback {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	color: #aaa;
+}
+
+/* 비밀번호 찾기 링크 */
+.login-card-body a {
+	color: #52586B;
+	font-size: 14px;
+	text-decoration: none;
+}
+
+.login-card-body a:hover {
+	text-decoration: underline;
+}
+
+/* 로그인 버튼 */
+.login-card-body .btn-dark {
+	background-color: #52586B;
+	color: white;
+	border: none;
+	height: 42px;
+	font-size: 16px;
+	width: 100%;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.login-card-body .btn-dark:hover {
+	background-color: #1f1f1f;
+}
+
+/* 비밀번호 찾기 모달 */
+.modal-content {
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.modal-header, .modal-body, .modal-footer {
+	padding: 16px 24px;
+}
+
+.modal-title {
+	font-size: 18px;
+	font-weight: bold;
+}
+
+/* 모달 내부 입력창 */
+.modal-body .form-control {
+	margin-bottom: 12px;
+}
+
+/* 인증 버튼 */
+.input-group-append .btn-sm {
+	height: 36px;
+	font-size: 13px;
+	padding: 0 16px;
+}
+
+/* 기타 유틸 클래스 */
+.title {
+	padding: 10px 20px;
+}
+
+.hide {
+	display: none;
+}
+
+.card {
+	box-shadow: none;
+}

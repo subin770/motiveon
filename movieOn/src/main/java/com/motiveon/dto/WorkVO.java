@@ -1,17 +1,25 @@
+// com.motiveon.dto.WorkVO
 package com.motiveon.dto;
 
 import java.util.Date;
+import org.springframework.format.annotation.DateTimeFormat;
 
 public class WorkVO {
-	private String wcode;
-	private String wtitle;
-	private Date wdate;
-	private Date wend;
-	private int wopen;
-	private int walarm;
-	private int eno;
-	private String wstatus;
-	private int dno;
+    private String wcode;          
+    private String wtitle;        
+    private Date wdate;            
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    private Date wend;            
+    private Integer wopen;        
+    private Integer walarm;       
+    private Integer eno;        
+    private String wstatus;       
+    private Integer dno;          
+
+    // 화면/등록용 확장 필드
+    private Integer managerEno;    
+    private String  wcontent;      
+    private String  managerName;
 	public String getWcode() {
 		return wcode;
 	}
@@ -36,22 +44,22 @@ public class WorkVO {
 	public void setWend(Date wend) {
 		this.wend = wend;
 	}
-	public int getWopen() {
+	public Integer getWopen() {
 		return wopen;
 	}
-	public void setWopen(int wopen) {
+	public void setWopen(Integer wopen) {
 		this.wopen = wopen;
 	}
-	public int getWalarm() {
+	public Integer getWalarm() {
 		return walarm;
 	}
-	public void setWalarm(int walarm) {
+	public void setWalarm(Integer walarm) {
 		this.walarm = walarm;
 	}
-	public int getEno() {
+	public Integer getEno() {
 		return eno;
 	}
-	public void setEno(int eno) {
+	public void setEno(Integer eno) {
 		this.eno = eno;
 	}
 	public String getWstatus() {
@@ -60,12 +68,30 @@ public class WorkVO {
 	public void setWstatus(String wstatus) {
 		this.wstatus = wstatus;
 	}
-	public int getDno() {
+	public Integer getDno() {
 		return dno;
 	}
-	public void setDno(int dno) {
+	public void setDno(Integer dno) {
 		this.dno = dno;
 	}
-	
-	
+	public Integer getManagerEno() {
+		return managerEno;
+	}
+	public void setManagerEno(Integer managerEno) {
+		this.managerEno = managerEno;
+	}
+	public String getWcontent() {
+		return wcontent;
+	}
+	public void setWcontent(String wcontent) {
+		this.wcontent = wcontent;
+	}
+	public String getManagerName() {
+		return managerName;
+	}
+	public void setManagerName(String managerName) {
+		this.managerName = managerName;
+	}   
+
+
 }

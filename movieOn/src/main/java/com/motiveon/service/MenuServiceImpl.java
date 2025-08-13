@@ -2,10 +2,9 @@ package com.motiveon.service;
 
 import java.sql.SQLException;
 import java.util.List;
+
 import com.motiveon.dao.MenuDAO;
 import com.motiveon.dto.MenuVO;
-
-
 
 public class MenuServiceImpl implements MenuService {
 	
@@ -35,3 +34,4 @@ public class MenuServiceImpl implements MenuService {
 	}
 
 }
+

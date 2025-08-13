@@ -4,6 +4,16 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee https://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
+	<context-param>
+		<param-name>log4jConfiguration</param-name>
+		<param-value>classpath:/log4j2.xml</param-value>
+	</context-param>
+	<listener>
+		<listener-class>org.apache.logging.log4j.web.Log4jServletContextListener
+		</listener-class>
+	</listener>
+
+
 	<!-- Root Context: 스프링 컨테이너 공통 설정 -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -41,14 +51,16 @@
 
 
 	<!-- Spring Security 필터 -->
-	<!-- <filter>
+	<filter>
 		<filter-name>springSecurityFilterChain</filter-name>
 		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
 	</filter>
+	
 	<filter-mapping>
 		<filter-name>springSecurityFilterChain</filter-name>
 		<url-pattern>/*</url-pattern>
-	</filter-mapping> -->
+	</filter-mapping> 
+
 
 	<!-- DispatcherServlet (Spring MVC 서블릿) -->
 	<servlet>
@@ -66,4 +78,9 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/WEB-INF/views/error/404.jsp</location>
+	</error-page>
 </web-app>

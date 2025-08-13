@@ -17,10 +17,11 @@ public class EmployeeVO {
     private int signtype;
     private String signpath;
     private String condition;
+    
 
 
-    private List<String> aname;
-
+    private List<String> authorities; // 권한
+    
     public int getEno() {
         return eno;
     }
@@ -133,11 +134,14 @@ public class EmployeeVO {
         this.condition = condition;
     }
 
-    public List<String> getAname() {
-        return aname;
+    public List<String> getAuthorities() {
+        return authorities;
     }
 
-    public void setAname(List<String> aname) {
-        this.aname = aname;
-    }
+	public void setAuthorities(List<String> authorities) {
+		this.authorities = authorities;
+	}
+
+
+    
 }

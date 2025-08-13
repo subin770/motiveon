@@ -18,11 +18,11 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css">
 
 <!-- jsTree -->
-<link  href="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/themes/default/style.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/themes/default/style.min.css" rel="stylesheet">
 
 <style>
   :root{ --primary:#3A8DFE; --line:rgba(0,0,0,.08); --text:#2B2F3A; }
-  body{ background:#fff; color:var(--text); font-size: 14px; }
+  body{ background:#fff; color:var(--text); font-size:14px; }
   .page-wrap{ padding:18px; }
   .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
   .btn-primary{ background:var(--primary); border-color:var(--primary); }
@@ -32,7 +32,6 @@
   .right-pane{ display:flex; flex-direction:column; }
   .right-head{ padding:12px 14px; border-bottom:1px solid var(--line); font-weight:700; }
   .right-body{ padding:10px 12px; overflow:auto; height:560px; }
-   
 
   /* 폼 테이블 */
   .form-table{ width:100%; border-collapse:separate; border-spacing:0 8px; }
@@ -47,12 +46,12 @@
   .file-drop{ border:1px dashed #c8cfdb; border-radius:10px; padding:10px 12px; color:#6b7280; display:flex; align-items:center; gap:8px; }
   .file-drop input[type=file]{ display:none; }
   #orgTree { padding:12px; }
-  #orgTree .jstree-anchor { user-select: none; }
+  #orgTree .jstree-anchor { user-select:none; }
 
   /* date input 높이 */
   input[type="date"].form-control{ min-height:38px; }
 
-  /* 담당자 입력의 X 버튼 */
+  /* 입력의 X 버튼 */
   .position-relative{ position:relative; }
   .clear-btn{
     position:absolute; right:8px; top:50%; transform:translateY(-50%);
@@ -60,38 +59,16 @@
     padding:0 4px; cursor:pointer;
   }
   .clear-btn:hover{ color:#6b7280; }
-  
-  /* 조직도 */
-  #orgTree, .jstree-anchor {
-    font-size: 13px !important;
-}
 
+  /* 조직도 폰트 */
+  #orgTree, .jstree-anchor { font-size:13px !important; }
 
-/* 업무 등록 제목 크기 조정 */
-h2, h3, h4, .page-title, .content-header h1 {
-    font-size: 18px !important; /* 기본보다 작게 */
-    font-weight: bold; /* 굵기는 유지 */
-}
+  /* 제목 크기 */
+  h2, h3, h4, .page-title, .content-header h1 { font-size:18px !important; font-weight:bold; }
 
-
-/* form-table의 th 스타일 지정 */
-.form-table th {
-  background-color: #f3f3f3; /* 배경색 */
-  color: #52586B;            /* 글씨색 */
-  border: 1px solid #ddd;    /* 테두리색 (원하면 변경 가능) */
-  padding: 8px 12px;         /* 안쪽 여백 */
-  text-align: left;          /* 글씨 왼쪽 정렬 */
-  font-weight: 600;          /* 글씨 두께 */
-  width: 100px;              /* 고정 폭 (원하는 경우) */
-}
-
-/* td에도 같은 테두리 적용해서 표 경계 깔끔하게 */
-.form-table td {
-  border: 1px solid #ddd;
-  padding: 8px 12px;
-}
-
-
+  /* th/td 경계 통일 */
+  .form-table th{ background-color:#f3f3f3; color:#52586B; border:1px solid #ddd; padding:8px 12px; text-align:left; font-weight:600; width:100px; }
+  .form-table td{ border:1px solid #ddd; padding:8px 12px; }
 </style>
 </head>
 
@@ -102,7 +79,6 @@ h2, h3, h4, .page-title, .content-header h1 {
   <div class="topbar">
     <h3 class="m-0 font-weight-bold">업무 등록</h3>
     <div>
-      <!-- 아이콘 제거: 텍스트만 -->
       <button type="button" class="btn btn-primary btn-sm" id="btnSubmit">등록</button>
       <button type="button" class="btn btn-default btn-sm" id="btnCancel">취소</button>
     </div>
@@ -113,37 +89,54 @@ h2, h3, h4, .page-title, .content-header h1 {
     <div class="left-pane">
       <form id="workForm" action="<%=ctx%>/work/regist" method="post" enctype="multipart/form-data">
         <table class="form-table">
+          <!-- 요청자 -->
           <tr>
             <th>요청자</th>
             <td>
-              <input type="text" class="input-clean" id="requesterName" value="${loginUser.ename}" readonly>
-              <input type="hidden" name="eno" value="${loginUser.eno}">
+              <c:choose>
+                <c:when test="${not empty loginUser}">
+                  <input type="text" class="input-clean" id="requesterName" value="${loginUser.ename}" readonly>
+                  <input type="hidden" name="eno" id="eno" value="${loginUser.eno}">
+                  <small class="text-muted">로그인 사용자로 자동 지정</small>
+                </c:when>
+                <c:otherwise>
+                  <div class="position-relative">
+                    <input type="text" class="input-clean pr-4" id="requesterName" placeholder="담당자와 동일하게 자동 설정(개발용)" readonly>
+                    <input type="hidden" name="eno" id="eno">
+                    <button type="button" id="btnClearRequester" class="clear-btn d-none" aria-label="요청자 지우기">&times;</button>
+                  </div>
+                  <small class="text-muted">로그인 전 테스트: 요청자 미지정 시 담당자 ENO로 자동 대체됩니다.</small>
+                </c:otherwise>
+              </c:choose>
             </td>
           </tr>
+
+          <!-- 제목 -->
           <tr>
             <th>제목</th>
             <td>
               <input type="text" class="input-clean" name="wtitle" id="wtitle" placeholder="제목을 입력해주세요." maxlength="150">
             </td>
           </tr>
+
+          <!-- 담당자 -->
           <tr>
             <th>담당자</th>
             <td>
               <div class="position-relative">
                 <input type="text" class="input-clean pr-4" name="managerName" id="managerName" placeholder="우측 조직도에서 선택" readonly>
                 <input type="hidden" name="managerEno" id="managerEno">
-                <!-- X 지우기 버튼 -->
                 <button type="button" id="btnClearManager" class="clear-btn d-none" aria-label="담당자 지우기">&times;</button>
               </div>
             </td>
           </tr>
+
+          <!-- 기한 -->
           <tr>
             <th>기한</th>
             <td>
               <div class="input-group">
-                <!-- 네이티브 date: 브라우저 아이콘 1개만 표시 -->
                 <input type="date" class="form-control" name="dueDate" id="dueDate" placeholder="연도-월-일" style="font-size:14px;">
-                
               </div>
             </td>
           </tr>
@@ -190,6 +183,9 @@ h2, h3, h4, .page-title, .content-header h1 {
 <script src="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/jstree.min.js"></script>
 
 <script>
+/* ===== 상태 플래그 (JSP EL → JS 불리언) ===== */
+const isLoggedIn = ${not empty loginUser};
+
 /* ===== 폼 위젯 ===== */
 $('#editor').summernote({
   placeholder: '내용을 입력해주세요.',
@@ -211,29 +207,42 @@ $('#files').on('change', function(){
   }
 });
 
-// 담당자 X 버튼 show/hide
+// X 버튼 토글
 function toggleManagerClear(){
   const has = !!$('#managerEno').val();
   $('#btnClearManager').toggleClass('d-none', !has);
 }
+function toggleRequesterClear(){
+  const has = !!$('#eno').val();
+  $('#btnClearRequester').toggleClass('d-none', !has);
+}
 $('#btnClearManager').on('click', function(){
-  $('#managerName').val('');
-  $('#managerEno').val('');
-  toggleManagerClear();
+  $('#managerName').val(''); $('#managerEno').val(''); toggleManagerClear();
+});
+$('#btnClearRequester').on('click', function(){
+  $('#requesterName').val(''); $('#eno').val(''); toggleRequesterClear();
 });
 
 /* ===== 등록/취소 ===== */
 $('#btnSubmit').on('click', function(){
   const title = $('#wtitle').val().trim();
-  const eno   = $('#managerEno').val().trim();
-  const due   = $('#dueDate').val().trim();
-  const html  = $('#editor').summernote('isEmpty') ? '' : $('#editor').summernote('code');
+  const mgrEno = $('#managerEno').val().trim();
+  const due    = $('#dueDate').val().trim();
+  const html   = $('#editor').summernote('isEmpty') ? '' : $('#editor').summernote('code');
 
   if(!title){ alert('제목을 입력해주세요.'); $('#wtitle').focus(); return; }
-  if(!eno){ alert('담당자를 선택해주세요.'); return; }
+  if(!mgrEno){ alert('담당자를 선택해주세요.'); return; }
   if(!due){ alert('기한을 선택해주세요.'); $('#dueDate').focus(); return; }
   if(!html || $(html).text().trim()===''){ alert('내용을 입력해주세요.'); $('#editor').summernote('focus'); return; }
 
+  // 로그인 전 개발용 폴백: 요청자 미지정시 담당자로 대체
+  if(!isLoggedIn){
+    const reqEno = $('#eno').val().trim();
+    if(!reqEno){
+      $('#eno').val(mgrEno);
+      $('#requesterName').val($('#managerName').val());
+    }
+  }
   $('#workForm').submit();
 });
 
@@ -241,8 +250,7 @@ $('#btnCancel').on('click', function(){
   if(window.opener){ window.close(); } else { history.back(); }
 });
 
-
-/* ====== jsTree (네가 만든 코드 기반) ====== */
+/* ====== jsTree ====== */
 $(function () {
   const $tree = $('#orgTree');
   try { $tree.jstree('destroy'); } catch(e) {}
@@ -340,37 +348,15 @@ $(function () {
       $('#managerName').val(n.text);
       $('#managerEno').val(eno);
       toggleManagerClear();
+
+      // 필요하면 로그인 전 요청자 자동 채우기까지:
+      // if(!isLoggedIn && !$('#eno').val()){ $('#eno').val(eno); $('#requesterName').val(n.text); toggleRequesterClear(); }
     }
-  });
-
-  // 이동 반영
-  $tree.off('move_node.jstree').on('move_node.jstree', function(e, data){
-    const tree = $tree.jstree(true);
-    const node = data.node;
-    const myType = node.original && node.original.type;
-    const parentNode = tree.get_node(data.parent);
-    const childIds = parentNode.children;
-
-    let posType = 0;
-    for (let i = 0; i < data.position; i++) {
-      const sib = tree.get_node(childIds[i]);
-      const sType = sib.original && sib.original.type;
-      if (sType === myType) posType++;
-    }
-
-    $.post('<c:url value="/org/move"/>', {
-      id: node.id,
-      parent: data.parent,
-      position: posType,
-      oldParent: data.old_parent
-    }).fail(function(){
-      alert('이동 반영 실패. 새로고침하여 상태를 확인하세요.');
-      $tree.jstree(true).refresh_node(data.old_parent);
-    });
   });
 
   // 초기 X 버튼 상태
   toggleManagerClear();
+  toggleRequesterClear();
 });
 </script>
 </body>

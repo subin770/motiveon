@@ -175,12 +175,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
-          <img src="<%=request.getContextPath() %>/member/getPicture?id=${loginUser.id}" class="img-circle elevation-2" alt="User Image">
+          <img src="<%=request.getContextPath() %>/member/getPicture?id=${loginUser.eno}" class="img-circle elevation-2" alt="User Image">
         </div>
         <div style="margin-left:20px;">
         	<div class="row">
         	  &nbsp;&nbsp;
-	          <a href="javascript:OpenWindow('member/detail?id=${loginUser.id}','회원정보',700,800);" title="내정보 보기" class="d-block">${loginUser.name }</a>
+	          <a href="javascript:OpenWindow('member/detail?id=${loginUser.eno}','회원정보',700,800);" title="내정보 보기" class="d-block">${loginUser.name }</a>
               &nbsp;&nbsp;&nbsp;&nbsp;	       	 
 	       	  <button class="btn btn-xs btn-primary col-xs-4" type="button" 
 	       	  onclick="location.href='<%=request.getContextPath()%>/commons/logout';">LOGOUT</button>

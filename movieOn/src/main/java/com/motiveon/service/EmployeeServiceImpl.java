@@ -2,10 +2,13 @@ package com.motiveon.service;
 
 import java.sql.SQLException;
 import java.util.List;
+import org.springframework.stereotype.Service;
 
 import com.motiveon.dao.EmployeeDAO;
 import com.motiveon.dto.EmployeeVO;
 
+
+@Service
 public class EmployeeServiceImpl implements EmployeeService{
 
 	private EmployeeDAO employeeDAO;
@@ -42,4 +45,5 @@ public class EmployeeServiceImpl implements EmployeeService{
 		employeeDAO.deleteEmployee(eno);
 		
 	}
+	
 }

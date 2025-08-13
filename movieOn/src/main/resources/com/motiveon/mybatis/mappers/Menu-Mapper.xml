@@ -23,7 +23,6 @@
 		from menu
 		where mCode = #{mCode}
 	</select>
-	
 	<select id="selectMenuByMname" resultType="menu">
 		select *
 		from menu
@@ -32,3 +31,4 @@
 	
 
 </mapper>
+

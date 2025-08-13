@@ -14,14 +14,6 @@ public class MenuDAOImpl implements MenuDAO {
 		this.session = session;
 	}
 
-	public SqlSession getSession() {
-		return session;
-	}
-
-	public void setSession(SqlSession session) {
-		this.session = session;
-	}
-
 	public List<MenuVO> selectMainMenu() throws SQLException {
 		return session.selectList("Menu-Mapper.selectMainMenu");
 	}

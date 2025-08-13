@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Work-Mapper">
+
+	<resultMap id="workMap" type="com.motiveon.dto.WorkVO">
+		<id property="wcode" column="WCODE" />
+		<result property="wtitle" column="WTITLE" />
+		<result property="wdate" column="WDATE" />
+		<result property="wend" column="WEND" />
+		<result property="wopen" column="WOPEN" />
+		<result property="walarm" column="WALARM" />
+		<result property="eno" column="ENO" />
+		<result property="wstatus" column="WSTATUS" />
+		<result property="dno" column="DNO" />
+		<!-- 목록용 -->
+		<result property="managerEno" column="MANAGER_ENO" />
+		<result property="managerName" column="MANAGER_ENAME" />
+	</resultMap>
+
+	<!-- 1) WORK 등록 -->
+	<insert id="insertWork" parameterType="com.motiveon.dto.WorkVO">
+		<selectKey keyProperty="wcode" resultType="string"
+			order="BEFORE">
+			SELECT 'W' || LPAD(SEQ_WORK.NEXTVAL, 10, '0') FROM DUAL
+		</selectKey>
+		INSERT INTO WORK (
+		WCODE, WTITLE, WDATE, WEND, WOPEN, WALARM, ENO, WSTATUS, DNO
+		) VALUES (
+		#{wcode}, #{wtitle}, SYSDATE, #{wend}, NVL(#{wopen},0), NVL(#{walarm},0),
+		#{eno}, NVL(#{wstatus}, '대기'), #{dno}
+		)
+	</insert>
+
+	<!-- 2) WORKMANAGER(담당자) 등록: 최초 담당자 WMSTEP=1 -->
+	<insert id="insertWorkManager"
+		parameterType="com.motiveon.dto.WorkVO">
+		INSERT INTO WORKMANAGER (WMSTEP, WCODE, ENO, ISAFTER, ANSWER)
+		VALUES (1, #{wcode}, #{managerEno}, 0, '대기')
+	</insert>
+
+	<!-- 3) 초기 내용은 WORKREPLY에 댓글로 저장(옵션) -->
+	<insert id="insertInitReply" parameterType="map">
+		<selectKey keyProperty="wrno" resultType="string"
+			order="BEFORE">
+			SELECT 'WR' || LPAD(SEQ_WORKREPLY.NEXTVAL, 10, '0') FROM DUAL
+		</selectKey>
+		INSERT INTO WORKREPLY (WRNO, WRCONTENT, WRREGDATE, WCODE, ENO)
+		VALUES (#{wrno}, #{content}, SYSDATE, #{wcode}, #{writerEno})
+	</insert>
+
+	<!-- 목록: 담당자 1순위 + 직원명 조인 -->
+	<select id="selectWorkList" resultMap="workMap">
+		SELECT
+		w.WCODE, w.WTITLE, w.WDATE, w.WEND, w.WOPEN, w.WALARM,
+		w.ENO, w.WSTATUS, w.DNO,
+		m.ENO AS MANAGER_ENO,
+		e.ENAME AS MANAGER_ENAME
+		FROM WORK w
+		LEFT JOIN (
+		SELECT WCODE, ENO
+		FROM WORKMANAGER
+		WHERE WMSTEP = 1
+		) m ON m.WCODE = w.WCODE
+		LEFT JOIN EMPLOYEE e ON e.ENO = m.ENO
+		ORDER BY w.WCODE DESC
+	</select>
+
+</mapper>

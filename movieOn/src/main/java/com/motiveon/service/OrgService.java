@@ -14,6 +14,6 @@ public interface OrgService {
 
 	void deleteNode(String id);
 
-	  void moveNode(String id, String parent, int pos, String oldParent);
+	void moveNode(String id, String parent, int pos, String oldParent);
 
 }

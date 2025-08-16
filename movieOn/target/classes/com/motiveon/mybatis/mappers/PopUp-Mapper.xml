@@ -44,7 +44,7 @@
   <!-- 삭제 -->
   <delete id="deletePopup" parameterType="string">
     DELETE FROM PopUp
-    WHERE popNo = #{popNo, jdbcType=VARCHAR}
+    WHERE popNo = #{popNo}
   </delete>
 
 </mapper>

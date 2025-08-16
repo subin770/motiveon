@@ -17,11 +17,11 @@ String ctx = request.getContextPath();
 	href="<%=ctx%>/resources/bootstrap/dist/css/adminlte.min.css">
 
 <style>
-:root { -
-	-primary: #3A8DFE; -
-	-navy: #1d3557; -
-	-line: rgba(0, 0, 0, .08); -
-	-text: #2B2F3A;
+:root { 
+	--primary: #3A8DFE;
+	--navy: #1d3557;
+	--line: rgba(0, 0, 0, .08);
+	--text: #2B2F3A;
 }
 
 body,
@@ -31,7 +31,8 @@ body,
 .content {
     background-color: #fff !important;
 }
-/* 페이지 타이틀 (내일정 스타일과 통일) */
+
+/* 페이지 타이틀 */
 .page-title {
 	padding-left: 20px;
 	margin-top: 10px;
@@ -55,6 +56,7 @@ body,
 	min-height: 80px;
 	border-radius: 12px;
 	box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+	cursor: pointer;
 }
 
 .stat .num {
@@ -70,92 +72,45 @@ body,
 	color: #4B5563;
 }
 
-.stat.wait {
-	background: #D6EFD8;
-} /* 대기 연녹 */
-.stat.prog {
-	background: #F6D6C6;
-} /* 진행 연살구 */
-.stat.done {
-	background: #FFF7AE;
-} /* 완료 연노랑 */
-.stat.agree {
-	background: #F4D4ED;
-} /* 협업 연보라 */
-.stat.dele {
-	background: #D9D9D9;
-} /* 대리요청 회색 */
-.stat.all {
-	background: #E3E7EF;
-} /* 전체 연그레이블루 */
+.stat.wait { background: #D6EFD8; }      /* 대기 연녹 */
+.stat.prog { background: #F6D6C6; }      /* 진행 연살구 */
+.stat.done { background: #FFF7AE; }      /* 완료 연노랑 */
+.stat.agree { background: #F4D4ED; }     /* 협업 연보라 */
+.stat.dele { background: #D9D9D9; }      /* 대리요청 회색 */
+.stat.all { background: #E3E7EF; }       /* 전체 연그레이블루 */
 
 /* 탭 */
-
 .tabs {
     display: flex;
-    margin: 0; /* 위아래 여백 제거 */
+    margin: 0;
     padding: 0;
 }
-
 .tab {
     padding: 8px 16px;
-    font-weight: 600;
-    color: #333;
     background-color: #ddd;
     border: 1px solid #ccc;
-    border-bottom: none; /* 아래쪽 선 제거해서 표와 연결 */
+    border-bottom: none;
     border-radius: 6px 6px 0 0;
     cursor: pointer;
-    font-size: 13px; 
+    font-size: 13px;
     font-weight: 400;
 }
-
 .tab.active {
     background-color: #6ec1e4;
     color: #000;
 }
-.tab + .tab {
-    margin-left: -1px; /* 옆 탭과 경계선 겹치게 */
-}
+.tab + .tab { margin-left: -1px; }
+.tab:hover { background-color: #d0d0d0; }
 
-.tab:hover {
-    background-color: #d0d0d0;
-}
-
-.table-clean {
-    border-top: none; /* 탭과 붙도록 위 테이블 선 제거 */
-}
-
-
-/* 검색 (오른쪽 끝 정렬) */
+/* 검색 */
 .header-row {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 10px;
 }
-
-.input-group .form-control {
-	height: 38px;
-}
-
-.input-group select.form-control {
-	width: 110px;
-	flex: 0 0 auto;
-	padding-left: 8px;
-	padding-right: 8px;
-	font-size: 13px;
-}
-
-.input-group input.form-control {
-	flex: 1 1 auto;
-}
-
-.btn-search {
-    background-color: #2C3E50; 
-    color: white; 
-}
-
+.input-group .form-control { height: 38px; }
+.btn-search { background-color: #2C3E50; color: white; }
 
 /* 테이블 */
 .table-clean {
@@ -164,7 +119,6 @@ body,
 	border-spacing: 0;
 	background: #fff;
 }
-
 .table-clean thead th {
 	background: #f5f5f5;
 	color: #555;
@@ -172,24 +126,15 @@ body,
 	font-weight: 700;
 	padding: 14px 16px;
 	text-align: center;
-	border-bottom: 1px solid var(- -line);
+	border-bottom: 1px solid var(--line);
 }
-
 .table-clean tbody td {
 	padding: 14px 16px;
-	border-bottom: 1px solid var(- -line);
+	border-bottom: 1px solid var(--line);
 	vertical-align: middle;
 }
-
-.t-title {
-	font-weight: 800;
-	color: #111827;
-}
-
-.t-sub {
-	font-size: 12px;
-	color: #6B7280;
-}
+.t-title { font-weight: 800; color: #111827; }
+.t-sub { font-size: 12px; color: #6B7280; }
 
 /* 상태 배지 */
 .badge-pill {
@@ -198,57 +143,20 @@ body,
 	font-weight: 800;
 	font-size: 12px;
 }
-
-.badge-wait {
-	background: #EEF2F6;
-	color: #6B7280;
-}
-
-.badge-prog {
-	background: rgba(58, 141, 254, .12);
-	color: #3A8DFE;
-}
-
-.badge-done {
-	background: rgba(39, 174, 96, .12);
-	color: #27AE60;
-}
-
-.badge-dele {
-	background: rgba(244, 180, 0, .16);
-	color: #C48A00;
-}
-
-/* 헤더 폭/정렬(요청 비율 유지) */
-.table-clean thead th:nth-child(1) {
-	width: 15%;
-} /* 제목 */
-.table-clean thead th:nth-child(2) {
-	width: 25%;
-} /* 요청자 */
-.table-clean thead th:nth-child(3) {
-	width: 15%;
-} /* 담당자 */
-.table-clean thead th:nth-child(4) {
-	width: 15%;
-} /* 기한 */
-.table-clean thead th:nth-child(5) {
-	width: 15%;
-	text-align: left;
-	padding-left: 10px;
-} /* 상태만 살짝 좌측 */
+.badge-wait { background: #EEF2F6; color: #6B7280; }
+.badge-prog { background: rgba(58, 141, 254, .12); color: #3A8DFE; }
+.badge-done { background: rgba(39, 174, 96, .12); color: #27AE60; }
+.badge-dele { background: rgba(244, 180, 0, .16); color: #C48A00; }
 
 /* 카드 헤더 */
 .card-header {
 	font-weight: 800;
 	font-size: 15px;
-	border-bottom: 1px solid var(- -line);
+	border-bottom: 1px solid var(--line);
 }
 
 /* 왼쪽 여백 제거(탑내비) */
-.content-wrapper {
-	margin-left: 0 !important;
-}
+.content-wrapper { margin-left: 0 !important; }
 </style>
 </head>
 <body class="hold-transition layout-top-nav">
@@ -297,10 +205,10 @@ body,
 
 				<!-- 내 업무 목록 -->
 				<div class="card">
-					<div class="card-header">내 업무 목록</div>
+					<div class="card-header">요청한 업무 목록</div>
 					<div class="card-body p-3">
 
-						<!-- 탭 + 검색(한 줄) -->
+						<!-- 탭 + 검색 -->
 						<div class="header-row">
 							<div class="tabs">
 								<div class="tab active" data-filter="ALL">전체</div>
@@ -310,18 +218,15 @@ body,
 								<div class="tab" data-filter="DELEGATE">대리요청</div>
 								<div class="tab" data-filter="DONE">완료</div>
 							</div>
-
 							<div class="input-group" style="max-width: 420px;">
 								<select id="searchField" class="form-control">
 									<option value="title">전체</option>
 									<option value="requester">요청자</option>
 									<option value="assignee">담당자</option>
-								</select> <input id="keyword" type="text" class="form-control"
-									placeholder="검색어를 입력하세요." style="flex: 1 1 auto; font-size: 13px;">
+								</select> 
+								<input id="keyword" type="text" class="form-control" placeholder="검색어를 입력하세요.">
 								<div class="input-group-append">
-									<button id="btnSearch" class="btn btn-search">
-										<i class="fas fa-search"></i>
-									</button>
+									<button id="btnSearch" class="btn btn-search"><i class="fas fa-search"></i></button>
 								</div>
 							</div>
 						</div>
@@ -345,27 +250,20 @@ body,
 										</td>
 										<td>${w.requesterName}</td>
 										<td>${w.assigneeName}</td>
-										<td class="text-center">${w.dueDate}</td>
-										<td class="text-right"><c:choose>
-												<c:when test="${w.status eq 'PROG'}">
-													<span class="badge-pill badge-prog">진행</span>
-												</c:when>
-												<c:when test="${w.status eq 'DONE'}">
-													<span class="badge-pill badge-done">완료</span>
-												</c:when>
-												<c:when test="${w.status eq 'DELEGATE'}">
-													<span class="badge-pill badge-dele">대리 요청</span>
-												</c:when>
-												<c:otherwise>
-													<span class="badge-pill badge-wait">대기</span>
-												</c:otherwise>
-											</c:choose></td>
+										<td class="text-center">${w.wend}</td>
+										<td class="text-right">
+											<c:choose>
+												<c:when test="${w.status eq 'PROG'}"><span class="badge-pill badge-prog">진행</span></c:when>
+												<c:when test="${w.status eq 'DONE'}"><span class="badge-pill badge-done">완료</span></c:when>
+												<c:when test="${w.status eq 'DELEGATE'}"><span class="badge-pill badge-dele">대리 요청</span></c:when>
+												<c:otherwise><span class="badge-pill badge-wait">대기</span></c:otherwise>
+											</c:choose>
+										</td>
 									</tr>
 								</c:forEach>
 								<c:if test="${empty workList}">
 									<tr>
-										<td colspan="5" class="text-center"
-											style="padding: 40px 0; color: #95A1AF; font-size: 14px;">표시할 업무가 없습니다.</td>
+										<td colspan="4" class="text-center" style="padding: 40px 0; color: #95A1AF;">표시할 업무가 없습니다.</td>
 									</tr>
 								</c:if>
 							</tbody>
@@ -373,22 +271,17 @@ body,
 
 						<!-- 페이징 -->
 						<div class="d-flex justify-content-center mt-3">
-							<ul class="pagination mb-0">
-								<li
-									class="page-item <c:if test='${!page.prev}'>disabled</c:if>'">
-									<a class="page-link"
-									href="?page=${page.page-1}&size=${page.size}">&laquo;</a>
+							<ul class="pagination pagination-sm justify-content-center mb-0">
+								<li class="page-item <c:if test='${!page.prev}'>disabled</c:if>'">
+									<a class="page-link" href="?page=${page.page-1}&size=${page.size}">&laquo;</a>
 								</li>
 								<c:forEach var="p" begin="${page.start}" end="${page.end}">
-									<li
-										class="page-item <c:if test='${p==page.page}'>active</c:if>'">
+									<li class="page-item <c:if test='${p==page.page}'>active</c:if>'">
 										<a class="page-link" href="?page=${p}&size=${page.size}">${p}</a>
 									</li>
 								</c:forEach>
-								<li
-									class="page-item <c:if test='${!page.next}'>disabled</c:if>'">
-									<a class="page-link"
-									href="?page=${page.page+1}&size=${page.size}">&raquo;</a>
+								<li class="page-item <c:if test='${!page.next}'>disabled</c:if>'">
+									<a class="page-link" href="?page=${page.page+1}&size=${page.size}">&raquo;</a>
 								</li>
 							</ul>
 						</div>
@@ -403,27 +296,27 @@ body,
 	<script src="<%=ctx%>/resources/bootstrap/plugins/jquery/jquery.min.js"></script>
 	<script src="<%=ctx%>/resources/bootstrap/dist/js/adminlte.min.js"></script>
 	<script>
-function filterBy(status){
-  $('.tab').removeClass('active');
-  $('.tab[data-filter="'+status+'"]').addClass('active');
-  if(status==='ALL'){ $('#tbody tr').show(); return; }
-  $('#tbody tr').each(function(){ $(this).toggle($(this).data('status')===status); });
-}
-$('.tab').on('click', function(){ filterBy($(this).data('filter')); });
-$('.stat').on('click', function(){ filterBy($(this).data('filter')); });
+	function filterBy(status){
+	  $('.tab').removeClass('active');
+	  $('.tab[data-filter="'+status+'"]').addClass('active');
+	  if(status==='ALL'){ $('#tbody tr').show(); return; }
+	  $('#tbody tr').each(function(){ $(this).toggle($(this).data('status')===status); });
+	}
+	$('.tab').on('click', function(){ filterBy($(this).data('filter')); });
+	$('.stat').on('click', function(){ filterBy($(this).data('filter')); });
 
-$('#btnSearch').on('click', function(){
-  const f = $('#searchField').val();
-  const kw = ($('#keyword').val()||'').toLowerCase().trim();
-  $('#tbody tr').each(function(){
-    const text = ($(this).find('td').map((i,td)=>$(td).text()).get().join(' ')||'').toLowerCase();
-    const data = (String($(this).data(f))||'').toLowerCase();
-    $(this).toggle( (f==='title' ? text : data).indexOf(kw) > -1 );
-  });
-});
-$('#keyword').on('keydown', e=>{ if(e.key==='Enter') $('#btnSearch').click(); });
+	$('#btnSearch').on('click', function(){
+	  const f = $('#searchField').val();
+	  const kw = ($('#keyword').val()||'').toLowerCase().trim();
+	  $('#tbody tr').each(function(){
+	    const text = ($(this).find('td').map((i,td)=>$(td).text()).get().join(' ')||'').toLowerCase();
+	    const data = (String($(this).data(f))||'').toLowerCase();
+	    $(this).toggle( (f==='title' ? text : data).indexOf(kw) > -1 );
+	  });
+	});
+	$('#keyword').on('keydown', e=>{ if(e.key==='Enter') $('#btnSearch').click(); });
 
-filterBy('ALL');
-</script>
+	filterBy('ALL');
+	</script>
 </body>
 </html>

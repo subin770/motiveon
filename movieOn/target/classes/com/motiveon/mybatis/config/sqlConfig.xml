@@ -1,23 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration
   PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
-  "https://mybatis.org/dtd/mybatis-3-config.dtd">
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
 
-	<typeAliases>
-		<typeAlias type="java.lang.String" alias="str"/>
-		<typeAlias type="java.lang.Integer" alias="int"/>
+    <settings>
+        <setting name="logImpl" value="LOG4J2"/>
+    </settings>
 	
-		<typeAlias type="com.motiveon.dto.EmployeeVO" alias="employee"/>
-		<typeAlias type="com.motiveon.dto.MenuVO" alias="menu"/>
-		<typeAlias type="com.motiveon.dto.CalendarVO" alias="calendar"/>
-		<typeAlias type="com.motiveon.dto.WorkVO" alias="WorkVO"/>
-		<!-- <typeAlias type="com.motiveon.dto.WorkManagerVO" alias="workManager"/>
-		<typeAlias type="com.motiveon.dto.WorkReplyVO" alias="workReply"/> -->
-		
-		 <typeAlias type="com.motiveon.dto.PopUpVO" alias="popup"/> 
-		 <typeAlias type="com.motiveon.command.PageMaker" alias="pageMaker"/>
-		
-	</typeAliases>
-	
+    <typeAliases>
+        <!-- 기본 자료형 -->
+        <typeAlias type="java.lang.String" alias="str"/>
+        <typeAlias type="java.lang.Integer" alias="int"/>
+
+        <!-- VO Alias -->
+        <typeAlias type="com.motiveon.dto.EmployeeVO" alias="employee"/>
+        <typeAlias type="com.motiveon.dto.MenuVO" alias="menu"/>
+        <typeAlias type="com.motiveon.dto.CalendarVO" alias="calendar"/>
+        <typeAlias type="com.motiveon.dto.PopUpVO" alias="popup"/>
+        <typeAlias type="com.motiveon.command.PageMaker" alias="pageMaker"/>
+
+        <!-- 업무 -->
+        <typeAlias type="com.motiveon.dto.WorkVO" alias="work"/>
+        <typeAlias type="com.motiveon.dto.WorkManagerVO" alias="workManager"/>
+        <typeAlias type="com.motiveon.dto.WorkAttachVO" alias="workAttach"/>
+        <typeAlias type="com.motiveon.dto.WorkReplyVO" alias="workReply"/>
+        <typeAlias type="com.motiveon.dto.WorkListDTO" alias="workListDTO"/>
+        <typeAlias type="com.motiveon.dto.ObjectionDTO" alias="objectionDTO"/>
+    </typeAliases>
+
+    
 </configuration>
+	

@@ -1,15 +1,21 @@
 package com.motiveon.controller;
 
+import java.util.List;
 import javax.annotation.Resource;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.motiveon.dto.EmployeeVO;
+import com.motiveon.dto.ObjectionDTO;
+import com.motiveon.dto.WorkManagerVO;
 import com.motiveon.dto.WorkVO;
 import com.motiveon.service.WorkService;
 
@@ -17,99 +23,129 @@ import com.motiveon.service.WorkService;
 @RequestMapping("/work")
 public class WorkController {
 
-	@Resource
-	private WorkService workService;
+    @Resource
+    private WorkService workService;
 
-	@GetMapping("/main")
-	public String main(Model model) throws Exception {
-	    model.addAttribute("list", workService.getList());
-	    return "work/main";
-	}
+    /** ================== 등록 ================== */
+    @PostMapping("/regist")
+    public String regist(@ModelAttribute WorkVO form,
+                         @SessionAttribute("loginUser") EmployeeVO loginUser,
+                         @RequestParam(value = "ownerEno", required = false) Integer ownerEno,
+                         RedirectAttributes rttr) {
 
+        int requesterEno = loginUser.getEno();
+        int assigneeEno = (ownerEno != null) ? ownerEno : requesterEno;
 
-	@GetMapping("/myWorkList")
-	public String myWorkList() {
-		return "work/myWorkList";
-	}
+        form.setDno(loginUser.getDno()); // 부서번호
+        if (form.getWstatus() == null || form.getWstatus().isEmpty()) {
+            form.setWstatus("WAIT");
+        }
+        form.setEno(assigneeEno);
 
-	@GetMapping("/toReqList")
-	public String toReqList() {
-		return "work/toReqList";
-	}
+        // service 내부에서 WORK + WORKMANAGER 모두 저장
+        workService.regist(form, requesterEno, assigneeEno);
 
-	@GetMapping("/depWorkList")
-	public String depWorkList() {
-		return "work/depWorkList";
-	}
+        rttr.addFlashAttribute("message", "업무가 등록되었습니다.");
+        // ✅ 등록 후 "내 업무 목록"으로 고정 이동
+        return "redirect:/work/myWorkList";
+    }
 
-	@GetMapping("/workRegistForm")
-	public String workRegistForm() {
-		return "work/workRegistForm";
-	}
+    /** ================== 상세 ================== */
+    @GetMapping("/detail")
+    public String workDetail(@RequestParam("wcode") String wcode, Model model) {
+        WorkVO work = workService.getWorkDetail(wcode);
+        List<WorkManagerVO> managers = workService.getWorkManagersByWcode(wcode);
 
-	@GetMapping("/workDetail")
-	public String workDetail() {
-		return "work/workDetail";
-	}
+        model.addAttribute("work", work);
+        model.addAttribute("managers", managers);
 
-	@GetMapping("/workModifyForm")
-	public String workModifyForm() {
-		return "work/workModifyForm";
-	}
+        return "work/workDetail";
+    }
 
-	@GetMapping("/waitDetail")
-	public String waitDetail() {
-		return "work/waitDetail";
-	}
+    /** 대기 상세 */
+    @GetMapping("/waitDetail")
+    public String waitDetail(@RequestParam("wcode") String wcode, Model model) {
+        WorkVO work = workService.getWorkDetail(wcode);
+        List<WorkManagerVO> managers = workService.getWorkManagersByWcode(wcode);
 
-	@GetMapping("/registForm")
-	public String registForm() {
-		return "work/workRegistForm";
-	}
+        model.addAttribute("work", work);
+        model.addAttribute("managers", managers);
 
-	@PostMapping("/regist")
-	public String regist(WorkVO work, HttpSession session, RedirectAttributes rttr) {
-		try {
-			// 로그인 있으면 세션 eno 고정
-			com.motiveon.dto.EmployeeVO loginUser = (com.motiveon.dto.EmployeeVO) session.getAttribute("loginUser");
-			if (loginUser != null)
-				work.setEno(loginUser.getEno());
-			else if (work.getEno() == null && work.getManagerEno() != null)
-				work.setEno(work.getManagerEno()); // 개발 폴백
+        return "work/waitDetail";
+    }
 
-			// 기본값
-			if (work.getWopen() == null)
-				work.setWopen(0);
-			if (work.getWalarm() == null)
-				work.setWalarm(0);
-			work.setWstatus("대기");
+    /** ================== 승인/이의신청 ================== */
+    @PostMapping("/approve")
+    public String approve(@RequestParam("wcode") String wcode,
+                          @SessionAttribute("loginUser") EmployeeVO me,
+                          RedirectAttributes rttr) {
+        workService.approve(wcode, me.getEno());
+        rttr.addAttribute("wcode", wcode);
+        return "redirect:/work/waitDetail";
+    }
 
-			// 필수 체크
-			if (work.getWtitle() == null || work.getWtitle().trim().isEmpty() || work.getEno() == null
-					|| work.getManagerEno() == null || work.getWend() == null) {
-				rttr.addFlashAttribute("error", "필수값 누락");
-				return "redirect:/work/registForm";
-			}
+    @PostMapping("/objection")
+    public String objection(@ModelAttribute ObjectionDTO dto,
+                            @SessionAttribute("loginUser") EmployeeVO me,
+                            RedirectAttributes rttr) {
+        dto.setEno(me.getEno());
+        workService.objection(dto);
+        rttr.addAttribute("wcode", dto.getWcode());
+        return "redirect:/work/detail";
+    }
 
-			workService.register(work);
-			rttr.addFlashAttribute("result", "OK");
-			return "redirect:/work/list";
-		} catch (Exception e) {
-			e.printStackTrace();
-			rttr.addFlashAttribute("error", "서버오류");
-			return "redirect:/work/registForm";
-		}
-	}
+    /** ================== 목록 ================== */
+    // 내 업무
+    @GetMapping("/myWorkList")
+    public String myWorkList(@RequestParam(defaultValue = "ALL") String status,
+                             @SessionAttribute("loginUser") EmployeeVO me,
+                             Model model) {
+        model.addAttribute("workList", workService.myList(me.getEno(), status));
+        model.addAttribute("status", status);
+        return "work/myWorkList";   // /WEB-INF/views/work/myWorkList.jsp
+    }
 
-	@GetMapping("/list")
-	public String list(Model model) {
-		try {
-			model.addAttribute("list", workService.getList());
-		} catch (Exception e) {
-			e.printStackTrace();
-			model.addAttribute("list", java.util.Collections.emptyList());
-		}
-		return "work/workList";
-	}
+    // 요청한 업무
+    @GetMapping("/toReqList")
+    public String toReqList(@RequestParam(defaultValue = "ALL") String status,
+                            @SessionAttribute("loginUser") EmployeeVO me,
+                            Model model) {
+        model.addAttribute("workList", workService.requestedList(me.getEno(), status));
+        model.addAttribute("status", status);
+        return "work/toReqList";    // /WEB-INF/views/work/toReqList.jsp
+    }
 
+    // 부서 업무
+    @GetMapping("/depWorkList")
+    public String depWorkList() {
+        return "work/depWorkList";  // /WEB-INF/views/work/depWorkList.jsp
+    }
+
+    /** ================== 수정 ================== */
+    @PostMapping("/modify")
+    public String modify(@ModelAttribute WorkVO form,
+                         @SessionAttribute("loginUser") EmployeeVO me,
+                         RedirectAttributes rttr) {
+        workService.modify(form, me.getEno());
+        rttr.addFlashAttribute("message", "업무가 수정되었습니다.");
+        rttr.addAttribute("wcode", form.getWcode());
+        return "redirect:/work/detail";
+    }
+
+    /** ================== 메인 대시보드 ================== */
+    @GetMapping("/main")
+    public String main(@SessionAttribute("loginUser") EmployeeVO me, Model model) {
+        int eno = me.getEno();
+        model.addAttribute("weeklyClosingList", workService.getWeeklyClosingList(eno));
+        model.addAttribute("weeklyRequestedList", workService.getWeeklyRequestedList(eno));
+        model.addAttribute("pendingApprovalList", workService.getPendingApprovalList(eno));
+        model.addAttribute("waitingRequestedList", workService.getWaitingRequestedList(eno));
+        return "work/main";  // /WEB-INF/views/work/main.jsp
+    }
+
+    /** ================== 뷰 전용 (단순 이동) ================== */
+    @GetMapping("/workRegistForm")
+    public String workRegistForm() { 
+        return "work/workRegistForm"; 
+    }
 }

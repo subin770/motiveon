@@ -4,91 +4,88 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:c="http://www.springframework.org/schema/c"
 	xmlns:p="http://www.springframework.org/schema/p"
-	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd
+		http://www.springframework.org/schema/beans     http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+	<!-- ===== Provider / Handlers ===== -->
 	<beans:bean id="customAuthenticationProvider" 
 	            class="com.motiveon.security.CustomAuthenticationProvider"
-	            c:employeeService-ref="employeeService"
-	            />
+	            c:employeeService-ref="employeeService"/>
 	<beans:bean id="loginSuccessHandler"
 		 	    class="com.motiveon.security.LoginSuccessHandler"
 		 	    p:defaultTargetUrl="/index"
 		 	    c:logSavedPath-ref="logSavedPath"
-		 	    c:logFileName-ref="loginUserLogFileName"
-		 	    />
+		 	    c:logFileName-ref="loginUserLogFileName"/>
 	<beans:bean id="loginFailureHandler"
-	            class="com.motiveon.security.LoginFailureHandler"
-			    />	 	
+	            class="com.motiveon.security.LoginFailureHandler"/>	 	
 	
-	 <!-- 인증 -->
+	<!-- ===== Authentication Manager ===== -->
 	<authentication-manager id="auth_manager">
-		<authentication-provider ref="customAuthenticationProvider" />
+		<authentication-provider ref="customAuthenticationProvider"/>
 	</authentication-manager>
 	
-	 
-	<!-- 인허가 -->
-	<http pattern="/resources/**" security="none" />
-	<http use-expressions="true" pattern="/**"  authentication-manager-ref="auth_manager">
-		<access-denied-handler error-page="/coommons/accessDenied" />
-		
-		<intercept-url pattern="/member/authority/**" access="hasRole('ROLE_ADMIN')" />
-		<intercept-url pattern="/member/list**" access="hasAnyRole('ROLE_ADMIN, ROLE_MANAGER')" />
-		<intercept-url pattern="/member/regist*" access="hasAnyRole('ROLE_ADMIN,MEMBER_CREATE')" />
-		<intercept-url pattern="/member/modify*" access="hasAnyRole('ROLE_ADMIN,MEMBER_UPDATE')" />
-		<intercept-url pattern="/member/remove*" access="hasAnyRole('ROLE_ADMIN,MEMBER_REMOVE')" />
-		
-		<intercept-url pattern="/notice/regist*" access="hasAnyRole('ROLE_MANAGER,NOTICE_CREATE')" />
-		<intercept-url pattern="/notice/modify*" access="hasAnyRole('ROLE_MANAGER,NOTICE_UPDATE')" />
-		<intercept-url pattern="/notice/remove*" access="hasAnyRole('ROLE_MANAGER,NOTICE_REMOVE')" />
-		
-		<intercept-url pattern="/member/*" access="isAuthenticated()" />
-		<intercept-url pattern="/notice/*" access="isAuthenticated()" />
-		<intercept-url pattern="/pds/*" access="isAuthenticated()" />
-		<intercept-url pattern="/board/*" access="isAuthenticated()" />
-		
-		
-		<intercept-url pattern="/menu/*" access="isAuthenticated()" />		
-		<intercept-url pattern="/summernote/*" access="isAuthenticated()" />
-		<intercept-url pattern="/reply/*" access="isAuthenticated()" />
-		<intercept-url pattern="/index*" access="isAuthenticated()" />
-		
+	<!-- ===== Static resources pass-through ===== -->
+	<http pattern="/resources/**" security="none"/>
+
+	<!-- ===== Main Security Config ===== -->
+	<http use-expressions="true" pattern="/**" authentication-manager-ref="auth_manager">
+		<!-- [FIX] 오타 수정: coommons -> commons -->
+		<access-denied-handler error-page="/commons/accessDenied"/>
+
+		<!-- Authorization rules -->
+		<intercept-url pattern="/member/authority/**" access="hasRole('ROLE_ADMIN')"/>
+		<!-- [FIX] hasAnyRole 문법 수정: 콤마 분리 -->
+		<intercept-url pattern="/member/list**"   access="hasAnyRole('ROLE_ADMIN','ROLE_MANAGER')"/>
+		<intercept-url pattern="/member/regist*" access="hasAnyRole('ROLE_ADMIN','MEMBER_CREATE')"/>
+		<intercept-url pattern="/member/modify*" access="hasAnyRole('ROLE_ADMIN','MEMBER_UPDATE')"/>
+		<intercept-url pattern="/member/remove*" access="hasAnyRole('ROLE_ADMIN','MEMBER_REMOVE')"/>
+
+		<!-- [FIX] hasAnyRole 문법 수정 -->
+		<intercept-url pattern="/notice/regist*" access="hasAnyRole('ROLE_MANAGER','NOTICE_CREATE')"/>
+		<intercept-url pattern="/notice/modify*" access="hasAnyRole('ROLE_MANAGER','NOTICE_UPDATE')"/>
+		<intercept-url pattern="/notice/remove*" access="hasAnyRole('ROLE_MANAGER','NOTICE_REMOVE')"/>
+
+		<!-- [ADD] work 보호: 시큐리티가 자동으로 로그인 페이지로 보냄 -->
+		<intercept-url pattern="/work/**"   access="isAuthenticated()"/>
+
+		<intercept-url pattern="/member/*"  access="isAuthenticated()"/>
+		<intercept-url pattern="/notice/*"  access="isAuthenticated()"/>
+		<intercept-url pattern="/pds/*"     access="isAuthenticated()"/>
+		<intercept-url pattern="/board/*"   access="isAuthenticated()"/>
+		<intercept-url pattern="/menu/*"    access="isAuthenticated()"/>		
+		<intercept-url pattern="/summernote/*" access="isAuthenticated()"/>
+		<intercept-url pattern="/reply/*"   access="isAuthenticated()"/>
+		<intercept-url pattern="/index*"    access="isAuthenticated()"/>
+
+		<!-- 마지막에 permitAll -->
 		<intercept-url pattern="/**" access="permitAll"/>
-		
-		
+
+		<!-- Form Login -->
 		<form-login
 			login-page="/commons/login"
 			login-processing-url="/commons/login/post"
 			username-parameter="eno"
 			password-parameter="pwd"
 			authentication-success-handler-ref="loginSuccessHandler"
-			authentication-failure-handler-ref="loginFailureHandler"		
-		/>
-		
+			authentication-failure-handler-ref="loginFailureHandler"/>
+
+		<!-- Logout -->
 		<logout
 			logout-url="/commons/logout"
 			logout-success-url="/commons/login"
 			invalidate-session="true"
-			delete-cookies="JSESSIONID"
-		/>
-		
-		<session-management invalid-session-url="/commons/loginTimeOut" >
-			<concurrency-control			
+			delete-cookies="JSESSIONID"/>
+
+		<!-- Session Management -->
+		<session-management invalid-session-url="/commons/loginTimeOut">
+			<concurrency-control
 				expired-url="/commons/loginExpired"
 				max-sessions="1"
-				session-registry-ref="sessionRegistry"
-			/>		
-		</session-management>	        
+				session-registry-ref="sessionRegistry"/>
+		</session-management>
 	</http>
 	
-		<!-- 세션동기화 -->
-	<beans:bean id="sessionRegistry" 
- 		        class="org.springframework.security.core.session.SessionRegistryImpl"
-            	/> 
+	<!-- Session registry -->
+	<beans:bean id="sessionRegistry" class="org.springframework.security.core.session.SessionRegistryImpl"/>
 </beans:beans>
-
-
-
-
-
-

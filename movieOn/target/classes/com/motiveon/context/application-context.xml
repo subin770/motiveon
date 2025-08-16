@@ -5,60 +5,83 @@
 	xmlns:p="http://www.springframework.org/schema/p"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-
-<!-- log saved path -->
+	<!-- ===============================
+	     공용 경로/파일명 Bean
+	     =============================== -->
 	<bean id="logSavedPath"
 	      class="java.lang.String"
-	      c:value="${savePath.log.files}"
-	      />      
+	      c:value="${savePath.log.files}" />
+
 	<bean id="loginUserLogFileName" 
 		  class="java.lang.String"      
-		  c:original="${savePath.login.user.log.fileName}"
-		  />
+		  c:original="${savePath.login.user.log.fileName}" />
 
-
-	<!-- DAO 등록 -->
+	<!-- ===============================
+	     DAO 등록 (SqlSession 생성자 주입)
+	     =============================== -->
 	<bean id="employeeDAO" 
-	      class="com.motiveon.dao.EmployeeDAOImpl"
-		  c:session-ref="sqlSession" />
+	      class="com.motiveon.dao.EmployeeDAOImpl">
+		<constructor-arg index="0" ref="sqlSession"/>
+	</bean>
+
 	<bean id="menuDAO" 
-	      class="com.motiveon.dao.MenuDAOImpl"
-		  c:session-ref="sqlSession" />
-	
+	      class="com.motiveon.dao.MenuDAOImpl">
+		<constructor-arg index="0" ref="sqlSession"/>
+	</bean>
+
 	<bean id="calendarDAO"
-	      class="com.motiveon.dao.CalendarDAOImpl"
-	      c:session-ref="sqlSession" />
-	      
-	      
+	      class="com.motiveon.dao.CalendarDAOImpl">
+		<constructor-arg index="0" ref="sqlSession"/>
+	</bean>
+
 	<bean id="loginUserLogDAO"
-	      class="com.motiveon.dao.LoginUserLogDAOImpl"
-	      c:session-ref="sqlSession"
-		/>
+	      class="com.motiveon.dao.LoginUserLogDAOImpl">
+		<constructor-arg index="0" ref="sqlSession"/>
+	</bean>
 
-	<bean id="PopUpDAO"
-	      class="com.motiveon.dao.PopUpDAOImpl"
-	      c:session-ref="sqlSession"
-		/>
-	      
+	<bean id="popUpDAO"
+	      class="com.motiveon.dao.PopUpDAOImpl">
+		<constructor-arg index="0" ref="sqlSession"/>
+	</bean>
 
-<!-- Service 등록 -->
+	<bean id="workDAO" 
+	      class="com.motiveon.dao.WorkDAOImpl">
+	    <constructor-arg index="0" ref="sqlSession"/>
+	</bean>
 
-	
+	<bean id="workManagerDAO" 
+	      class="com.motiveon.dao.WorkManagerDAOImpl">
+		<constructor-arg index="0" ref="sqlSession"/>
+	</bean>
+
+	<bean id="workReplyDAO" 
+	      class="com.motiveon.dao.WorkReplyDAOImpl">
+		<constructor-arg index="0" ref="sqlSession"/>
+	</bean>
+
+	<!-- ===============================
+	     Service 등록
+	     =============================== -->
+	<bean id="workService" 
+		  class="com.motiveon.service.WorkServiceImpl"
+          c:workDAO-ref="workDAO"
+          c:workManagerDAO-ref="workManagerDAO"
+          c:workReplyDAO-ref="workReplyDAO" />
+
 	<bean id="calendarService"
 	      class="com.motiveon.service.CalendarServiceImpl"
 	      c:calendarDAO-ref="calendarDAO" />
 
 	<bean id="menuService"
-		  class="com.motiveon.service.MenuServiceImpl" 
+		  class="com.motiveon.service.MenuServiceImpl"
 		  c:menuDAO-ref="menuDAO" />
-		
+
 	<bean id="employeeService"
 		  class="com.motiveon.service.EmployeeServiceImpl"
 		  c:employeeDAO-ref="employeeDAO" />
-		  
-		  
-	<bean id="PopUpService"
+
+	<bean id="popUpService"
           class="com.motiveon.service.PopUpServiceImpl"
-          c:popUpDAO-ref="PopUpDAO"
-/>
+          c:popUpDAO-ref="popUpDAO" />
+
 </beans>

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.motiveon.command.PageMaker;
@@ -101,11 +102,12 @@ public class PopUpController {
         return "popup/remove_success";    // 삭제 후 목록 페이지로 리다이렉트
     }
 
-    @PostMapping("/removeSelected")
+	@RequestMapping(value = "/removeSelected", method = { RequestMethod.GET, RequestMethod.POST})
     public String removeSelected(@RequestParam("popNos") List<String> popNos) throws SQLException {
-        for(String popNo : popNos) {
+        for (String popNo : popNos) {
             popUpService.removePopup(popNo);
         }
-        return "popup/remove_success";
+        return "redirect:/popup/list";
     }
+   
 }

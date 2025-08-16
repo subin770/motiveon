@@ -347,7 +347,7 @@ body,
 										</td>
 										<td>${w.requesterName}</td>
 										<td>${w.assigneeName}</td>
-										<td class="text-center">${w.dueDate}</td>
+										<td class="text-center">${w.wend}</td>
 										<td class="text-right"><c:choose>
 												<c:when test="${w.status eq 'PROG'}">
 													<span class="badge-pill badge-prog">진행</span>

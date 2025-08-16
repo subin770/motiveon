@@ -32,8 +32,6 @@
   .right-pane{ display:flex; flex-direction:column; }
   .right-head{ padding:12px 14px; border-bottom:1px solid var(--line); font-weight:700; }
   .right-body{ padding:10px 12px; overflow:auto; height:560px; }
-
-  /* 폼 테이블 */
   .form-table{ width:100%; border-collapse:separate; border-spacing:0 8px; }
   .form-table th{
     width:110px; background:#F6F7FB; border:1px solid var(--line);
@@ -47,11 +45,7 @@
   .file-drop input[type=file]{ display:none; }
   #orgTree { padding:12px; }
   #orgTree .jstree-anchor { user-select:none; }
-
-  /* date input 높이 */
   input[type="date"].form-control{ min-height:38px; }
-
-  /* 입력의 X 버튼 */
   .position-relative{ position:relative; }
   .clear-btn{
     position:absolute; right:8px; top:50%; transform:translateY(-50%);
@@ -59,23 +53,15 @@
     padding:0 4px; cursor:pointer;
   }
   .clear-btn:hover{ color:#6b7280; }
-
-  /* 조직도 폰트 */
   #orgTree, .jstree-anchor { font-size:13px !important; }
-
-  /* 제목 크기 */
   h2, h3, h4, .page-title, .content-header h1 { font-size:18px !important; font-weight:bold; }
-
-  /* th/td 경계 통일 */
-  .form-table th{ background-color:#f3f3f3; color:#52586B; border:1px solid #ddd; padding:8px 12px; text-align:left; font-weight:600; width:100px; }
-  .form-table td{ border:1px solid #ddd; padding:8px 12px; }
 </style>
 </head>
 
 <body>
 <div class="page-wrap">
 
-  <!-- 상단 타이틀/버튼 -->
+  <!-- 상단바 -->
   <div class="topbar">
     <h3 class="m-0 font-weight-bold">업무 등록</h3>
     <div>
@@ -84,87 +70,61 @@
     </div>
   </div>
 
+  <!-- 좌우 split -->
   <div class="split">
-    <!-- 좌측: 폼 -->
+    <!-- 좌측 입력 -->
     <div class="left-pane">
-      <form id="workForm" action="<%=ctx%>/work/regist" method="post" enctype="multipart/form-data">
+      <form id="workForm" action="<c:url value='/work/regist'/>" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="requesterEno" value="${loginUser.eno}">
+        <input type="hidden" name="requesterDno" value="${loginUser.dno}">
+        <input type="hidden" name="ownerEno" id="ownerEno">
+
         <table class="form-table">
-          <!-- 요청자 -->
           <tr>
             <th>요청자</th>
-            <td>
-              <c:choose>
-                <c:when test="${not empty loginUser}">
-                  <input type="text" class="input-clean" id="requesterName" value="${loginUser.ename}" readonly>
-                  <input type="hidden" name="eno" id="eno" value="${loginUser.eno}">
-                  <small class="text-muted">로그인 사용자로 자동 지정</small>
-                </c:when>
-                <c:otherwise>
-                  <div class="position-relative">
-                    <input type="text" class="input-clean pr-4" id="requesterName" placeholder="담당자와 동일하게 자동 설정(개발용)" readonly>
-                    <input type="hidden" name="eno" id="eno">
-                    <button type="button" id="btnClearRequester" class="clear-btn d-none" aria-label="요청자 지우기">&times;</button>
-                  </div>
-                  <small class="text-muted">로그인 전 테스트: 요청자 미지정 시 담당자 ENO로 자동 대체됩니다.</small>
-                </c:otherwise>
-              </c:choose>
-            </td>
+            <td><input type="text" class="input-clean" value="${loginUser.name}" readonly></td>
           </tr>
-
-          <!-- 제목 -->
           <tr>
             <th>제목</th>
-            <td>
-              <input type="text" class="input-clean" name="wtitle" id="wtitle" placeholder="제목을 입력해주세요." maxlength="150">
-            </td>
+            <td><input type="text" class="input-clean" name="wtitle" id="wtitle" placeholder="제목을 입력해주세요." maxlength="150" required></td>
           </tr>
-
-          <!-- 담당자 -->
           <tr>
             <th>담당자</th>
             <td>
               <div class="position-relative">
-                <input type="text" class="input-clean pr-4" name="managerName" id="managerName" placeholder="우측 조직도에서 선택" readonly>
-                <input type="hidden" name="managerEno" id="managerEno">
-                <button type="button" id="btnClearManager" class="clear-btn d-none" aria-label="담당자 지우기">&times;</button>
+                <input type="text" class="input-clean pr-4" name="ownerName" id="ownerName" placeholder="우측 조직도에서 선택" readonly>
+                <button type="button" id="btnClearOwner" class="clear-btn d-none">&times;</button>
               </div>
+              <small class="text-muted">미선택 시 요청자가 자동 담당자로 지정됩니다.</small>
             </td>
           </tr>
-
-          <!-- 기한 -->
           <tr>
             <th>기한</th>
-            <td>
-              <div class="input-group">
-                <input type="date" class="form-control" name="dueDate" id="dueDate" placeholder="연도-월-일" style="font-size:14px;">
-              </div>
-            </td>
+            <td><input type="date" class="form-control" name="wend" id="wend" required></td>
           </tr>
         </table>
 
-        <!-- 본문 에디터 -->
         <div class="mt-2">
-          <textarea id="editor" name="wcontent"></textarea>
+          <textarea id="editor" name="wcontent" required></textarea>
         </div>
 
-        <!-- 첨부파일 -->
         <div class="mt-2 file-drop" id="fileBox">
           <i class="fas fa-paperclip"></i><span>첨부파일</span>
           <label class="mb-0 ml-auto">
             <input type="file" name="files" id="files" multiple>
-            <span class="btn btn-sm btn-outline-secondary">Add File</span>
+            <span class="btn btn-sm btn-outline-secondary">파일 추가</span>
           </label>
         </div>
         <ul class="mt-2 small text-muted" id="fileList"></ul>
       </form>
     </div>
 
-    <!-- 우측: 조직도 -->
+    <!-- 우측 조직도 -->
     <div class="right-pane">
       <div class="right-head">조직도</div>
       <div class="right-body">
         <div class="mb-2">
-          <input type="text" class="form-control form-control-sm" id="orgSearch" placeholder="검색(이름/부서)" style="font-size:12px;">
+          <input type="text" class="form-control form-control-sm" id="orgSearch" placeholder="검색(이름/부서)">
         </div>
         <div id="orgTree"></div>
       </div>
@@ -172,34 +132,23 @@
   </div>
 </div>
 
-<!-- Scripts -->
+<!-- 스크립트 -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="<%=ctx%>/resources/bootstrap/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="<%=ctx%>/resources/bootstrap/dist/js/adminlte.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/lang/summernote-ko-KR.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/jstree.min.js"></script>
 
 <script>
-/* ===== 상태 플래그 (JSP EL → JS 불리언) ===== */
-const isLoggedIn = ${not empty loginUser};
-
-/* ===== 폼 위젯 ===== */
+/* Summernote */
 $('#editor').summernote({
   placeholder: '내용을 입력해주세요.',
   height: 260,
-  lang: 'ko-KR',
-  toolbar: [
-    ['style', ['bold','italic','underline','clear']],
-    ['para',  ['ul','ol','paragraph']],
-    ['insert',['table','link']],
-    ['view',  ['fullscreen','codeview']]
-  ]
+  lang: 'ko-KR'
 });
 
-// 파일 목록 표시
+/* 파일리스트 */
 $('#files').on('change', function(){
   const list = $('#fileList').empty();
   for(const f of this.files){
@@ -207,156 +156,98 @@ $('#files').on('change', function(){
   }
 });
 
-// X 버튼 토글
-function toggleManagerClear(){
-  const has = !!$('#managerEno').val();
-  $('#btnClearManager').toggleClass('d-none', !has);
+/* 담당자 해제 버튼 토글 */
+function toggleOwnerClear(){
+  $('#btnClearOwner').toggleClass('d-none', !$('#ownerEno').val());
 }
-function toggleRequesterClear(){
-  const has = !!$('#eno').val();
-  $('#btnClearRequester').toggleClass('d-none', !has);
-}
-$('#btnClearManager').on('click', function(){
-  $('#managerName').val(''); $('#managerEno').val(''); toggleManagerClear();
-});
-$('#btnClearRequester').on('click', function(){
-  $('#requesterName').val(''); $('#eno').val(''); toggleRequesterClear();
+$('#btnClearOwner').on('click', function(){
+  $('#ownerName').val('');
+  $('#ownerEno').val('');
+  toggleOwnerClear();
 });
 
-/* ===== 등록/취소 ===== */
+/* 등록 버튼 */
 $('#btnSubmit').on('click', function(){
   const title = $('#wtitle').val().trim();
-  const mgrEno = $('#managerEno').val().trim();
-  const due    = $('#dueDate').val().trim();
-  const html   = $('#editor').summernote('isEmpty') ? '' : $('#editor').summernote('code');
+  const wend  = $('#wend').val().trim();
 
-  if(!title){ alert('제목을 입력해주세요.'); $('#wtitle').focus(); return; }
-  if(!mgrEno){ alert('담당자를 선택해주세요.'); return; }
-  if(!due){ alert('기한을 선택해주세요.'); $('#dueDate').focus(); return; }
-  if(!html || $(html).text().trim()===''){ alert('내용을 입력해주세요.'); $('#editor').summernote('focus'); return; }
+  if(!title){ alert('제목을 입력해주세요.'); return; }
+  if(!wend){ alert('기한을 선택해주세요.'); return; }
+  if($('#editor').summernote('isEmpty')){ alert('내용을 입력해주세요.'); return; }
 
-  // 로그인 전 개발용 폴백: 요청자 미지정시 담당자로 대체
-  if(!isLoggedIn){
-    const reqEno = $('#eno').val().trim();
-    if(!reqEno){
-      $('#eno').val(mgrEno);
-      $('#requesterName').val($('#managerName').val());
-    }
+  // 담당자 미선택 → 요청자 본인
+  if(!$('#ownerEno').val()){
+    let requesterEno = $('input[name="requesterEno"]').val();
+    if(requesterEno){ $('#ownerEno').val(requesterEno); }
+    else { alert('로그인 정보가 없습니다.'); return; }
   }
-  $('#workForm').submit();
+
+  const formData = new FormData($('#workForm')[0]);
+
+  $.ajax({
+    url: $('#workForm').attr('action'),
+    type: 'POST',
+    data: formData,
+    processData: false,
+    contentType: false,
+    success: function(){
+      alert('등록이 완료되었습니다.');
+      if(window.opener){
+        window.opener.location.reload();
+        window.close();
+      } else {
+        location.href = '<c:url value="/work/list"/>';
+      }
+    },
+    error: function(xhr){
+      alert('등록 실패: ' + xhr.status);
+    }
+  });
 });
 
+/* 취소 버튼 */
 $('#btnCancel').on('click', function(){
   if(window.opener){ window.close(); } else { history.back(); }
 });
 
-/* ====== jsTree ====== */
+/* 조직도 */
 $(function () {
   const $tree = $('#orgTree');
-  try { $tree.jstree('destroy'); } catch(e) {}
-
-  function customMenu(node){
-    const items = {};
-    if (node.original && node.original.type === 'department') {
-      items.createDept = {
-        label: "부서 추가",
-        action: function(){
-          const name = (prompt("추가할 부서명을 입력하세요.") || '').trim();
-          if(!name) return;
-          $.post('<c:url value="/org/department"/>', { name, parent: node.id }, function(res){
-            $tree.jstree(true).create_node(node, {
-              id: res.id, parent: node.id, text: name, type: 'department', children: true
-            }, "last", function(){ $tree.jstree('open_node', node); });
-          }, 'json').fail(() => alert('부서 추가 실패'));
-        }
-      };
-    }
-    items.rename = {
-      label: "이름 변경",
-      action: function(){
-        const name = (prompt("새로운 이름", node.text) || '').trim();
-        if(!name) return;
-        $.post('<c:url value="/org/rename"/>', { id: node.id, name })
-          .done(() => $tree.jstree(true).rename_node(node, name))
-          .fail(() => alert('이름 변경 실패'));
-      }
-    };
-    items.remove = {
-      label: "삭제",
-      action: function(){
-        if(!confirm("삭제할까요?")) return;
-        $.post('<c:url value="/org/delete"/>', { id: node.id })
-          .done(() => $tree.jstree(true).delete_node(node))
-          .fail(() => alert('삭제 실패'));
-      }
-    };
-    return items;
-  }
-
   $tree.jstree({
     core: {
       data: function (node, cb) {
         $.ajax({
           url: '<c:url value="/org/children"/>',
           data: { parent: node.id || '#' },
-          dataType: 'json',
-          cache: false
+          dataType: 'json'
         }).done(function(res){
-          if (!Array.isArray(res)) { console.error('children not array', res); cb([]); return; }
-          const fixed = res.map(r => {
-            const id    = r.id    ?? r.ID;
-            const text  = r.text  ?? r.TEXT;
-            const type0 = r.type  ?? r.TYPE;
-            const type  = (type0 ? String(type0).toLowerCase()
-                                 : (String(id).startsWith('e-') ? 'employee' : 'department'));
-            return { id, text, type, children: (type === 'department') };
-          });
+          const fixed = res.map(r => ({
+            id: r.id, text: r.text, type: r.type,
+            children: (r.type === 'department')
+          }));
           cb(fixed);
-        }).fail(function(xhr){
-          console.error('[children] error', xhr.status, xhr.responseText);
-          cb([]);
         });
-      },
-      check_callback: function (op, node, parent) {
-        if(op === 'move_node'){
-          if (node.original?.type === 'employee' && parent && parent.type !== 'department') return false;
-          if (node.original?.type === 'department' && parent && !(parent.id === '#' || parent.type === 'department')) return false;
-        }
-        return true;
-      },
-      dblclick_toggle: false
+      }
     },
     types: { department: { icon: "fas fa-building" }, employee: { icon: "fas fa-user" } },
-    plugins: ["types","wholerow","search","dnd","contextmenu"],
-    contextmenu: { items: customMenu }
+    plugins: ["types","wholerow","search"]
   });
 
-  // 검색
-  let to=false;
   $('#orgSearch').on('keyup', function(){
-    if(to) clearTimeout(to);
-    to=setTimeout(function(){ $('#orgTree').jstree(true).search($('#orgSearch').val()); }, 200);
+    $tree.jstree(true).search($(this).val());
   });
 
-  // 선택: 직원이면 담당자 입력칸 채움 + X 버튼 보이기
-  $tree.off('select_node.jstree').on('select_node.jstree', function (e, data) {
+  $tree.on('select_node.jstree', function (e, data) {
     const n = data.node;
-    if (n.original?.type === 'department') {
-      $tree.jstree(true).open_node(n);
-    } else if (n.original?.type === 'employee') {
+    if (n.original.type === 'employee') {
       const eno = (n.id || '').replace(/^e-/, '');
-      $('#managerName').val(n.text);
-      $('#managerEno').val(eno);
-      toggleManagerClear();
-
-      // 필요하면 로그인 전 요청자 자동 채우기까지:
-      // if(!isLoggedIn && !$('#eno').val()){ $('#eno').val(eno); $('#requesterName').val(n.text); toggleRequesterClear(); }
+      $('#ownerName').val(n.text);
+      $('#ownerEno').val(eno);
+      toggleOwnerClear();
     }
   });
 
-  // 초기 X 버튼 상태
-  toggleManagerClear();
-  toggleRequesterClear();
+  toggleOwnerClear();
 });
 </script>
 </body>

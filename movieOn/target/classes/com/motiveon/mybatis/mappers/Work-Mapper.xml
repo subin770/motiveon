@@ -1,77 +1,266 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="Work-Mapper">
 
-	<resultMap id="workMap" type="com.motiveon.dto.WorkVO">
-		<id property="wcode" column="WCODE" />
-		<result property="wtitle" column="WTITLE" />
-		<result property="wdate" column="WDATE" />
-		<result property="wend" column="WEND" />
-		<result property="wopen" column="WOPEN" />
-		<result property="walarm" column="WALARM" />
-		<result property="eno" column="ENO" />
-		<result property="wstatus" column="WSTATUS" />
-		<result property="dno" column="DNO" />
-		<!-- 목록용 -->
-		<result property="managerEno" column="MANAGER_ENO" />
-		<result property="managerName" column="MANAGER_ENAME" />
-	</resultMap>
+  <!-- ================== 공통 resultMap ================== -->
+  <resultMap id="workMap" type="com.motiveon.dto.WorkVO">
+    <id     property="wcode" column="WCODE"/>
+    <result property="wtitle" column="WTITLE"/>
+    <result property="wdate"  column="WDATE"/>
+    <result property="wend"   column="WEND"/>
+    <result property="eno"    column="ENO"/>
+    <result property="wstatus" column="WSTATUS"/>
+    <result property="dno"    column="DNO"/>
+    <result property="ownerName" column="OWNER_NAME"/>
+    <result property="managerName" column="MANAGER_NAME"/>
+    <result property="requesterName" column="REQUESTER_NAME"/>
+    <result property="statusName" column="STATUS_NAME"/>
+  </resultMap>
 
-	<!-- 1) WORK 등록 -->
-	<insert id="insertWork" parameterType="com.motiveon.dto.WorkVO">
-		<selectKey keyProperty="wcode" resultType="string"
-			order="BEFORE">
-			SELECT 'W' || LPAD(SEQ_WORK.NEXTVAL, 10, '0') FROM DUAL
-		</selectKey>
-		INSERT INTO WORK (
-		WCODE, WTITLE, WDATE, WEND, WOPEN, WALARM, ENO,
-		WSTATUS, DNO
-		) VALUES (
-		#{wcode}, #{wtitle}, SYSDATE, #{wend},
-		NVL(#{wopen},0), NVL(#{walarm},0),
-		#{eno}, NVL(#{wstatus}, '대기'),
-		#{dno}
-		)
-	</insert>
+  <resultMap id="workListMap" type="com.motiveon.dto.WorkListDTO">
+    <id     property="wcode" column="WCODE"/>
+    <result property="wtitle" column="WTITLE"/>
+    <result property="wdate" column="WDATE"/>
+    <result property="wend" column="WEND"/>
+    <result property="eno" column="ENO"/>
+    <result property="wstatus" column="WSTATUS"/>
+    <result property="ownerName" column="OWNER_NAME"/>
+    <result property="managerName" column="MANAGER_NAME"/>
+    <result property="requesterName" column="REQUESTER_NAME"/>
+    <result property="statusName" column="STATUS_NAME"/>
+  </resultMap>
 
-	<!-- 2) WORKMANAGER(담당자) 등록: 최초 담당자 WMSTEP=1 -->
-	<insert id="insertWorkManager"
-		parameterType="com.motiveon.dto.WorkVO">
-		INSERT INTO WORKMANAGER (WMSTEP, WCODE, ENO, ISAFTER,
-		ANSWER)
-		VALUES (1, #{wcode}, #{managerEno}, 0, '대기')
-	</insert>
+  <!-- ================== 등록 / 수정 ================== -->
+  <select id="getNextWcode" resultType="string">
+    SELECT 'W' || LPAD(WORK_SEQ.NEXTVAL, 5, '0') FROM dual
+  </select>
 
-	<!-- 3) 초기 내용은 WORKREPLY에 댓글로 저장(옵션) -->
-	<insert id="insertInitReply" parameterType="map">
-		<selectKey keyProperty="wrno" resultType="string"
-			order="BEFORE">
-			SELECT 'WR' || LPAD(SEQ_WORKREPLY.NEXTVAL, 10, '0') FROM DUAL
-		</selectKey>
-		INSERT INTO WORKREPLY (WRNO, WRCONTENT, WRREGDATE, WCODE, ENO)
-		VALUES
-		(#{wrno}, #{content}, SYSDATE, #{wcode}, #{writerEno})
-	</insert>
+  <insert id="insertWork" parameterType="com.motiveon.dto.WorkVO">
+    INSERT INTO WORK (WCODE, WTITLE, WDATE, WEND, ENO, WSTATUS, DNO)
+    VALUES (#{wcode}, #{wtitle}, SYSDATE, #{wend}, #{eno}, #{wstatus}, #{dno})
+  </insert>
 
-	<!-- 목록: 담당자 1순위 + 직원명 조인 -->
-	<!-- 목록: 담당자 1순위 + 직원명 조인 -->
-	<select id="selectWorkList" resultMap="workMap">
-		SELECT
-		w.WCODE, w.WTITLE,
-		w.WDATE, w.WEND, w.WOPEN, w.WALARM,
-		w.ENO, w.WSTATUS, w.DNO,
-		m.ENO AS MANAGER_ENO,
-		e.NAME AS MANAGER_ENAME
-		FROM WORK w
-		LEFT JOIN (
-		SELECT WCODE, ENO
-		FROM WORKMANAGER
-		WHERE WMSTEP = 1
-		) m ON m.WCODE = w.WCODE
-		LEFT JOIN EMPLOYEE e ON e.ENO = m.ENO
-		ORDER BY w.WCODE DESC
-	</select>
+  <update id="updateWork" parameterType="com.motiveon.dto.WorkVO">
+    UPDATE WORK
+    SET WTITLE = #{wtitle},
+        WEND = #{wend},
+        WSTATUS = #{wstatus}
+    WHERE WCODE = #{wcode}
+  </update>
+
+  <!-- ================== 상세조회 ================== -->
+  <select id="selectWorkDetail" parameterType="string" resultMap="workMap">
+    SELECT 
+        W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.ENO, W.WSTATUS, W.DNO,
+        E.NAME AS OWNER_NAME,
+        (SELECT E2.NAME FROM WORKMANAGER M2 
+         JOIN EMPLOYEE E2 ON M2.ENO = E2.ENO
+         WHERE M2.WCODE = W.WCODE AND M2.WMSTEP = 1) AS MANAGER_NAME,
+        (SELECT E3.NAME FROM WORKMANAGER M3
+         JOIN EMPLOYEE E3 ON M3.ENO = E3.ENO
+         WHERE M3.WCODE = W.WCODE AND M3.WMSTEP = 0) AS REQUESTER_NAME,
+        CASE W.WSTATUS
+          WHEN 'WAIT' THEN '대기중'
+          WHEN 'PROG' THEN '진행중'
+          WHEN 'APPROVED' THEN '승인됨'
+          WHEN 'DONE' THEN '완료'
+          ELSE '기타'
+        END AS STATUS_NAME
+    FROM WORK W
+    JOIN EMPLOYEE E ON W.ENO = E.ENO
+    WHERE W.WCODE = #{wcode}
+  </select>
+
+  <!-- ================== 승인 업데이트 ================== -->
+  <update id="updateApproval" parameterType="map">
+    UPDATE WORK
+    SET WSTATUS = 'APPROVED',
+        ENO = #{eno}
+    WHERE WCODE = #{wcode}
+  </update>
+
+  <!-- ================== 반려 사유 등록 ================== -->
+  <insert id="insertObjection" parameterType="com.motiveon.dto.ObjectionDTO">
+    INSERT INTO WORK_OBJECTION (OBJCODE, WCODE, ENO, CONTENT, REGDATE)
+    VALUES (OBJ_SEQ.NEXTVAL, #{wcode}, #{eno}, #{content}, SYSDATE)
+  </insert>
+
+  <!-- ================== 리스트 조회 ================== -->
+  <!-- 내가 담당자로 속한 업무 리스트 -->
+  <select id="selectMyList" parameterType="map" resultMap="workListMap">
+    SELECT 
+        W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.WSTATUS, W.ENO,
+        E.NAME AS MANAGER_NAME,
+        (SELECT E2.NAME FROM WORKMANAGER M2 
+         JOIN EMPLOYEE E2 ON M2.ENO = E2.ENO
+         WHERE M2.WCODE = W.WCODE AND M2.WMSTEP = 0) AS REQUESTER_NAME,
+        (SELECT E3.NAME FROM EMPLOYEE E3 WHERE E3.ENO = W.ENO) AS OWNER_NAME,
+        CASE W.WSTATUS
+          WHEN 'WAIT' THEN '대기중'
+          WHEN 'PROG' THEN '진행중'
+          WHEN 'APPROVED' THEN '승인됨'
+          WHEN 'DONE' THEN '완료'
+          ELSE '기타'
+        END AS STATUS_NAME
+    FROM WORK W
+    JOIN WORKMANAGER M ON W.WCODE = M.WCODE
+    JOIN EMPLOYEE E ON M.ENO = E.ENO
+    WHERE M.ENO = #{eno}
+      <if test="status != null and status != ''">
+        AND W.WSTATUS = #{status}
+      </if>
+    ORDER BY W.WDATE DESC
+  </select>
+
+  <!-- 내가 요청한 업무 리스트 -->
+  <select id="selectRequestedList" parameterType="map" resultMap="workListMap">
+    SELECT 
+        W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.WSTATUS, W.ENO,
+        (SELECT E2.NAME FROM WORKMANAGER M2 
+         JOIN EMPLOYEE E2 ON M2.ENO = E2.ENO
+         WHERE M2.WCODE = W.WCODE AND M2.WMSTEP = 1) AS MANAGER_NAME,
+        E.NAME AS REQUESTER_NAME,
+        (SELECT E3.NAME FROM EMPLOYEE E3 WHERE E3.ENO = W.ENO) AS OWNER_NAME,
+        CASE W.WSTATUS
+          WHEN 'WAIT' THEN '대기중'
+          WHEN 'PROG' THEN '진행중'
+          WHEN 'APPROVED' THEN '승인됨'
+          WHEN 'DONE' THEN '완료'
+          ELSE '기타'
+        END AS STATUS_NAME
+    FROM WORK W
+    JOIN WORKMANAGER M ON W.WCODE = M.WCODE
+    JOIN EMPLOYEE E ON M.ENO = E.ENO
+    WHERE M.ENO = #{eno} AND M.WMSTEP = 0
+      <if test="status != null and status != ''">
+        AND W.WSTATUS = #{status}
+      </if>
+    ORDER BY W.WDATE DESC
+  </select>
+
+  <!-- 주간 요청한 업무 리스트 -->
+  <select id="selectWeeklyRequestedList" parameterType="int" resultMap="workListMap">
+    SELECT 
+        W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.WSTATUS, W.ENO,
+        (SELECT E2.NAME FROM WORKMANAGER M2 
+         JOIN EMPLOYEE E2 ON M2.ENO = E2.ENO
+         WHERE M2.WCODE = W.WCODE AND M2.WMSTEP = 1) AS MANAGER_NAME,
+        E.NAME AS REQUESTER_NAME,
+        (SELECT E3.NAME FROM EMPLOYEE E3 WHERE E3.ENO = W.ENO) AS OWNER_NAME,
+        CASE W.WSTATUS
+          WHEN 'WAIT' THEN '대기중'
+          WHEN 'PROG' THEN '진행중'
+          WHEN 'APPROVED' THEN '승인됨'
+          WHEN 'DONE' THEN '완료'
+          ELSE '기타'
+        END AS STATUS_NAME
+    FROM WORK W
+    JOIN WORKMANAGER M ON W.WCODE = M.WCODE
+    JOIN EMPLOYEE E ON M.ENO = E.ENO
+    WHERE M.ENO = #{eno} AND M.WMSTEP = 0
+      AND W.WDATE BETWEEN TRUNC(SYSDATE,'IW') AND TRUNC(SYSDATE,'IW')+6
+    ORDER BY W.WDATE DESC
+  </select>
+
+  <!-- 주간 마감 리스트 -->
+  <select id="selectWeeklyClosingList" parameterType="int" resultMap="workListMap">
+    SELECT 
+        W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.WSTATUS, W.ENO,
+        (SELECT E2.NAME FROM WORKMANAGER M2 
+         JOIN EMPLOYEE E2 ON M2.ENO = E2.ENO
+         WHERE M2.WCODE = W.WCODE AND M2.WMSTEP = 0) AS REQUESTER_NAME,
+        (SELECT E3.NAME FROM WORKMANAGER M3 
+         JOIN EMPLOYEE E3 ON M3.ENO = E3.ENO
+         WHERE M3.WCODE = W.WCODE AND M3.WMSTEP = 1) AS MANAGER_NAME,
+        (SELECT E4.NAME FROM EMPLOYEE E4 WHERE E4.ENO = W.ENO) AS OWNER_NAME,
+        CASE W.WSTATUS
+          WHEN 'WAIT' THEN '대기중'
+          WHEN 'PROG' THEN '진행중'
+          WHEN 'APPROVED' THEN '승인됨'
+          WHEN 'DONE' THEN '완료'
+          ELSE '기타'
+        END AS STATUS_NAME
+    FROM WORK W
+    JOIN EMPLOYEE E ON W.ENO = E.ENO
+    WHERE W.ENO = #{eno}
+      AND W.WEND BETWEEN TRUNC(SYSDATE,'IW') AND TRUNC(SYSDATE,'IW')+6
+  </select>
+
+  <!-- 전체 업무 리스트 -->
+  <select id="selectWorkList" resultMap="workMap">
+    SELECT 
+        W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.ENO, W.DNO, W.WSTATUS,
+        E.NAME AS OWNER_NAME,
+        (SELECT E2.NAME FROM WORKMANAGER M2 
+         JOIN EMPLOYEE E2 ON M2.ENO = E2.ENO
+         WHERE M2.WCODE = W.WCODE AND M2.WMSTEP = 1) AS MANAGER_NAME,
+        (SELECT E3.NAME FROM WORKMANAGER M3
+         JOIN EMPLOYEE E3 ON M3.ENO = E3.ENO
+         WHERE M3.WCODE = W.WCODE AND M3.WMSTEP = 0) AS REQUESTER_NAME,
+        CASE W.WSTATUS
+          WHEN 'WAIT' THEN '대기중'
+          WHEN 'PROG' THEN '진행중'
+          WHEN 'APPROVED' THEN '승인됨'
+          WHEN 'DONE' THEN '완료'
+          ELSE '기타'
+        END AS STATUS_NAME
+    FROM WORK W
+    JOIN EMPLOYEE E ON W.ENO = E.ENO
+    ORDER BY W.WDATE DESC
+  </select>
+  
+  <!-- 승인 대기중인 업무 리스트 -->
+  <select id="selectPendingApprovalList" parameterType="int" resultMap="workListMap">
+    SELECT 
+        W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.WSTATUS, W.ENO,
+        (SELECT E2.NAME FROM WORKMANAGER M2 
+         JOIN EMPLOYEE E2 ON M2.ENO = E2.ENO
+         WHERE M2.WCODE = W.WCODE AND M2.WMSTEP = 1) AS MANAGER_NAME,
+        (SELECT E3.NAME FROM WORKMANAGER M3
+         JOIN EMPLOYEE E3 ON M3.ENO = E3.ENO
+         WHERE M3.WCODE = W.WCODE AND M3.WMSTEP = 0) AS REQUESTER_NAME,
+        (SELECT E4.NAME FROM EMPLOYEE E4 WHERE E4.ENO = W.ENO) AS OWNER_NAME,
+        CASE W.WSTATUS
+          WHEN 'WAIT' THEN '대기중'
+          WHEN 'PROG' THEN '진행중'
+          WHEN 'APPROVED' THEN '승인됨'
+          WHEN 'DONE' THEN '완료'
+          ELSE '기타'
+        END AS STATUS_NAME
+    FROM WORK W
+    JOIN WORKMANAGER M ON W.WCODE = M.WCODE
+    WHERE M.ENO = #{eno}
+      AND W.WSTATUS = 'WAIT'
+    ORDER BY W.WDATE DESC
+  </select>
+  
+ <select id="selectWaitingRequestedList" parameterType="int" resultMap="workListMap">
+  SELECT 
+      W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.WSTATUS, W.ENO,
+      (SELECT E2.NAME 
+         FROM WORKMANAGER M2 
+         JOIN EMPLOYEE E2 ON M2.ENO = E2.ENO
+        WHERE M2.WCODE = W.WCODE AND M2.WMSTEP = 1) AS MANAGER_NAME,
+      E.NAME AS REQUESTER_NAME,
+      (SELECT E3.NAME 
+         FROM EMPLOYEE E3 
+        WHERE E3.ENO = W.ENO) AS OWNER_NAME,
+      CASE W.WSTATUS
+        WHEN 'WAIT' THEN '대기중'
+        WHEN 'PROG' THEN '진행중'
+        WHEN 'APPROVED' THEN '승인됨'
+        WHEN 'DONE' THEN '완료'
+        ELSE '기타'
+      END AS STATUS_NAME
+  FROM WORK W
+  JOIN WORKMANAGER M ON W.WCODE = M.WCODE
+  JOIN EMPLOYEE E ON M.ENO = E.ENO
+  WHERE M.ENO = #{eno}     -- 내가 요청자
+    AND M.WMSTEP = 0
+    AND W.WSTATUS = 'WAIT' -- 승인 대기 상태만
+  ORDER BY W.WDATE DESC
+</select>
 
 </mapper>

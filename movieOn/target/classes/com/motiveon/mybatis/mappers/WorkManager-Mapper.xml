@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="WorkManager-Mapper">
+
+  <!-- resultMap -->
+  <resultMap id="workManagerMap" type="com.motiveon.dto.WorkManagerVO">
+    <id     property="wcode"   column="WCODE"/>
+    <result property="wmstep"  column="WMSTEP"/>
+    <result property="eno"     column="ENO"/>
+    <result property="isafter" column="ISAFTER"/>
+    <result property="answer"  column="ANSWER"/>
+  </resultMap>
+
+  <!-- 등록 -->
+  <insert id="insertWorkManager" parameterType="com.motiveon.dto.WorkManagerVO">
+    INSERT INTO WORKMANAGER
+      (WMSTEP, WCODE, ENO, ISAFTER, ANSWER)
+    VALUES
+      (#{wmstep}, #{wcode}, #{eno}, #{isafter}, #{answer})
+  </insert>
+
+  <!-- 특정 업무에 해당하는 담당자/요청자 조회 -->
+  <select id="selectWorkManagerByWcode" parameterType="string"
+          resultMap="workManagerMap">
+    SELECT WMSTEP, WCODE, ENO, ISAFTER, ANSWER
+    FROM WORKMANAGER
+    WHERE WCODE = #{wcode}
+    ORDER BY WMSTEP
+  </select>
+  
+  
+  <select id="getByWcode" parameterType="string" resultType="com.motiveon.dto.WorkManagerVO">
+    SELECT WMSTEP, WCODE, ENO, ISAFTER, ANSWER
+    FROM WORKMANAGER
+    WHERE WCODE = #{wcode}
+</select>
+  
+
+</mapper>

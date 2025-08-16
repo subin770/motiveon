@@ -31,8 +31,8 @@ public class CalendarServiceImpl implements CalendarService {
 
 	@Override
 	public void regist(CalendarVO calendar) throws Exception {
-		
-		registCalendar(calendar); 
+
+		registCalendar(calendar);
 	}
 
 	@Override
@@ -40,25 +40,24 @@ public class CalendarServiceImpl implements CalendarService {
 		// 일정 코드 수동 생성
 		String ccode = calendarDAO.selectCcode();
 		calendar.setCcode(ccode);
-		
+
 		calendar.setSdate(parseDate(calendar.getStart()));
-	    calendar.setEdate(parseDate(calendar.getEnd()));
+		calendar.setEdate(parseDate(calendar.getEnd()));
 
 		// insert
 		calendarDAO.insertCalendar(calendar);
 	}
-	
+
 	private Date parseDate(String datetime) {
-	    try {
-	    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-	    	    return sdf.parse(datetime);
-	    } catch (ParseException e) {
-	        e.printStackTrace();
-	        return null;
-	    }
+			return sdf.parse(datetime);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
-
 
 	@Override
 	public List<CalendarVO> getCalendarList(Criteria cri, int eno) throws SQLException {
@@ -89,7 +88,6 @@ public class CalendarServiceImpl implements CalendarService {
 		return calendar;
 	}
 
-	
 	@Override
 	public void remove(String ccode) throws SQLException {
 		calendarDAO.deleteCalendar(ccode);
@@ -117,50 +115,44 @@ public class CalendarServiceImpl implements CalendarService {
 
 	@Override
 	public List<CalendarVO> getCalendarList() throws SQLException {
-	    return calendarDAO.selectAllCalendar();
+		return calendarDAO.selectAllCalendar();
 	}
-
 
 	// CalendarServiceImpl.java
 	@Override
 	public int modifyCalendar(CalendarVO calendar) throws SQLException {
-	    return calendarDAO.updateCalendar(calendar);  
+		return calendarDAO.updateCalendar(calendar);
 	}
-
 
 	@Override
 	public int removeCalendar(String ccode) {
-	    return calendarDAO.deleteCalendar(ccode);
+		return calendarDAO.deleteCalendar(ccode);
 	}
 
 	@Override
 	public void delete(String ccode) throws Exception {
-	    calendarDAO.delete(ccode);
+		calendarDAO.delete(ccode);
 	}
 
+	@Resource
+	private SqlSession session;
 
-	    @Resource
-	    private SqlSession session;
+	private static final String NAMESPACE = "Calendar-Mapper";
 
-	    private static final String NAMESPACE = "Calendar-Mapper";
+	@Override
+	public int updateCalendar(CalendarVO calendar) {
+		return session.update(NAMESPACE + ".updateCalendar", calendar);
+	}
 
-	    @Override
-	    public int updateCalendar(CalendarVO calendar) {
-	        return session.update(NAMESPACE + ".updateCalendar", calendar);
-	    }
+	@Override
+	public List<CalendarVO> searchCalendar(String keyword) throws SQLException {
+		return session.selectList("Calendar-Mapper.searchCalendar", keyword);
+	}
 
-	    @Override
-	    public List<CalendarVO> searchCalendar(String keyword) throws SQLException {
-	        return session.selectList("Calendar-Mapper.searchCalendar", keyword);
-	    }
-
-		@Override
-		public int modify(CalendarVO vo) {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-
-
+	@Override
+	public int modify(CalendarVO vo) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 }

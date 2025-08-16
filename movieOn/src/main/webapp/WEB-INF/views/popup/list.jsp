@@ -20,9 +20,7 @@
 						공지</h3>
 					<button type="button" class="btn btn-primary" id="registBtn"
 						onclick="OpenWindow('regist','등록',700,800);">등 록</button>
-					<button type="button" class="btn btn-primary" id="registBtn"
-						onclick="OpenWindow('remove','삭제',700,800);"
-						style="background-color: red; border-color: red;">삭 제</button>
+			<button type="button" class="btn btn-danger" onclick="deleteSelected()">삭 제</button>
 				</div>
 				<div class="card-body">
 					<table class="table table-bordered table-striped text-center"
@@ -123,6 +121,24 @@ MemberPictureBackground("<%=request.getContextPath()%>
       checkbox.checked = !checkbox.checked;
     }
   }
+  
+  function deleteSelected() {
+      const checked = document.querySelectorAll('input[name="popNos"]:checked');
+      if (checked.length === 0) {
+        alert("삭제할 항목을 선택하세요.");
+        return;
+      }
+
+      const popNos = Array.from(checked).map(cb => cb.value);
+
+      if (confirm("정말 삭제하시겠습니까?")) {
+        // 단일 삭제면 popNos[0]만 전달
+        //location.href = 'remove?popNo=' + popNos[0];
+
+        // 다중 삭제 처리 원하면
+        location.href = 'removeSelected?popNos=' + popNos.join(',');
+      }
+    }
 </script>
 
 </body>

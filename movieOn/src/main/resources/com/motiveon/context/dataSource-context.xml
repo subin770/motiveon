@@ -27,11 +27,12 @@
 	</bean>	
 
 	<bean id="sqlSessionFactory" 
-	      class="org.mybatis.spring.SqlSessionFactoryBean"	
-	      p:dataSource-ref="dataSource"
-	      p:configLocation="classpath:com/motiveon/mybatis/config/sqlConfig.xml"
-	      p:mapperLocations="classpath:com/motiveon/mybatis/mappers/*-Mapper.xml"
-	      />
+		  class="org.mybatis.spring.SqlSessionFactoryBean"
+          p:dataSource-ref="dataSourceSpied"   
+          p:configLocation="classpath:com/motiveon/mybatis/config/sqlConfig.xml"
+          p:mapperLocations="classpath*:com/motiveon/mybatis/mappers/**/*-Mapper.xml" />
+
+	      
 	<bean id="sqlSession" 
 		  class="org.mybatis.spring.SqlSessionTemplate"
 		  c:sqlSessionFactory-ref="sqlSessionFactory"
@@ -40,4 +41,7 @@
 		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
 		p:dataSource-ref="dataSource"
 		/>
+		
+		
+
 </beans>

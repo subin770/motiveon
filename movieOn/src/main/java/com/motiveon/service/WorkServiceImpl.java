@@ -1,7 +1,10 @@
 package com.motiveon.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,35 +14,34 @@ import com.motiveon.dao.WorkReplyDAO;
 import com.motiveon.dto.ObjectionDTO;
 import com.motiveon.dto.WorkListDTO;
 import com.motiveon.dto.WorkManagerVO;
+import com.motiveon.dto.WorkReplyVO;
 import com.motiveon.dto.WorkVO;
 
-@Service("workService")
+@Service
 public class WorkServiceImpl implements WorkService {
 
     private final WorkDAO workDAO;
     private final WorkManagerDAO workManagerDAO;
     private final WorkReplyDAO workReplyDAO;
 
-    public WorkServiceImpl(WorkDAO workDAO,
-                           WorkManagerDAO workManagerDAO,
-                           WorkReplyDAO workReplyDAO) {
+    @Autowired
+    public WorkServiceImpl(WorkDAO workDAO, WorkManagerDAO workManagerDAO, WorkReplyDAO workReplyDAO) {
         this.workDAO = workDAO;
         this.workManagerDAO = workManagerDAO;
         this.workReplyDAO = workReplyDAO;
     }
 
-    /** 등록 : WORK + WORKMANAGER */
+    /** ================== 등록 ================== */
     @Transactional
     @Override
     public String regist(WorkVO work, int requesterEno, int ownerEno) {
-        // WCODE 채번
         String wcode = workDAO.getNextWcode();
         work.setWcode(wcode);
+        work.setEno(requesterEno); 
 
-        // WORK 저장
         workDAO.insertWork(work);
 
-        // 요청자 (wmstep=0)
+        // 요청자
         WorkManagerVO requester = new WorkManagerVO();
         requester.setWcode(wcode);
         requester.setEno(requesterEno);
@@ -48,7 +50,7 @@ public class WorkServiceImpl implements WorkService {
         requester.setAnswer("REQUESTER");
         workManagerDAO.insertWorkManager(requester);
 
-        // 담당자 (요청자와 다를 때, wmstep=1)
+        // 담당자
         if (ownerEno != requesterEno) {
             WorkManagerVO owner = new WorkManagerVO();
             owner.setWcode(wcode);
@@ -62,39 +64,71 @@ public class WorkServiceImpl implements WorkService {
         return wcode;
     }
 
-    /** 상세 조회 */
+    /** ================== 상세 ================== */
     @Override
     public WorkVO getWorkDetail(String wcode) {
         return workDAO.selectWorkDetail(wcode);
     }
 
-    /** 승인 */
-    @Transactional
     @Override
-    public void approve(String wcode, int eno) {
-        workDAO.updateApproval(wcode, eno);
+    public WorkVO getWorkByWcode(String wcode) throws Exception {
+        return workDAO.selectWorkDetail(wcode);
     }
 
-    /** 이의제기 */
+    /** ================== 승인 ================== */
     @Transactional
     @Override
-    public void objection(ObjectionDTO dto) {
-        workDAO.insertObjection(dto);
+    public int approveWork(String wcode) throws Exception {
+        return workDAO.updateWorkStatus(wcode, "승인", "APPROVED");
     }
 
-    /** 내 업무 리스트 */
+    /** ================== 반려 ================== */
+    @Transactional
+    @Override
+    public int rejectWork(String wcode, String reason) throws Exception {
+        return workDAO.updateWorkStatus(wcode, "반려", "REJECT");
+    }
+
+    /** ================== 이의신청 ================== */
+    @Override
+    public void objection(ObjectionDTO dto) throws Exception {
+        workReplyDAO.insertObjection(dto);
+        workDAO.updateWorkStatus(dto.getWcode(), "OBJECTION", "대기");
+    }
+
+    @Override
+    public List<WorkReplyVO> selectObjectionList(String wcode) throws Exception {
+        return workReplyDAO.selectObjectionList(wcode);
+    }
+
+    @Override
+    public WorkReplyVO selectObjectionByWrno(int wrno) throws Exception {
+        return workReplyDAO.selectObjectionByWrno(wrno);
+    }
+
+    /** ================== 목록 ================== */
     @Override
     public List<WorkListDTO> myList(int eno, String status) {
-        return workDAO.selectMyList(eno, status);
+        Map<String, Object> param = new HashMap<>();
+        param.put("eno", eno);
+        param.put("status", status);
+        return workDAO.selectMyList(param);
     }
 
-    /** 내가 요청한 업무 리스트 */
     @Override
     public List<WorkListDTO> requestedList(int eno, String status) {
-        return workDAO.selectRequestedList(eno, status);
+        Map<String, Object> param = new HashMap<>();
+        param.put("eno", eno);
+        param.put("status", status);
+        return workDAO.selectRequestedList(param);
     }
 
-    /** 업무 수정 */
+    @Override
+    public List<WorkListDTO> selectMyList(Map<String, Object> params) {
+        return workDAO.selectMyList(params);
+    }
+
+    /** ================== 수정 ================== */
     @Transactional
     @Override
     public void modify(WorkVO work, int eno) {
@@ -102,45 +136,57 @@ public class WorkServiceImpl implements WorkService {
         workDAO.updateWork(work);
     }
 
-    /** 주간 마감 업무 */
+    /** ================== 대시보드 ================== */
     @Override
     public List<WorkListDTO> getWeeklyClosingList(int eno) {
         return workDAO.selectWeeklyClosingList(eno);
     }
 
-    /** 주간 요청 업무 */
     @Override
     public List<WorkListDTO> getWeeklyRequestedList(int eno) {
         return workDAO.selectWeeklyRequestedList(eno);
     }
 
-    /** 결재 대기 업무 */
     @Override
     public List<WorkListDTO> getPendingApprovalList(int eno) {
         return workDAO.selectPendingApprovalList(eno);
     }
 
-    /** 승인 대기 요청 업무 */
     @Override
     public List<WorkListDTO> getWaitingRequestedList(int eno) {
         return workDAO.selectWaitingRequestedList(eno);
     }
 
-    /** 전체 업무 목록 */
+    /** ================== 기타 ================== */
     @Override
     public List<WorkListDTO> getWorkList() {
         return workDAO.selectWorkList();
     }
 
-    /** WCODE 기준 담당자 목록 */
     @Override
     public List<WorkManagerVO> getWorkManagersByWcode(String wcode) {
         return workManagerDAO.getByWcode(wcode);
     }
 
-	@Override
-	public WorkVO getDetail(String wcode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /** ================== 상태 업데이트 ================== */
+    @Override
+    public int updateWorkStatus(String wcode, String status, String state) {
+        return workDAO.updateWorkStatus(wcode, status, state);
+    }
+
+
+    @Override
+    public List<WorkListDTO> depWorkList(int dno) {
+        return workDAO.selectDepWorkList(dno);
+    }
+    @Override
+    public void insertObjection(WorkReplyVO reply) {
+        workDAO.insertObjection(reply);
+    }
+
+    @Override
+    public void updateWorkStatus(String wcode, String status) {
+        workDAO.updateWorkStatus(wcode, status);
+    }
+
 }

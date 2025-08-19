@@ -4,102 +4,139 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.session.SqlSession;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.motiveon.dto.ObjectionDTO;
 import com.motiveon.dto.WorkListDTO;
+import com.motiveon.dto.WorkReplyVO;
 import com.motiveon.dto.WorkVO;
 
 @Repository
 public class WorkDAOImpl implements WorkDAO {
 
-    private final SqlSession sqlSession;
-    private static final String NS = "Work-Mapper";
+    private final SqlSessionTemplate sqlSession;
+    private static final String NAMESPACE = "Work-Mapper.";
 
-    public WorkDAOImpl(SqlSession sqlSession) {
+    public WorkDAOImpl(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
 
     @Override
     public String getNextWcode() {
-        return sqlSession.selectOne(NS + ".getNextWcode");
+        return sqlSession.selectOne(NAMESPACE + "getNextWcode");
     }
 
     @Override
     public void insertWork(WorkVO work) {
-        sqlSession.insert(NS + ".insertWork", work);
-    }
-
-    @Override
-    public void updateWork(WorkVO work) {
-        sqlSession.update(NS + ".updateWork", work);
+        sqlSession.insert(NAMESPACE + "insertWork", work);
     }
 
     @Override
     public WorkVO selectWorkDetail(String wcode) {
-        return sqlSession.selectOne(NS + ".selectWorkDetail", wcode);
+        return sqlSession.selectOne(NAMESPACE + "selectWorkDetail", wcode);
     }
 
     @Override
-    public void updateApproval(String wcode, int eno) {
-        Map<String,Object> params = new HashMap<>();
-        params.put("wcode", wcode);
-        params.put("eno", eno);
-        sqlSession.update(NS + ".updateApproval", params);
+    public int updateApproval(String wcode, int eno) {
+        // eno까지 활용하려면 Map 전달
+        return sqlSession.update(NAMESPACE + "updateApproval", Map.of("wcode", wcode, "eno", eno));
     }
 
     @Override
     public void insertObjection(ObjectionDTO dto) {
-        sqlSession.insert(NS + ".insertObjection", dto);
+        sqlSession.insert(NAMESPACE + "insertObjection", dto);
     }
-
-    // ===== 여기서 Map 만들어서 전달 =====
 
     @Override
     public List<WorkListDTO> selectMyList(Map<String, Object> params) {
-        return sqlSession.selectList(NS + ".selectMyList", params);
+        return sqlSession.selectList(NAMESPACE + "selectMyList", params);
     }
 
     @Override
     public List<WorkListDTO> selectRequestedList(Map<String, Object> params) {
-        return sqlSession.selectList(NS + ".selectRequestedList", params);
+        return sqlSession.selectList(NAMESPACE + "selectRequestedList", params);
+    }
+
+    @Override
+    public int updateWork(WorkVO work) {
+        return sqlSession.update(NAMESPACE + "updateWork", work);
     }
 
     @Override
     public List<WorkListDTO> selectWeeklyClosingList(int eno) {
-        return sqlSession.selectList(NS + ".selectWeeklyClosingList", eno);
+        return sqlSession.selectList(NAMESPACE + "selectWeeklyClosingList", eno);
     }
 
     @Override
     public List<WorkListDTO> selectWeeklyRequestedList(int eno) {
-        return sqlSession.selectList(NS + ".selectWeeklyRequestedList", eno);
+        return sqlSession.selectList(NAMESPACE + "selectWeeklyRequestedList", eno);
     }
 
     @Override
     public List<WorkListDTO> selectPendingApprovalList(int eno) {
-        return sqlSession.selectList(NS + ".selectPendingApprovalList", eno);
+        return sqlSession.selectList(NAMESPACE + "selectPendingApprovalList", eno);
     }
 
     @Override
     public List<WorkListDTO> selectWaitingRequestedList(int eno) {
-        return sqlSession.selectList(NS + ".selectWaitingRequestedList", eno);
+        return sqlSession.selectList(NAMESPACE + "selectWaitingRequestedList", eno);
     }
 
     @Override
     public List<WorkListDTO> selectWorkList() {
-        return sqlSession.selectList(NS + ".selectWorkList");
+        return sqlSession.selectList(NAMESPACE + "selectWorkList");
     }
 
+
+
 	@Override
-	public List<WorkListDTO> selectMyList(int eno, String status) {
+	public void updateWorkStatusApproved(String wcode) {
 		// TODO Auto-generated method stub
-		return null;
+		
+	}
+	
+	@Override
+	public void updateStatus(String wcode, String status) {
+	    sqlSession.update("Work-Mapper.updateStatus", Map.of("wcode", wcode, "status", status));
+	}
+
+
+
+	@Override
+	public void updateManagerAnswer(Map<String, Object> param) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
-	public List<WorkListDTO> selectRequestedList(int eno, String status) {
+	public void insertObjection(WorkReplyVO reply) {
 		// TODO Auto-generated method stub
-		return null;
+		
 	}
+
+	@Override
+	public int updateWorkStatus(String wcode, String status, String state) {
+	    Map<String, Object> param = new HashMap<>();
+	    param.put("wcode", wcode);
+	    param.put("status", status); // 예: "이의신청"
+	    param.put("state", state);   // 예: "OBJECTION"
+	    return sqlSession.update("Work-Mapper.updateWorkStatus", param);
+	}
+
+
+	
+	@Override
+	public List<WorkListDTO> selectDepWorkList(int dno) {
+	    return sqlSession.selectList("Work-Mapper.selectDepWorkList", dno);
+	}
+
+	@Override
+	public void updateWorkStatus(String wcode, String status) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
 }

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Notice-Mapper">
+
+	<!-- 🔹 resultMap 정의: VO 필드와 컬럼 매핑 -->
+	<resultMap id="noticeResult" type="com.motiveon.dto.NoticeVO">
+		<id column="nno" property="nno" />
+		<result column="title" property="title" />
+		<result column="content" property="content" />
+		<result column="regdate" property="regdate" />
+		<result column="UPDATEDATE " property="UPDATEDATE " />
+		<result column="viewcnt" property="viewcnt" />
+		<result column="eno" property="eno" />
+		<result column="dno" property="dno" />
+		<result column="fixed" property="fixed" />
+		<result column="ename" property="ename" />
+		<result column="filename" property="filename" />
+	</resultMap>
+
+	<!-- 🔍 검색 조건 SQL 공통 분리 -->
+	<sql id="search">
+		<choose>
+			<when test="searchType != null and searchType == 't'">
+				AND n.title LIKE '%' || #{keyword} || '%'
+			</when>
+			<when test="searchType != null and searchType == 'c'">
+				AND n.content LIKE '%' || #{keyword} || '%'
+			</when>
+			<when test="searchType != null and searchType == 'e'">
+				AND e.name LIKE '%' || #{keyword} || '%'
+			</when>
+		</choose>
+	</sql>
+
+	<!-- 🔹 공지사항 목록 조회 (상단고정 포함 정렬) -->
+	<select id="selectSearchNoticeList"
+		parameterType="com.motiveon.command.PageMaker"
+		resultMap="noticeResult">
+		SELECT *
+		FROM (
+		SELECT rownum AS rnum, SearchNoticeResult.*
+		FROM (
+		SELECT
+		n.nno, n.title, n.content, n.regdate, n.UPDATEDATE , n.viewcnt,
+		n.eno, n.dno, n.fixed,
+		e.name AS ename,
+		a.filename
+		FROM notice n
+		LEFT JOIN employee e ON n.eno = e.eno
+		LEFT JOIN nattach a ON n.nno = a.nno
+		WHERE 1=1
+		<include refid="search" />
+		ORDER BY
+		CASE n.fixed WHEN '1' THEN 1 ELSE 0 END DESC,
+		n.regdate DESC
+		) SearchNoticeResult
+      <![CDATA[ WHERE rownum <= #{endRow} ]]>
+		)
+    <![CDATA[ WHERE rnum >= #{startRow} ]]>
+	</select>
+
+	<!-- 🔹 전체 게시물 수 -->
+	<select id="selectSearchNoticeListCount" resultType="int"
+		parameterType="com.motiveon.command.PageMaker">
+		SELECT count(*)
+		FROM notice n
+		LEFT JOIN employee e ON n.eno = e.eno
+		<where>
+			n.nno IS NOT NULL
+			<include refid="search" />
+		</where>
+	</select>
+
+	<!-- 🔹 공지사항 상세 조회 -->
+	<select id="selectNoticeByNno" parameterType="int"
+		resultMap="noticeResult">
+		SELECT
+		n.nno, n.title, n.content, n.regdate, n.UPDATEDATE , n.viewcnt,
+		n.eno, n.dno, n.fixed,
+		e.name AS ename,
+		a.filename
+		FROM notice n
+		LEFT JOIN employee e ON n.eno = e.eno
+		LEFT JOIN nattach a ON n.nno = a.nno
+		WHERE n.nno = #{nno}
+	</select>
+
+	<!-- 🔹 시퀀스 -->
+	<select id="selectNoticeSequenceNextValue" resultType="int">
+		SELECT notice_seq.nextval FROM dual
+	</select>
+
+	<!-- 🔹 이미지 파일 사용 횟수 조회 -->
+	<select id="selectCountUsedByImage" resultType="int">
+		SELECT count(*)
+		FROM notice
+		WHERE content LIKE '%' || #{imageFile} || '%'
+	</select>
+
+	<insert id="insertAttach" parameterType="map">
+		INSERT INTO nattach (attach_id, nno, filename)
+		VALUES (nattach_seq.nextval, #{nno}, #{filename})
+	</insert>
+
+
+	<!-- 🔹 등록 -->
+	<insert id="insertNotice"
+		parameterType="com.motiveon.dto.NoticeVO">
+		INSERT INTO notice (
+		nno, title, content, regdate, UPDATEDATE ,
+		viewcnt, eno, dno, fixed
+		) VALUES (
+		notice_seq.nextval,
+		#{title},
+		#{content},
+		sysdate,
+		sysdate,
+		#{viewcnt},
+		#{eno},
+		#{dno},
+		#{fixed, jdbcType=CHAR}
+		)
+	</insert>
+
+	<!-- 🔹 수정 -->
+	<update id="updateNotice"
+		parameterType="com.motiveon.dto.NoticeVO">
+		UPDATE notice
+		SET
+		title = #{title},
+		content = #{content},
+		UPDATEDATE  = sysdate,
+		fixed = #{fixed, jdbcType=CHAR}  <!-- 여기 jdbcType 추가 -->
+		WHERE nno = #{nno}
+	</update>
+
+	<!-- 🔹 삭제 -->
+	<delete id="deleteNotice" parameterType="int">
+		DELETE FROM notice
+		WHERE nno = #{nno}
+	</delete>
+
+	<!-- 🔹 조회수 증가 -->
+	<update id="increaseViewCount" parameterType="int">
+		UPDATE notice
+		SET viewcnt = viewcnt + 1
+		WHERE nno = #{nno}
+	</update>
+
+	<select id="selectRecentNotices" resultMap="noticeResult">
+<![CDATA[ SELECT * FROM ( SELECT n.nno, n.title, n.content, n.regdate, n.UPDATEDATE , n.viewcnt, n.eno, n.dno, n.fixed, e.name AS ename, a.filename FROM notice n LEFT JOIN employee e ON n.eno = e.eno LEFT JOIN nattach a ON n.nno = a.nno ORDER BY NVL(n.regdate, TO_DATE('1900-01-01', 'YYYY-MM-DD')) DESC ) WHERE ROWNUM <= 3 ]]>
+	</select>
+	
+	<!-- 중요 공지 하나만 꺼내오기 -->
+	<select id="selectFixedNotice" resultMap="noticeResult"> SELECT * FROM ( SELECT
+		* FROM notice WHERE fixed = '1' ORDER BY regdate DESC ) WHERE ROWNUM = 1
+  </select>
+</mapper>

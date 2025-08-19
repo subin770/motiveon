@@ -54,10 +54,11 @@
 		<constructor-arg index="0" ref="sqlSession"/>
 	</bean>
 
-	<bean id="workReplyDAO" 
-	      class="com.motiveon.dao.WorkReplyDAOImpl">
-		<constructor-arg index="0" ref="sqlSession"/>
-	</bean>
+<!-- MyBatis Mapper 스캔 -->
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <property name="basePackage" value="com.motiveon.dao"/>
+</bean>
+
 
 	<!-- ===============================
 	     Service 등록
@@ -84,4 +85,13 @@
           class="com.motiveon.service.PopUpServiceImpl"
           c:popUpDAO-ref="popUpDAO" />
 
+
+
+
+<bean id="hrDAO" class="com.motiveon.dao.HrDAOImpl" c:session-ref="sqlSession"/>
+<bean id="hrService" class="com.motiveon.service.HrServiceImpl" c:hrDAO-ref="hrDAO"/>
+<bean id="noticeDAO" class="com.motiveon.dao.NoticeDAOImpl" c:session-ref="sqlSession"/>
+<bean id="noticeService" class="com.motiveon.service.NoticeServiceImpl" c:noticeDAO-ref="noticeDAO"/>
+<bean id="approvalDAO" class="com.motiveon.dao.ApprovalDAOImpl" c:session-ref="sqlSession"/>
+<bean id="approvalService" class="com.motiveon.service.ApprovalServiceImpl" c:approvalDAO-ref="approvalDAO"/>
 </beans>

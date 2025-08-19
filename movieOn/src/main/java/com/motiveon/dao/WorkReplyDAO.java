@@ -1,16 +1,24 @@
 package com.motiveon.dao;
 
+import java.util.List;
+
 import com.motiveon.dto.ObjectionDTO;
+import com.motiveon.dto.WorkReplyVO;
 
-/**
- * 업무 댓글/이의신청 DAO 인터페이스
- * 매퍼 네임스페이스: WorkReply-Mapper
- */
+
 public interface WorkReplyDAO {
+	
+    
 
-    /**
-     * 이의신청 등록
-     * @param dto 이의신청 DTO (wcode, eno, 사유 등 포함)
-     */
-    void insertObjection(ObjectionDTO dto);
+    void insertObjection(ObjectionDTO dto) throws Exception;
+    
+ // 이의신청 목록 조회
+    List<WorkReplyVO> selectObjectionList(String wcode) throws Exception;
+
+    // wrno 기준 단건 조회
+    WorkReplyVO selectObjectionByWrno(int wrno) throws Exception;
+
+	int insertObjection(WorkReplyVO reply); 
+
+
 }

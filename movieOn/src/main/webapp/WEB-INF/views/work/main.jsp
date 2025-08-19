@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%
 String ctx = request.getContextPath();
 %>
@@ -11,6 +12,7 @@ String ctx = request.getContextPath();
 <title>업무 홈</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- AdminLTE / Bootstrap -->
 <link rel="stylesheet"
 	href="<%=ctx%>/resources/bootstrap/plugins/fontawesome-free/css/all.min.css">
 <link rel="stylesheet"
@@ -121,19 +123,23 @@ body {
 }
 
 /* 4컬럼 폭 : 40/20/20/20 */
-#tbl-weekly thead th:nth-child(1), #tbl-weekly-req thead th:nth-child(1) {
+#tbl-weekly thead th:nth-child(1), #tbl-weekly-req thead th:nth-child(1)
+	{
 	width: 40%;
 }
 
-#tbl-weekly thead th:nth-child(2), #tbl-weekly-req thead th:nth-child(2) {
+#tbl-weekly thead th:nth-child(2), #tbl-weekly-req thead th:nth-child(2)
+	{
 	width: 20%;
 }
 
-#tbl-weekly thead th:nth-child(3), #tbl-weekly-req thead th:nth-child(3) {
+#tbl-weekly thead th:nth-child(3), #tbl-weekly-req thead th:nth-child(3)
+	{
 	width: 20%;
 }
 
-#tbl-weekly thead th:nth-child(4), #tbl-weekly-req thead th:nth-child(4) {
+#tbl-weekly thead th:nth-child(4), #tbl-weekly-req thead th:nth-child(4)
+	{
 	width: 20%;
 }
 
@@ -143,10 +149,10 @@ body {
 	padding-right: 20px;
 }
 
-/* 부트스트랩 pagination 커스텀 */
+/* pagination 커스텀 */
 .pagination {
-    margin: 0;
-    margin-top: 20px; 
+	margin: 0;
+	margin-top: 20px;
 }
 
 .pagination .page-link {
@@ -234,7 +240,7 @@ body {
 											</td>
 											<td>${w.ownerName}</td>
 											<td>${w.statusName}</td>
-											<td>${w.wend}</td>
+											<td><fmt:formatDate value="${w.wend}" pattern="yyyy-MM-dd"/></td>
 										</tr>
 									</c:forEach>
 								</tbody>
@@ -265,8 +271,7 @@ body {
 											</td>
 											<td>${r.ownerName}</td>
 											<td>${r.statusName}</td>
-											<td>${r.wend}</td>
-											
+											<td><fmt:formatDate value="${r.wend}" pattern="yyyy-MM-dd"/></td>
 										</tr>
 									</c:forEach>
 								</tbody>
@@ -303,7 +308,7 @@ body {
 													<a href="<%=ctx%>/approval/detail?wid=${p.wcode}">${p.wtitle}</a>
 												</td>
 												<td>${p.requesterName}</td>
-												<td>${p.wend}</td>
+												<td><fmt:formatDate value="${p.wend}" pattern="yyyy-MM-dd"/></td>
 											</tr>
 										</c:forEach>
 									</tbody>
@@ -334,10 +339,10 @@ body {
 										<c:forEach var="x" items="${waitingRequestedList}">
 											<tr>
 												<td class="text-truncate">
-													<a href="<%=ctx%>/work/detail?wid=${x.wcode}">${x.wtitle}</a>
+													<a href="<%=ctx%>/wait/detail?wid=${x.wcode}">${x.wtitle}</a>
 												</td>
 												<td>${x.ownerName}</td>
-												<td>${x.wend}</td>
+												<td><fmt:formatDate value="${x.wend}" pattern="yyyy-MM-dd"/></td>
 											</tr>
 										</c:forEach>
 									</tbody>
@@ -346,28 +351,28 @@ body {
 						</div>
 					</div>
 				</div>
- 	
+
 			</div>
 		</section>
-</div>
+	</div>
 
-<script src="<%=ctx%>/resources/bootstrap/plugins/jquery/jquery.min.js"></script>
-<script src="<%=ctx%>/resources/bootstrap/dist/js/adminlte.min.js"></script>
+	<script src="<%=ctx%>/resources/bootstrap/plugins/jquery/jquery.min.js"></script>
+	<script src="<%=ctx%>/resources/bootstrap/dist/js/adminlte.min.js"></script>
 
-<script>
-	// 탭 토글
-	$('.tab').on('click', function() {
-		$('.tab').removeClass('active');	
-		$(this).addClass('active');
-		const key = $(this).data('tab');
-		if (key === 'my') {
-			$('#tab-my').show();
-			$('#tab-req').hide();
-		} else {
-			$('#tab-my').hide();
-			$('#tab-req').show();
-		}
-	});
-</script>
+	<script>
+		// 탭 토글
+		$('.tab').on('click', function() {
+			$('.tab').removeClass('active');
+			$(this).addClass('active');
+			const key = $(this).data('tab');
+			if (key === 'my') {
+				$('#tab-my').show();
+				$('#tab-req').hide();
+			} else {
+				$('#tab-my').hide();
+				$('#tab-req').show();
+			}
+		});
+	</script>
 </body>
 </html>

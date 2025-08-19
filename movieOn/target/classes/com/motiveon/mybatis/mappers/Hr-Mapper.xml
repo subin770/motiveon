@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Hr-Mapper">
+<resultMap type="hr" id="HrByMonthMap">
+	<result property="day" column="day"/>
+    <result property="workDate" column="workDate"/>
+    <result property="hrcode" column="hrcode"/>
+    <result property="eno" column="eno"/>
+    <result property="state" column="state"/>
+    <result property="hrTime" column="hrTime"/>
+    <result property="overTime" column="overTime"/>
+    <result property="reqChange" column="reqChange"/>
+    <result property="onTime" column="onTime"/>
+    <result property="offTime" column="offTime"/>
+    <result property="stdTime" column="stdTime"/>
+</resultMap>
+
+	<!-- 직원 근태리스트 -->
+	<select id="selectHrList" resultType="hr">
+		SELECT
+		workdate, hrcode, ontime,
+		offtime, state, hritme, overtime
+		FROM
+		hr
+		WHERE
+		eno=#{eno}
+	</select>
+
+	<!-- 월의 1일~ 말일 기준 근태 내역 조회 -->
+	<select id="selectHrByMonth" parameterType="map" resultMap="HrByMonthMap">
+	SELECT
+		a.day,
+		b.workDate,
+		b.hrcode,
+		b.eno,
+		b.state,
+		b.hrTime,
+		b.overTime,
+		b.reqChange,
+		b.onTime,
+		b.offTime,
+		b.stdTime
+	FROM (
+		SELECT
+			TO_CHAR(TO_DATE(#{monthStart}, 'YYYY-MM-DD') + (LEVEL-1), 'YYYY-MM-DD') AS day
+		FROM DUAL
+		CONNECT BY 
+			<![CDATA[ LEVEL <= TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(#{monthStart}, 'YYYY-MM-DD')), 'DD'))]]>
+		 ) a 
+	LEFT OUTER JOIN (
+		SELECT
+			hrcode,
+			eno,
+			state,
+			hrTime,
+			overTime,
+			workDate,
+			reqChange,
+			onTime,
+			offTime,
+			stdTime
+		FROM HR
+		WHERE eno = #{eno}
+		 ) b
+	ON a.day = b.workDate
+	ORDER BY a.day
+	</select>
+
+	<!-- 날짜로 근태 조회 -->
+	<select id="selectHrByDate" parameterType="hashmap"
+		resultType="hr">
+		SELECT
+		ontime, offtime, state, hrtime, oevertime
+		FROM
+		hr
+		WHERE
+		eno=#{eno}
+		AND
+		workdate=#{workDate}
+	</select>
+	
+	<!-- 근테 추가 -->
+	<insert id="insertHr" parameterType="hr">
+	insert into 
+		hr(eno, workdate, state, hrtime, overtime, ontime, offtime,
+		   hrcode, reqchange, stdtime)
+		values(#{eno}, #{workDate}, #{state}, #{hrtime}, #{overTime}, #{onTime}, #{offTime},
+		   #{hrCode}, #{reqChange}, #{stdTime})
+	</insert>
+	
+	<!-- 근테 수정 -->
+	<update id="updateHr" parameterType="hr">
+		update hr
+		set hrTime=#{hrTime},
+			overTime=#{overTime}, 
+			workDate=#{workDate},
+			state=#{state}, 
+			onTime=#{onTime}, 
+			offTime=#{offTime}, 
+			stdTime=#{stdTime},
+			reqChange=#{reqChange}
+		where hrcode=#{hrcode}
+	</update>
+
+	<!-- 근태 삭제 -->
+	<delete id="deleteHr" parameterType="str">
+		delete from hr
+		where
+		hrcode=#{hrcode}
+	</delete>
+
+	<!-- 직원 직위 불러오기 -->
+	<select id="selectPpsByPpscode" parameterType="str"
+		resultType="postposition">
+		SELECT
+		ppscode, ppsname, ppspay
+		FROM
+		postposition
+		WHERE
+		ppsCode=#{ppsCode}
+	</select>
+	
+
+<!-- 팀별 근태 목록 -->
+<select id="getTeamList" parameterType="map" resultType="map">
+  SELECT *
+  FROM (
+    SELECT inner_query.*, ROWNUM rnum
+    FROM (
+      SELECT
+        E.ENO  AS "eno",
+        E.NAME AS "name",
+        E.JOB  AS "job",
+        NVL(SUM(CASE WHEN H.STATE = 2 THEN 1 ELSE 0 END), 0) AS "late",        -- 지각
+        NVL(SUM(CASE WHEN H.STATE = 3 THEN 1 ELSE 0 END), 0) AS "earlyLeave",  -- 조퇴
+        0 AS "vacation",                                                       -- 휴가는 항상 0
+        NVL(SUM(CASE WHEN H.STATE = 0 THEN 1 ELSE 0 END), 0) AS "absent",      -- 결근
+        NVL(SUM(CASE WHEN H.STATE = 1 THEN 1 ELSE 0 END), 0) AS "present",     -- 정상
+        NVL(COUNT(H.WORKDATE), 0) AS "totalDays",
+        CASE
+          WHEN COUNT(H.WORKDATE) = 0 THEN 0
+          ELSE ROUND(
+                 (SUM(CASE WHEN H.STATE IN (1,2,3) THEN 1 ELSE 0 END) / COUNT(H.WORKDATE)) * 100
+               ,1)
+        END AS "rate"
+      FROM EMPLOYEE E
+      LEFT JOIN HR H
+        ON H.ENO = E.ENO
+       AND TO_CHAR(H.WORKDATE, 'YYYY') = #{year,jdbcType=VARCHAR}
+       AND TO_CHAR(H.WORKDATE, 'MM')   = #{month,jdbcType=VARCHAR}
+      WHERE E.DNO = #{dno,jdbcType=INTEGER}
+      <if test="q != null and q != ''">
+        AND (
+             CAST(E.ENO AS VARCHAR2(20)) LIKE '%' || #{q,jdbcType=VARCHAR} || '%'
+          OR E.NAME LIKE '%' || #{q,jdbcType=VARCHAR} || '%'
+        )
+      </if>
+      GROUP BY E.ENO, E.NAME, E.JOB
+      ORDER BY
+        <choose>
+          <when test="sort == 'name'">"name"</when>
+          <when test="sort == 'job'">"job"</when>
+          <when test="sort == 'rate'">"rate"</when>
+          <otherwise>"job"</otherwise>
+        </choose>
+        <choose>
+          <when test="order == 'asc'">ASC</when>
+          <otherwise>DESC</otherwise>
+        </choose>
+    ) inner_query
+  )
+  WHERE rnum BETWEEN (#{offset,jdbcType=INTEGER} + 1)
+                  AND (#{offset,jdbcType=INTEGER} + #{size,jdbcType=INTEGER})
+</select>
+
+
+
+
+<!-- 팀별 근태 목록 총 건수 -->
+<select id="countTeamList" parameterType="map" resultType="int">
+    SELECT COUNT(*) 
+    FROM EMPLOYEE E
+    WHERE E.DNO = #{dno}
+    <if test="q != null and q != ''">
+        AND (E.ENO LIKE '%' || #{q} || '%' OR E.NAME LIKE '%' || #{q} || '%')
+    </if>
+</select>
+
+
+<!-- 해당 월의 근무일수 (주말, 공휴일 제외 X 버전) -->
+<select id="getWorkDays" parameterType="map" resultType="int">
+    SELECT COUNT(*) 
+    FROM HR H
+    JOIN EMPLOYEE E ON H.ENO = E.ENO
+    WHERE E.DNO = #{dno}
+      AND TO_CHAR(H.WORKDATE, 'YYYY-MM') = #{month}
+</select>
+
+<select id="getteamName" parameterType="int" resultType="string">
+    SELECT NAME
+    FROM DEPARTMENT
+    WHERE DNO = #{dno}
+</select>
+
+</mapper>

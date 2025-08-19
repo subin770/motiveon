@@ -3,31 +3,54 @@ package com.motiveon.dao;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.motiveon.dto.ObjectionDTO;
 import com.motiveon.dto.WorkListDTO;
+import com.motiveon.dto.WorkReplyVO;
 import com.motiveon.dto.WorkVO;
 
 public interface WorkDAO {
-
     String getNextWcode();
 
     void insertWork(WorkVO work);
-    void updateWork(WorkVO work);
 
     WorkVO selectWorkDetail(String wcode);
-    void updateApproval(String wcode, int eno);
+
+    int updateApproval(String wcode, int eno);
+
     void insertObjection(ObjectionDTO dto);
 
-    // ===== 여기 부분을 int, String 파라미터로 통일 =====
     List<WorkListDTO> selectMyList(Map<String, Object> params);
 
-    // 요청받은 업무 목록
     List<WorkListDTO> selectRequestedList(Map<String, Object> params);
+
+    int updateWork(WorkVO work);
+
     List<WorkListDTO> selectWeeklyClosingList(int eno);
+
     List<WorkListDTO> selectWeeklyRequestedList(int eno);
+
     List<WorkListDTO> selectPendingApprovalList(int eno);
+
     List<WorkListDTO> selectWaitingRequestedList(int eno);
+
     List<WorkListDTO> selectWorkList();
-    List<WorkListDTO> selectMyList(int eno, String status);
-    List<WorkListDTO> selectRequestedList(int eno, String status);
+
+    void insertObjection(WorkReplyVO reply);
+
+    List<WorkListDTO> selectDepWorkList(int dno);
+    void updateWorkStatus(@Param("wcode") String wcode, @Param("status") String status);
+    void updateWorkStatusApproved(String wcode);
+    
+    void updateStatus(@Param("wcode") String wcode, @Param("status") String status);
+
+
+    void updateManagerAnswer(Map<String, Object> param);
+
+
+
+    
+    public int updateWorkStatus(String wcode, String status, String state);
+
 }

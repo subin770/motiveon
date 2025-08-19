@@ -10,16 +10,50 @@ public class WorkListDTO {
 	private Date wdate;
 	private Date wend;
 	private String ownerName; // EMPLOYEE.NAME 매핑용
-	private String wstatus; // ★ 추가
+	 private String wstate;
 	private int eno;
+	private int dno;
 	private String requesterName;
 	private String managerName;
 	private String statusName;
 	private String id;
-	 private Date dueDate;  
+	private Date dueDate;
+	private String categoryName;
+	private String assigneeName;
+	private String answer;
 
-	
-	
+	public String getAnswer() {
+		return answer;
+	}
+
+	public void setAnswer(String answer) {
+		this.answer = answer;
+	}
+
+	public int getDno() {
+		return dno;
+	}
+
+	public void setDno(int dno) {
+		this.dno = dno;
+	}
+
+	public String getAssigneeName() {
+		return assigneeName;
+	}
+
+	public void setAssigneeName(String assigneeName) {
+		this.assigneeName = assigneeName;
+	}
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+
 	public Date getDueDate() {
 		return dueDate;
 	}
@@ -116,12 +150,12 @@ public class WorkListDTO {
 		this.ownerName = ownerName;
 	}
 
-	// ★ 새로 추가
-	public String getWstatus() {
-		return wstatus;
+	public String getWstate() {
+		return wstate;
 	}
 
-	public void setWstatus(String wstatus) {
-		this.wstatus = wstatus;
+	public void setWstate(String wstate) {
+		this.wstate = wstate;
 	}
+
 }

@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%
 String ctx = request.getContextPath();
 %>
@@ -340,30 +341,33 @@ body,
 							</thead>
 							<tbody id="tbody">
 								<c:forEach var="w" items="${workList}">
-									<tr data-status="${w.status}">
-										<td>
-											<div class="t-title">${w.title}</div>
-											<div class="t-sub">${w.categoryName}</div>
-										</td>
-										<td>${w.requesterName}</td>
-										<td>${w.assigneeName}</td>
-										<td class="text-center">${w.wend}</td>
-										<td class="text-right"><c:choose>
-												<c:when test="${w.status eq 'PROG'}">
-													<span class="badge-pill badge-prog">진행</span>
-												</c:when>
-												<c:when test="${w.status eq 'DONE'}">
-													<span class="badge-pill badge-done">완료</span>
-												</c:when>
-												<c:when test="${w.status eq 'DELEGATE'}">
-													<span class="badge-pill badge-dele">대리 요청</span>
-												</c:when>
-												<c:otherwise>
-													<span class="badge-pill badge-wait">대기</span>
-												</c:otherwise>
-											</c:choose></td>
-									</tr>
-								</c:forEach>
+    <tr data-status="${w.wstate}">
+        <td>${w.wtitle}</td>
+        <td>${w.requesterName}</td>
+        <td>${w.managerName}</td>
+        
+        <td><fmt:formatDate value="${w.wend}" pattern="yyyy-MM-dd"/></td>
+        <td>
+            <c:choose>
+                <c:when test="${w.wstate eq 'PROG'}">
+                    <span class="badge-pill badge-prog">${w.statusName}</span>
+                </c:when>
+                <c:when test="${w.wstate eq 'DONE'}">
+                    <span class="badge-pill badge-done">${w.statusName}</span>
+                </c:when>
+                <c:when test="${w.wstate eq 'DELEGATE'}">
+                    <span class="badge-pill badge-dele">${w.statusName}</span>
+                </c:when>
+                <c:when test="${w.wstate eq 'REJECT'}">
+                    <span class="badge-pill badge-reject">${w.statusName}</span>
+                </c:when>
+                <c:otherwise>
+                    <span class="badge-pill badge-wait">${w.statusName}</span>
+                </c:otherwise>
+            </c:choose>
+        </td>
+    </tr>
+</c:forEach>
 								<c:if test="${empty workList}">
 									<tr>
 										<td colspan="5" class="text-center"

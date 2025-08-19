@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+
 <%
 String ctx = request.getContextPath();
 %>
@@ -27,7 +29,6 @@ String ctx = request.getContextPath();
 body, .content-wrapper, .main-footer, .main-header, .content {
 	background-color: #fff !important;
 }
-
 /* 페이지 타이틀 */
 .page-title {
 	padding-left: 20px;
@@ -35,7 +36,6 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 	font-size: 18px;
 	font-weight: 600;
 }
-
 /* 현황 카드 */
 .status-wrap {
 	display: grid !important;
@@ -52,6 +52,7 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 	min-height: 80px;
 	border-radius: 12px;
 	box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+	cursor: pointer;
 }
 
 .stat .num {
@@ -174,11 +175,14 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 	padding: 14px 16px;
 	border-bottom: 1px solid var(- -line);
 	vertical-align: middle;
+	text-align: center;
 }
 
 .t-title {
 	font-weight: 800;
 	color: #111827;
+	text-align: left;
+	cursor: pointer; /* 제목 클릭 가능하게 */
 }
 
 .t-sub {
@@ -214,29 +218,6 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 	color: #C48A00;
 }
 
-/* 헤더 폭 */
-.table-clean thead th:nth-child(1) {
-	width: 15%;
-}
-
-.table-clean thead th:nth-child(2) {
-	width: 25%;
-}
-
-.table-clean thead th:nth-child(3) {
-	width: 15%;
-}
-
-.table-clean thead th:nth-child(4) {
-	width: 15%;
-}
-
-.table-clean thead th:nth-child(5) {
-	width: 15%;
-	text-align: left;
-	padding-left: 10px;
-}
-
 /* 카드 헤더 */
 .card-header {
 	font-weight: 800;
@@ -260,6 +241,7 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 </style>
 </head>
 <body class="hold-transition layout-top-nav">
+	<body class="hold-transition layout-top-nav">
 	<div class="content-wrapper">
 		<section class="content-header">
 			<div class="container-fluid">
@@ -327,10 +309,11 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 
 							<div class="input-group" style="max-width: 420px;">
 								<select id="searchField" class="form-control">
-									<option value="title">전체</option>
+									<option value="title">제목</option>
 									<option value="requester">요청자</option>
 									<option value="assignee">담당자</option>
-								</select> <input id="keyword" type="text" class="form-control"
+								</select> 
+								<input id="keyword" type="text" class="form-control"
 									placeholder="검색어를 입력하세요."
 									style="flex: 1 1 auto; font-size: 13px;">
 								<div class="input-group-append">
@@ -348,43 +331,47 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 									<th>제목</th>
 									<th>요청자</th>
 									<th>담당자</th>
-									<th class="text-center">기한</th>
+									<th>등록일</th>
+									<th>기한</th>
 									<th>상태</th>
 								</tr>
 							</thead>
 							<tbody id="tbody">
 								<c:forEach var="w" items="${workList}">
-									<tr data-status="${w.status}" data-title="${w.title}"
-										data-requester="${w.requesterName}"
-										data-assignee="${w.assigneeName}">
-										<td>
-											<div class="t-title">${w.title}</div>
-											<div class="t-sub">${w.categoryName}</div>
-										</td>
-										<td>${w.requesterName}</td>
-										<td>${w.assigneeName}</td>
-										<td class="text-center">${w.dueDate}</td>
-										<td class="text-right"><c:choose>
-												<c:when test="${w.status eq 'PROG'}">
+									<tr data-wcode="${w.wcode}" data-status="${w.wstate}"
+										data-title="${w.wtitle}" data-requester="${w.eno}"
+										data-assignee="${w.eno}">
+										<td class="t-title">${w.wtitle}</td>
+										<td>${w.eno}</td> <!-- requesterName 대신 ENO 표시 -->
+										<td>${w.eno}</td> <!-- managerName 대신 ENO 표시 -->
+										<td><fmt:formatDate value="${w.wdate}" pattern="yyyy-MM-dd" /></td>
+										<td><fmt:formatDate value="${w.wend}" pattern="yyyy-MM-dd" /></td>
+										<td><c:choose>
+												<c:when test="${w.wstate eq 'WAIT'}">
+													<span class="badge-pill badge-wait">대기</span>
+												</c:when>
+												<c:when test="${w.wstate eq 'ING'}">
 													<span class="badge-pill badge-prog">진행</span>
 												</c:when>
-												<c:when test="${w.status eq 'DONE'}">
+												<c:when test="${w.wstate eq 'DONE'}">
 													<span class="badge-pill badge-done">완료</span>
 												</c:when>
-												<c:when test="${w.status eq 'DELEGATE'}">
-													<span class="badge-pill badge-dele">대리 요청</span>
+												<c:when test="${w.wstate eq 'DELEGATE'}">
+													<span class="badge-pill badge-dele">대리</span>
 												</c:when>
-												<c:otherwise>
-													<span class="badge-pill badge-wait">대기</span>
-												</c:otherwise>
+												<c:when test="${w.wstate eq 'REJECT'}">
+													<span class="badge-pill badge-wait">반려</span>
+												</c:when>
+												<c:otherwise>${w.wstate}</c:otherwise>
 											</c:choose></td>
 									</tr>
 								</c:forEach>
+
 								<c:if test="${empty workList}">
 									<tr>
-										<td colspan="5" class="text-center"
-											style="padding: 40px 0; color: #95A1AF; font-size: 14px;">표시할
-											업무가 없습니다.</td>
+										<td colspan="6" class="text-center"
+											style="padding: 40px 0; color: #95A1AF; font-size: 14px;">
+											표시할 업무가 없습니다.</td>
 									</tr>
 								</c:if>
 							</tbody>
@@ -396,7 +383,6 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 			</div>
 		</section>
 	</div>
-
 	<script src="<%=ctx%>/resources/bootstrap/plugins/jquery/jquery.min.js"></script>
 	<script src="<%=ctx%>/resources/bootstrap/dist/js/adminlte.min.js"></script>
 	<script>
@@ -414,9 +400,8 @@ body, .content-wrapper, .main-footer, .main-header, .content {
       const f = $('#searchField').val();
       const kw = ($('#keyword').val()||'').toLowerCase().trim();
       $('#tbody tr').each(function(){
-        const allText = ($(this).find('td').map((i,td)=>$(td).text()).get().join(' ')||'').toLowerCase();
         const fieldVal = (String($(this).data(f))||'').toLowerCase();
-        $(this).toggle( (f==='title' ? allText : fieldVal).indexOf(kw) > -1 );
+        $(this).toggle(fieldVal.indexOf(kw) > -1);
       });
     });
     $('#keyword').on('keydown', e=>{ if(e.key==='Enter') $('#btnSearch').click(); });
@@ -430,6 +415,34 @@ body, .content-wrapper, .main-footer, .main-header, .content {
         window.open(url, 'workRegPopup', opt);
       });
     })();
+
+    // 제목 클릭 시 상세보기 열기
+    $('#tbody').on('click', '.t-title', function(){
+      var $tr = $(this).closest('tr');
+      var wcode = $tr.data('wcode');
+      var status = $tr.data('status');
+      var ctx = '<%=ctx%>';
+
+      var detailUrl = (status === 'WAIT')
+                        ? ctx + '/work/waitDetail?wcode=' + wcode
+                        : ctx + '/work/workDetail?wcode=' + wcode;
+
+      var opt = 'width=980,height=720,top=80,left=120,scrollbars=yes';
+      window.open(detailUrl, 'workDetailPopup', opt);
+    });
+    
+    
+    $("#btnApprove").on("click", function(){
+        $.post(ctx + "/work/approve", { wcode: $("#wcode").val() })
+         .done(function(res){
+             if(res === "OK"){
+                 alert("승인 처리되었습니다.");
+                 opener.location.reload(); // 부모창 새로고침
+                 window.close(); // 팝업 닫기
+             }
+         });
+    });
+
 
     // 초기 상태
     filterBy('ALL');

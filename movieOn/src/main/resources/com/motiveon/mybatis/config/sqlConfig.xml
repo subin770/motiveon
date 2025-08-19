@@ -27,6 +27,10 @@
         <typeAlias type="com.motiveon.dto.WorkReplyVO" alias="workReply"/>
         <typeAlias type="com.motiveon.dto.WorkListDTO" alias="workListDTO"/>
         <typeAlias type="com.motiveon.dto.ObjectionDTO" alias="objectionDTO"/>
+        
+        <typeAlias type="com.motiveon.dto.PostPositionVO" alias="postposition"/>
+		<typeAlias type="com.motiveon.dto.HrVO" alias="hr"/>
+        
     </typeAliases>
 
     

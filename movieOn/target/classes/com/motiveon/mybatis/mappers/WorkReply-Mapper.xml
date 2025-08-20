@@ -20,11 +20,12 @@
 			jdbcType="INTEGER" />
 	</resultMap>
 
-	<insert id="insertObjection"
-		parameterType="com.motiveon.dto.ObjectionDTO">
-		INSERT INTO WORKREPLY (WRNO, WRCONTENT, WCODE, ENO)
-		VALUES (WORKREPLY_SEQ.NEXTVAL, #{content}, #{wcode}, #{eno})
-	</insert>
+	 <insert id="insertObjection" parameterType="com.motiveon.dto.WorkReplyVO">
+        INSERT INTO WORKREPLY 
+            (WRNO, WRCONTENT, WRREGDATE, UPDATEDATE, WCODE, ENO)
+        VALUES 
+            (WORKREPLY_SEQ.NEXTVAL, #{wrcontent}, SYSDATE, SYSDATE, #{wcode}, #{eno})
+    </insert>
 
 	<select id="selectObjectionList" parameterType="string"
 		resultType="com.motiveon.dto.WorkReplyVO">
@@ -44,10 +45,12 @@
 	<!-- 특정 업무의 이의신청 목록 조회 -->
 	<select id="selectByWcode" parameterType="string"
 		resultMap="objectionMap">
-		SELECT WRNO, WRCONTENT, WRREGDATE, UPDATEDATE, WCODE, ENO, PARENT_WRNO
+		SELECT WRNO, WRCONTENT, WRREGDATE, UPDATEDATE, WCODE, ENO,
+		PARENT_WRNO
 		FROM WORKREPLY
 		WHERE WCODE = #{wcode,jdbcType=VARCHAR}
-		ORDER BY WRREGDATE DESC
+		ORDER
+		BY WRREGDATE DESC
 	</select>
 
 </mapper>

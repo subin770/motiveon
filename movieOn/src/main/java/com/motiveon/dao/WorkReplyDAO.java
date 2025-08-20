@@ -18,7 +18,7 @@ public interface WorkReplyDAO {
     // wrno 기준 단건 조회
     WorkReplyVO selectObjectionByWrno(int wrno) throws Exception;
 
-	int insertObjection(WorkReplyVO reply); 
+    int insertObjection(WorkReplyVO reply) throws Exception;
 
-
+	
 }

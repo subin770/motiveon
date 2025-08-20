@@ -21,6 +21,15 @@ public class WorkListDTO {
 	private String categoryName;
 	private String assigneeName;
 	private String answer;
+	private String statusLabel;
+
+	public String getStatusLabel() {
+		return statusLabel;
+	}
+
+	public void setStatusLabel(String statusLabel) {
+		this.statusLabel = statusLabel;
+	}
 
 	public String getAnswer() {
 		return answer;

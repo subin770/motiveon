@@ -32,9 +32,8 @@ public class WorkReplyDAOImpl implements WorkReplyDAO {
         return session.selectOne(NS + ".selectObjectionByWrno", wrno);
     }
 
-	@Override
-	public int insertObjection(WorkReplyVO reply) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    @Override
+    public int insertObjection(WorkReplyVO reply) throws Exception {
+        return session.insert(NS + ".insertObjection", reply);
+    }
 }

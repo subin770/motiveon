@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="Work-Mapper">
@@ -19,6 +18,11 @@
 		<result property="wcontent" column="WCONTENT" />
 		<result property="requesterEno" column="REQUESTER_ENO" />
 		<result property="managerEno" column="MANAGER_ENO" />
+		<!-- 요청자/담당자 이름 -->
+		<result property="requesterName" column="REQUESTERNAME" />
+		<result property="managerName" column="MANAGERNAME" />
+		<result property="ownerName" column="OWNER_NAME" />
+		<result property="statusName" column="STATUS_NAME" />
 	</resultMap>
 
 	<!-- 목록 조회용 (간략 DTO) -->
@@ -33,6 +37,9 @@
 		<result property="eno" column="ENO" />
 		<result property="dno" column="DNO" />
 		<result property="answer" column="ANSWER" />
+		<!-- 요청자/담당자 이름 추가 -->
+		<result property="requesterName" column="REQUESTERNAME" />
+		<result property="managerName" column="MANAGERNAME" />
 	</resultMap>
 
 	<!-- 댓글/이의신청 -->
@@ -62,15 +69,17 @@
 		LPAD(WORK_SEQ.NEXTVAL, 5, '0') FROM dual
 	</select>
 
+
 	<!-- ================== 등록 ================== -->
 	<insert id="insertWork" parameterType="com.motiveon.dto.WorkVO">
 		INSERT INTO WORK (
-		WCODE, WTITLE, WDATE, WEND, WOPEN, WALARM, ENO,
-		WSTATUS, DNO, WSTATE, WCONTENT, REQUESTER_ENO, MANAGER_ENO
-		) VALUES (
-		#{wcode}, #{wtitle}, #{wdate}, #{wend}, #{wopen}, #{walarm}, #{eno},
-		#{wstatus}, #{dno}, #{wstate}, #{wcontent}, #{requesterEno},
-		#{managerEno}
+		WCODE,
+		WTITLE, WDATE, WEND, WSTATUS, ENO, DNO, REQUESTER_ENO, MANAGER_ENO
+		)
+		VALUES (
+		#{wcode}, #{wtitle}, SYSDATE, #{wend}, #{wstatus}, #{eno},
+		#{dno},
+		#{requesterEno}, #{managerEno}
 		)
 	</insert>
 
@@ -78,20 +87,9 @@
 	<!-- ================== 상세 ================== -->
 	<select id="selectWorkDetail" parameterType="string"
 		resultMap="workMap">
-		SELECT
-		W.*,
-		CASE WSTATE
-		WHEN 'WAIT' THEN '대기'
-		WHEN 'ING' THEN
-		'진행'
-		WHEN 'DONE' THEN '완료'
-		WHEN 'REJECT' THEN '반려'
-		WHEN 'DELEGATE' THEN
-		'대리'
-		END AS STATUSNAME
-		FROM WORK W
-		WHERE WCODE = #{wcode}
+		SELECT * FROM WORK WHERE WCODE = #{wcode}
 	</select>
+
 
 	<!-- ================== 상태 변경 ================== -->
 	<update id="updateApproval" parameterType="map">
@@ -115,32 +113,24 @@
 		#{eno}
 	</update>
 
+
 	<!-- ================== 목록 조회 ================== -->
-	<select id="selectMyList" resultMap="workListMap">
-		SELECT W.*, E1.NAME AS
-		requesterName, E2.NAME AS managerName
-		FROM WORK W
-		JOIN EMPLOYEE E1 ON
-		W.REQUESTER_ENO = E1.ENO
-		JOIN EMPLOYEE E2 ON W.MANAGER_ENO = E2.ENO
-		WHERE W.MANAGER_ENO = #{eno}
+	<select id="selectMyWorkList" parameterType="int"
+		resultMap="workListMap">
+		SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
+		FROM
+		WORK
+		WHERE MANAGER_ENO = #{managerEno}
 	</select>
 
-
-	<select id="selectRequestedList" resultMap="workListMap"
-		parameterType="int">
-		SELECT W.WCODE,
-		W.WTITLE,
-		W.WDATE,
-		W.WEND,
-		W.WSTATUS,
-		W.ENO,
-		E.NAME AS employeeName
-		FROM WORK W
-		JOIN EMPLOYEE E ON W.ENO = E.ENO
-		WHERE W.ENO = #{eno}
+	<!-- 내가 요청한 업무 -->
+	<select id="selectRequestedWorkList" parameterType="int"
+		resultMap="workListMap">
+		SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
+		FROM
+		WORK
+		WHERE REQUESTER_ENO = #{requesterEno}
 	</select>
-
 
 
 	<update id="updateWork" parameterType="com.motiveon.dto.WorkVO">
@@ -153,94 +143,13 @@
 		WHERE WCODE = #{wcode}
 	</update>
 
-	<!-- ================== 대시보드용 ================== -->
-	<select id="selectWeeklyClosingList" parameterType="int"
-		resultMap="workListMap">
-		SELECT WCODE, WTITLE, WDATE, WEND, WSTATE, ENO, DNO,
-		CASE
-		WSTATE
-		WHEN 'WAIT' THEN '대기'
-		WHEN 'ING' THEN '진행'
-		WHEN 'DONE' THEN '완료'
-		WHEN 'REJECT' THEN '반려'
-		WHEN 'DELEGATE' THEN '대리'
-		END AS STATUSNAME
-		FROM
-		WORK
-		WHERE ENO = #{eno}
-	</select>
-
-	<select id="selectWeeklyRequestedList" parameterType="int"
-		resultMap="workListMap">
-		SELECT WCODE, WTITLE, WDATE, WEND, WSTATE, ENO, DNO,
-		CASE
-		WSTATE
-		WHEN 'WAIT' THEN '대기'
-		WHEN 'ING' THEN '진행'
-		WHEN 'DONE' THEN '완료'
-		WHEN 'REJECT' THEN '반려'
-		WHEN 'DELEGATE' THEN '대리'
-		END AS STATUSNAME
-		FROM
-		WORK
-		WHERE ENO = #{eno}
-	</select>
-
-	<select id="selectPendingApprovalList" parameterType="int"
-		resultMap="workListMap">
-		SELECT WCODE, WTITLE, WDATE, WEND, WSTATE, ENO, DNO,
-		CASE
-		WSTATE
-		WHEN 'WAIT' THEN '대기'
-		WHEN 'ING' THEN '진행'
-		WHEN 'DONE' THEN '완료'
-		WHEN 'REJECT' THEN '반려'
-		WHEN 'DELEGATE' THEN '대리'
-		END AS STATUSNAME
-		FROM
-		WORK
-		WHERE ENO = #{eno}
-	</select>
-
-	<select id="selectWaitingRequestedList" parameterType="int"
-		resultMap="workListMap">
-		SELECT WCODE, WTITLE, WDATE, WEND, WSTATE, ENO, DNO,
-		CASE
-		WSTATE
-		WHEN 'WAIT' THEN '대기'
-		WHEN 'ING' THEN '진행'
-		WHEN 'DONE' THEN '완료'
-		WHEN 'REJECT' THEN '반려'
-		WHEN 'DELEGATE' THEN '대리'
-		END AS STATUSNAME
-		FROM
-		WORK
-		WHERE ENO = #{eno}
-	</select>
-
-	<select id="selectWorkList" resultMap="workListMap"
-		parameterType="int">
-		SELECT W.WCODE,
-		W.WTITLE,
-		W.WDATE,
-		W.WEND,
-		W.WSTATUS,
-		W.ENO,
-		W.DNO,
-		E1.NAME AS employeeName, -- 담당자 이름
-		D.DNAME AS deptName -- 부서 이름
-		FROM WORK W
-		JOIN EMPLOYEE E1 ON W.ENO = E1.ENO
-		JOIN DEPARTMENT D ON
-		W.DNO = D.DNO
-		WHERE W.ENO = #{eno}
-	</select>
 
 
 	<!-- ================== 이의신청/댓글 ================== -->
 	<select id="selectObjectionList" resultMap="workReplyMap">
 		SELECT R.WRNO,
-		R.WCODE, R.ENO, R.WRCONTENT, R.WRREGDATE, E.ENAME AS WRITERNAME
+		R.WCODE, R.ENO, R.WRCONTENT, R.WRREGDATE,
+		E.ENAME AS WRITERNAME
 		FROM
 		WORKREPLY R
 		JOIN EMPLOYEE E ON R.ENO = E.ENO
@@ -250,7 +159,8 @@
 
 	<select id="selectObjectionByWrno" resultMap="workReplyMap">
 		SELECT R.WRNO,
-		R.WCODE, R.ENO, R.WRCONTENT, R.WRREGDATE, E.ENAME AS WRITERNAME
+		R.WCODE, R.ENO, R.WRCONTENT, R.WRREGDATE,
+		E.ENAME AS WRITERNAME
 		FROM
 		WORKREPLY R
 		JOIN EMPLOYEE E ON R.ENO = E.ENO
@@ -267,10 +177,66 @@
 
 	<select id="selectDepWorkList" resultMap="workListMap"
 		parameterType="int">
-		SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
+		SELECT W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.WSTATUS,
+		W.ENO, W.DNO,
+		R.ENAME AS REQUESTERNAME,
+		M.ENAME AS MANAGERNAME
 		FROM WORK
+		W
+		LEFT JOIN EMPLOYEE R ON W.REQUESTER_ENO = R.ENO
+		LEFT JOIN EMPLOYEE M
+		ON W.MANAGER_ENO = M.ENO
 		WHERE DNO = #{dno}
 	</select>
 
+	<!-- 담당자 목록 -->
+	<select id="selectWorkManagersByWcode" parameterType="string"
+		resultType="com.motiveon.dto.WorkManagerVO">
+		SELECT WM.WCODE, WM.ENO, E.ENAME
+		FROM WORKMANAGER WM
+		JOIN
+		EMPLOYEE E ON WM.ENO = E.ENO
+		WHERE WM.WCODE = #{wcode}
+	</select>
 
+	<select id="selectPendingApprovalList" parameterType="int"
+		resultMap="workListMap">
+		SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
+		FROM
+		WORK
+		WHERE ENO = #{eno}
+		AND WSTATUS = 'PENDING'
+	</select>
+	<select id="selectWaitingRequestedList" parameterType="int"
+		resultMap="workListMap">
+		SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
+		FROM
+		WORK
+		WHERE ENO = #{eno}
+		AND WSTATUS = 'WAITING'
+	</select>
+
+	<select id="selectWeeklyRequestedList" parameterType="int"
+		resultMap="workListMap">
+		SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
+		FROM
+		WORK
+		WHERE ENO = #{eno}
+		AND WDATE BETWEEN TRUNC(SYSDATE, 'IW') AND
+		TRUNC(SYSDATE, 'IW')+6
+	</select>
+
+	<select id="selectWeeklyClosingList" parameterType="int"
+		resultType="com.motiveon.dto.WorkVO">
+		SELECT
+		WCODE,
+		WTITLE,
+		WDATE,
+		WEND,
+		WSTATUS,
+		ENO,
+		DNO
+		FROM WORK
+		WHERE ENO = #{eno}
+	</select>
 </mapper>

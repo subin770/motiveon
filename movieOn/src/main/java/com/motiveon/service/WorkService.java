@@ -1,5 +1,6 @@
 package com.motiveon.service;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -16,44 +17,50 @@ public interface WorkService {
 
     // ================== 상세 ==================
     WorkVO getWorkDetail(String wcode);
-    WorkVO getWorkByWcode(String wcode) throws Exception; // 둘 중 하나만 써도 무방
+    WorkVO getWorkByWcode(String wcode) throws Exception; // 필요 시 하나만 사용 가능
 
     // ================== 승인 / 반려 / 이의신청 ==================
-    int approveWork(String wcode) throws Exception;               // 승인
-    int rejectWork(String wcode, String reason) throws Exception; // 반려
-    void objection(ObjectionDTO dto) throws Exception;            // 이의신청 등록
+    int approveWork(String wcode) throws Exception;                  // 승인
+    int rejectWork(String wcode, String reason) throws Exception;    // 반려
 
+    void objection(ObjectionDTO dto) throws Exception;               // 이의신청 등록
     List<WorkReplyVO> selectObjectionList(String wcode) throws Exception; // 이의신청 목록
     WorkReplyVO selectObjectionByWrno(int wrno) throws Exception;         // 이의신청 상세
+                        // 이의신청 코멘트 추가
+    int insertObjection(WorkReplyVO reply) throws Exception;
 
     // ================== 목록 ==================
-    
-    List<WorkListDTO> selectMyList(Map<String, Object> params);
-
-
+    List<WorkListDTO> selectMyList(Map<String, Object> params);  // 조건부 내 업무
+    List<WorkListDTO> myList(int eno, String status);            // 상태별 내 업무
+    List<WorkListDTO> requestedList(int eno, String status);     // 상태별 요청한 업무
+    List<WorkListDTO> depWorkList(int dno);                      // 부서 업무
+    List<WorkListDTO> getWorkList();                             // 전체 업무 목록
 
     // ================== 수정 ==================
     void modify(WorkVO work, int eno);
 
     // ================== 대시보드 ==================
-    List<WorkListDTO> getWeeklyClosingList(int eno);
-    List<WorkListDTO> getWeeklyRequestedList(int eno);
-    List<WorkListDTO> getPendingApprovalList(int eno);
-    List<WorkListDTO> getWaitingRequestedList(int eno);
-
+    List<WorkListDTO> getWeeklyClosingList(int eno);     // 주간 마감 예정
+    List<WorkListDTO> getWeeklyRequestedList(int eno);   // 주간 요청한 업무
+    List<WorkListDTO> getPendingApprovalList(int eno);   // 승인 대기
+  
     // ================== 기타 ==================
-    List<WorkListDTO> getWorkList();
     List<WorkManagerVO> getWorkManagersByWcode(String wcode);
 
     // ================== 상태 업데이트 ==================
-    int updateWorkStatus(String wcode, String status, String state);
+    int updateWorkStatus(String wcode, String status, String state); // 상세 상태 변경
+    void updateWorkStatus(String wcode, String status);              // 단순 상태 변경
+
+    // ================== 요청자 / 담당자 ==================
+    List<WorkListDTO> getMyWorkList(int managerEno);     // 내가 담당자인 업무
+    List<WorkListDTO> getRequestedWorkList(int requesterEno); // 내가 요청한 업무
     
     
-    List<WorkListDTO> myList(int eno, String status);
-    List<WorkListDTO> requestedList(int eno, String status);
-
-    void insertObjection(WorkReplyVO reply);
-    List<WorkListDTO> depWorkList(int dno);
-
-    void updateWorkStatus(String wcode, String status);
+    List<WorkListDTO> getWaitingRequestedList(int requesterEno) ;
+    
+    
+    List<WorkListDTO> selectWeeklyClosingList(int eno);
+    List<WorkListDTO> selectWeeklyRequestedList(int eno);
+    List<WorkListDTO> selectPendingApprovalList(int eno);
+    List<WorkListDTO> selectWaitingRequestedList(int eno);
 }

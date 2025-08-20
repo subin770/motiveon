@@ -1,5 +1,6 @@
 package com.motiveon.dao;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -27,13 +28,7 @@ public interface WorkDAO {
 
     int updateWork(WorkVO work);
 
-    List<WorkListDTO> selectWeeklyClosingList(int eno);
-
-    List<WorkListDTO> selectWeeklyRequestedList(int eno);
-
-    List<WorkListDTO> selectPendingApprovalList(int eno);
-
-    List<WorkListDTO> selectWaitingRequestedList(int eno);
+   
 
     List<WorkListDTO> selectWorkList();
 
@@ -48,9 +43,17 @@ public interface WorkDAO {
 
     void updateManagerAnswer(Map<String, Object> param);
 
-
+    List<WorkListDTO> selectMyWorkList(int managerEno);
+    List<WorkListDTO> selectRequestedWorkList(int requesterEno);
 
     
     public int updateWorkStatus(String wcode, String status, String state);
+
+    List<WorkVO> selectPendingApprovalList() throws SQLException;
+    
+    List<WorkListDTO> selectWeeklyClosingList(int eno);
+    List<WorkListDTO> selectWeeklyRequestedList(int eno);
+    List<WorkListDTO> selectPendingApprovalList(int eno);
+    List<WorkListDTO> selectWaitingRequestedList(int eno);
 
 }

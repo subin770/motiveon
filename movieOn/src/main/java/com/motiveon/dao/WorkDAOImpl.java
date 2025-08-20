@@ -1,5 +1,6 @@
 package com.motiveon.dao;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,25 +64,7 @@ public class WorkDAOImpl implements WorkDAO {
         return sqlSession.update(NAMESPACE + "updateWork", work);
     }
 
-    @Override
-    public List<WorkListDTO> selectWeeklyClosingList(int eno) {
-        return sqlSession.selectList(NAMESPACE + "selectWeeklyClosingList", eno);
-    }
-
-    @Override
-    public List<WorkListDTO> selectWeeklyRequestedList(int eno) {
-        return sqlSession.selectList(NAMESPACE + "selectWeeklyRequestedList", eno);
-    }
-
-    @Override
-    public List<WorkListDTO> selectPendingApprovalList(int eno) {
-        return sqlSession.selectList(NAMESPACE + "selectPendingApprovalList", eno);
-    }
-
-    @Override
-    public List<WorkListDTO> selectWaitingRequestedList(int eno) {
-        return sqlSession.selectList(NAMESPACE + "selectWaitingRequestedList", eno);
-    }
+    
 
     @Override
     public List<WorkListDTO> selectWorkList() {
@@ -137,6 +120,42 @@ public class WorkDAOImpl implements WorkDAO {
 		
 	}
 
+	@Override
+	public List<WorkListDTO> selectMyWorkList(int managerEno) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
+	@Override
+	public List<WorkListDTO> selectRequestedWorkList(int requesterEno) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	 @Override
+	    public List<WorkListDTO> selectWeeklyClosingList(int eno) {
+	        return sqlSession.selectList(NAMESPACE + "selectWeeklyClosingList", eno);
+	    }
+
+	    @Override
+	    public List<WorkListDTO> selectWeeklyRequestedList(int eno) {
+	        return sqlSession.selectList(NAMESPACE + "selectWeeklyRequestedList", eno);
+	    }
+
+	    @Override
+	    public List<WorkListDTO> selectPendingApprovalList(int eno) {
+	        return sqlSession.selectList(NAMESPACE + "selectPendingApprovalList", eno);
+	    }
+
+	    @Override
+	    public List<WorkListDTO> selectWaitingRequestedList(int eno) {
+	        return sqlSession.selectList(NAMESPACE + "selectWaitingRequestedList", eno);
+	    }
+
+		@Override
+		public List<WorkVO> selectPendingApprovalList() throws SQLException {
+			// TODO Auto-generated method stub
+			return null;
+		}
 
 }

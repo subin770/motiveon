@@ -19,16 +19,16 @@ String ctx = request.getContextPath();
 	href="<%=ctx%>/resources/bootstrap/dist/css/adminlte.min.css">
 
 <style>
-:root { -
-	-primary: #3A8DFE; -
-	-navy: #1d3557; -
-	-line: rgba(0, 0, 0, .08); -
-	-text: #2B2F3A;
+:root { 
+	--primary: #3A8DFE; 
+	--navy: #1d3557; 
+	--line: rgba(0, 0, 0, .08); 
+	--text: #2B2F3A;
 }
 
 body {
 	background: #f4f6f9;
-	color: var(- -text);
+	color: var(--text);
 }
 
 /* 페이지 타이틀 */
@@ -43,7 +43,7 @@ body {
 .card-header {
 	font-weight: 800;
 	font-size: 15px;
-	border-bottom: 1px solid var(- -line);
+	border-bottom: 1px solid var(--line);
 }
 
 /* 탭 */
@@ -95,12 +95,12 @@ body {
 	font-weight: 700;
 	padding: 12px 16px;
 	text-align: center;
-	border-bottom: 1px solid var(- -line);
+	border-bottom: 1px solid var(--line);
 }
 
 .table-clean tbody td {
 	padding: 30px 16px;
-	border-bottom: 1px solid var(- -line);
+	border-bottom: 1px solid var(--line);
 	vertical-align: middle;
 }
 

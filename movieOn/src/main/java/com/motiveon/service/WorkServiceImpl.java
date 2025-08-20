@@ -1,5 +1,7 @@
 package com.motiveon.service;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,11 +39,11 @@ public class WorkServiceImpl implements WorkService {
     public String regist(WorkVO work, int requesterEno, int ownerEno) {
         String wcode = workDAO.getNextWcode();
         work.setWcode(wcode);
-        work.setEno(requesterEno); 
+        work.setEno(requesterEno);
 
         workDAO.insertWork(work);
 
-        // 요청자
+        // 요청자 등록
         WorkManagerVO requester = new WorkManagerVO();
         requester.setWcode(wcode);
         requester.setEno(requesterEno);
@@ -50,7 +52,7 @@ public class WorkServiceImpl implements WorkService {
         requester.setAnswer("REQUESTER");
         workManagerDAO.insertWorkManager(requester);
 
-        // 담당자
+        // 담당자 등록
         if (ownerEno != requesterEno) {
             WorkManagerVO owner = new WorkManagerVO();
             owner.setWcode(wcode);
@@ -86,6 +88,7 @@ public class WorkServiceImpl implements WorkService {
     @Transactional
     @Override
     public int rejectWork(String wcode, String reason) throws Exception {
+        // TODO: reason 저장 필요 → DAO에서 반려 사유 컬럼이 있으면 같이 update
         return workDAO.updateWorkStatus(wcode, "반려", "REJECT");
     }
 
@@ -104,6 +107,12 @@ public class WorkServiceImpl implements WorkService {
     @Override
     public WorkReplyVO selectObjectionByWrno(int wrno) throws Exception {
         return workReplyDAO.selectObjectionByWrno(wrno);
+    }
+
+    @Override
+    @Transactional
+    public int insertObjection(WorkReplyVO reply) throws Exception {
+        return workReplyDAO.insertObjection(reply);
     }
 
     /** ================== 목록 ================== */
@@ -153,9 +162,11 @@ public class WorkServiceImpl implements WorkService {
     }
 
     @Override
-    public List<WorkListDTO> getWaitingRequestedList(int eno) {
-        return workDAO.selectWaitingRequestedList(eno);
+    public List<WorkListDTO> getWaitingRequestedList(int requesterEno) {
+        return workDAO.selectWaitingRequestedList(requesterEno);
     }
+
+
 
     /** ================== 기타 ================== */
     @Override
@@ -174,19 +185,46 @@ public class WorkServiceImpl implements WorkService {
         return workDAO.updateWorkStatus(wcode, status, state);
     }
 
-
-    @Override
-    public List<WorkListDTO> depWorkList(int dno) {
-        return workDAO.selectDepWorkList(dno);
-    }
-    @Override
-    public void insertObjection(WorkReplyVO reply) {
-        workDAO.insertObjection(reply);
-    }
-
     @Override
     public void updateWorkStatus(String wcode, String status) {
         workDAO.updateWorkStatus(wcode, status);
     }
 
+    /** ================== 요청자 / 담당자 ================== */
+    @Override
+    public List<WorkListDTO> getMyWorkList(int managerEno) {
+        return workDAO.selectMyWorkList(managerEno); // DAO + Mapper 필요
+    }
+
+    @Override
+    public List<WorkListDTO> getRequestedWorkList(int requesterEno) {
+        return workDAO.selectRequestedWorkList(requesterEno); // DAO + Mapper 필요
+    }
+    /** ================== 부서 ================== */
+    @Override
+    public List<WorkListDTO> depWorkList(int dno) {
+        return workDAO.selectDepWorkList(dno);
+    }
+    @Override
+    public List<WorkListDTO> selectWeeklyClosingList(int eno) {
+        return workDAO.selectWeeklyClosingList(eno);
+    }
+
+    @Override
+    public List<WorkListDTO> selectWeeklyRequestedList(int eno) {
+        return workDAO.selectWeeklyRequestedList(eno);
+    }
+
+    @Override
+    public List<WorkListDTO> selectPendingApprovalList(int eno) {
+        return workDAO.selectPendingApprovalList(eno);
+    }
+
+    @Override
+    public List<WorkListDTO> selectWaitingRequestedList(int eno) {
+        return workDAO.selectWaitingRequestedList(eno);
+    }
+    
+    
+    
 }

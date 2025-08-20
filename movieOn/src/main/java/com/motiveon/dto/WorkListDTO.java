@@ -10,7 +10,7 @@ public class WorkListDTO {
 	private Date wdate;
 	private Date wend;
 	private String ownerName; // EMPLOYEE.NAME 매핑용
-	private String wstate;
+	
 	private int eno;
 	private int dno;
 	private int requesterEno;
@@ -189,12 +189,6 @@ public class WorkListDTO {
 		this.ownerName = ownerName;
 	}
 
-	public String getWstate() {
-		return wstate;
-	}
-
-	public void setWstate(String wstate) {
-		this.wstate = wstate;
-	}
+	
 
 }

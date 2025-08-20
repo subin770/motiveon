@@ -13,7 +13,7 @@
     </div>
 
     <div class="form-box">
-      <form id="modifyForm" method="post" action="${pageContext.request.contextPath}/notice/modify" enctype="multipart/form-data">
+      <form id="modifyForm" method="post" action="<%=request.getContextPath() %>/notice/modifyPost" enctype="multipart/form-data">
         <input type="hidden" name="nno" value="${notice.nno}" />
         <input type="hidden" name="eno" value="${notice.eno}" />
         <input type="hidden" name="dno" value="${notice.dno}" />

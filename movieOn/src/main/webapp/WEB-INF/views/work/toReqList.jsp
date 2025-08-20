@@ -303,11 +303,11 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 							</thead>
 							<tbody id="tbody">
 								<c:forEach var="work" items="${reqList}">
-									<tr data-status="${work.wstate }" data-title="${work.wtitle}"
+									<tr data-status="${work.wstatus }" data-title="${work.wtitle}"
 										data-managername="${work.managerName}">
 										<td>
 											<div class="t-title"
-												onclick="openDetail('${work.wcode}','${work.wstate }')">
+												onclick="openDetail('${work.wcode}','${work.wstatus }')">
 												${work.wtitle}</div>
 
 											<div class="t-sub">
@@ -318,13 +318,13 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 										<td class="text-center"><fmt:formatDate
 												value="${work.wend}" pattern="yyyy-MM-dd" /></td>
 										<td class="text-right"><c:choose>
-												<c:when test="${work.wstate  eq 'PROG'}">
+												<c:when test="${work.wstatus  eq 'PROG'}">
 													<span class="badge-pill badge-prog">진행</span>
 												</c:when>
-												<c:when test="${work.wstate  eq 'DONE'}">
+												<c:when test="${work.wstatus  eq 'DONE'}">
 													<span class="badge-pill badge-done">완료</span>
 												</c:when>
-												<c:when test="${work.wstate  eq 'DELEGATE'}">
+												<c:when test="${work.wstatus  eq 'DELEGATE'}">
 													<span class="badge-pill badge-dele">대리 요청</span>
 												</c:when>
 												<c:otherwise>

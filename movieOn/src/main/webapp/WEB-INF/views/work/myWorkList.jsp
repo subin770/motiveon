@@ -337,8 +337,9 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 							</thead>
 							<tbody id="tbody">
 								<c:forEach var="work" items="${myList}">
-									<tr data-wcode="${work.wcode}" data-status="${work.wstate }"
-										data-title="${work.wtitle}" data-requester="${work.requesterName}"
+									<tr data-wcode="${work.wcode}" data-status="${work.wstatus }"
+										data-title="${work.wtitle}"
+										data-requester="${work.requesterName}"
 										data-assignee="${work.managerName}">
 										<td class="t-title">${work.wtitle}</td>
 										<td>${work.requesterName}</td>
@@ -350,19 +351,19 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 										<td><fmt:formatDate value="${work.wend}"
 												pattern="yyyy-MM-dd" /></td>
 										<td><c:choose>
-												<c:when test="${work.wstate  eq 'WAIT'}">
+												<c:when test="${work.wstatus  eq 'WAIT'}">
 													<span class="badge-pill badge-wait">대기</span>
 												</c:when>
-												<c:when test="${work.wstate  eq 'ING'}">
+												<c:when test="${work.wstatus  eq 'ING'}">
 													<span class="badge-pill badge-prog">진행</span>
 												</c:when>
-												<c:when test="${work.wstate  eq 'DONE'}">
+												<c:when test="${work.wstatus  eq 'DONE'}">
 													<span class="badge-pill badge-done">완료</span>
 												</c:when>
-												<c:when test="${work.wstate  eq 'DELEGATE'}">
+												<c:when test="${work.wstatus  eq 'DELEGATE'}">
 													<span class="badge-pill badge-dele">대리</span>
 												</c:when>
-												<c:when test="${work.wstate  eq 'REJECT'}">
+												<c:when test="${work.wstatus  eq 'REJECT'}">
 													<span class="badge-pill badge-wait">반려</span>
 												</c:when>
 												<c:otherwise>${work.wstatus }</c:otherwise>
@@ -380,7 +381,12 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 								</c:if>
 							</tbody>
 						</table>
-
+						<div class="card-footer">
+							<!-- pagination.jsp -->
+							<div class="card-footer text-center">
+								<%@ include file="/WEB-INF/views/module/pagination.jsp"%>
+							</div>
+						</div>
 					</div>
 				</div>
 

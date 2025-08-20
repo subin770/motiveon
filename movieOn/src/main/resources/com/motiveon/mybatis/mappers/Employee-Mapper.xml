@@ -5,7 +5,7 @@
 
 <mapper namespace="Employee-Mapper">
 
-  
+ 
     <select id="selectEmployeeByEno" parameterType="int" resultType="employee">
     	select *
     	from employee
@@ -13,21 +13,21 @@
     	
     </select>
 
-  
+ 
     <select id="selectEmployeeList" resultType="employee">
-    	select * 
+    	select *
     	from employee
-      
+     
     </select>
 
-  
+ 
     <insert id="insertEmployee" parameterType="employee">
-       insert into 
+       insert into
        employee ( eno, dno, birth, email, name, photo, ppscode, job, phone, enabled, pwd, signtype, signpath, condition )
 	   VALUES ( #{eno}, #{dno}, #{birth}, #{email}, #{name}, #{photo}, #{ppscode},#{job}, #{phone}, #{enabled}, #{pwd}, #{signtype}, #{signpath},#{condition})
     </insert>
 
-    
+   
     <update id="updateEmployee" parameterType="employee">
         update employee
         set
@@ -49,12 +49,12 @@
 
    
     <delete id="deleteEmployee" parameterType="int">
-    	delete 
+    	delete
     	from employee
     	where  eno = #{eno}
     </delete>
-    
-    
+   
+   
 <!--     <insert id="insertAuthorities" >
 insert into auth_detail(mem_id,role_id)
 values (#{mem_id},#{role_id})
@@ -72,6 +72,6 @@ from auth_detail
 where role
 </select>
      -->
-    
+   
 
 </mapper>

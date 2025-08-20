@@ -213,6 +213,10 @@ public class WorkController {
 
         return "work/main";
     }
+    @GetMapping("/workDetail")
+    public String workDetail() {
+        return "work/workDetail";
+    }
 
 
 

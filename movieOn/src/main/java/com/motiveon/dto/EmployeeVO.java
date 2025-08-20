@@ -20,7 +20,7 @@ public class EmployeeVO {
     
 
 
-    private List<String> authorities; // 권한
+    private String authority; // 권한
     
     public int getEno() {
         return eno;
@@ -134,14 +134,13 @@ public class EmployeeVO {
         this.condition = condition;
     }
 
-    public List<String> getAuthorities() {
-        return authorities;
-    }
-
-	public void setAuthorities(List<String> authorities) {
-		this.authorities = authorities;
+	public String getAuthority() {
+		return authority;
 	}
 
+	public void setAuthority(String authority) {
+		this.authority = authority;
+	}
 
-    
+      
 }

@@ -17,7 +17,7 @@
       <button class="btn btn-gray" onclick="location.href='${pageContext.request.contextPath}/notice/main'">목록</button>
     </div>
     <div class="right">
-      <button class="btn btn-blue" onclick="location.href='${pageContext.request.contextPath}/notice/modify/${notice.nno}'">수정</button>
+      <button class="btn btn-blue" onclick="location.href='${pageContext.request.contextPath}/notice/modify?nno=${notice.nno}'">수정</button>
       <button class="btn btn-red" onclick="if(confirm('삭제하시겠습니까?')) location.href='${pageContext.request.contextPath}/notice/delete/${notice.nno}'">삭제</button>
     </div>
   </div>

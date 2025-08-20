@@ -46,14 +46,14 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 			if (!employee.getPwd().equals(login_pwd))
 				throw new BadCredentialsException("패스워드가 일치하지 않습니다.");
 
-			List<String> roles = employee.getAuthorities();
+			List<String> roles = new ArrayList<String>();
 
-			if (roles == null || roles.isEmpty()) {
-				roles = new ArrayList<>();
+			if (employee.getAuthority() == null) {
 				roles.add("ROLE_USER"); // 기본 권한
+			}else {
+				roles.add(employee.getAuthority());
+				
 			}
-
-			employee.setAuthorities(roles);
 
 			UserDetails authUser = new User(employee); // UserDetails 구현체
 

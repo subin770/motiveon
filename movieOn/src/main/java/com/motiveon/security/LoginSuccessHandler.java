@@ -34,7 +34,7 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
 		User user = (User) authentication.getDetails();
 		EmployeeVO loginUser = user.getEmployeeVO();
 		
-		System.out.println("Authorities: " + loginUser.getAuthorities());
+		System.out.println("Authorities: " + loginUser.getAuthority());
 		
 		HttpSession session = request.getSession();
 		session.setAttribute("loginUser", loginUser);
@@ -54,7 +54,7 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
 			out.newLine();
 		}
 
-		boolean isAdmin = loginUser.getAuthorities() != null && loginUser.getAuthorities().contains("ROLE_ADMIN");
+		boolean isAdmin = loginUser.getAuthority().equals("ROLE_ADMIN");
 
 		if (isAdmin) {
 		    response.sendRedirect(request.getContextPath() + "/admin/main");

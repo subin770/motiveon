@@ -62,8 +62,8 @@ public class NoticeController {
 		return "redirect:/notice/main";
 	}
 
-	@GetMapping("/detail/{nno}")
-	public String detail(@PathVariable int nno, Model model) {
+	@GetMapping("/detail")
+	public String detail(int nno, Model model) {
 		NoticeVO notice = noticeService.getNotice(nno);
 		if (notice == null) {
 			return "error/404";
@@ -72,17 +72,17 @@ public class NoticeController {
 		return "notice/detail";
 	}
 
-	@GetMapping("/modify/{nno}")
-	public String modifyForm(@PathVariable int nno, Model model) {
+	@GetMapping("/modify")
+	public String modifyForm(int nno, Model model) {
 		model.addAttribute("notice", noticeService.getNotice(nno));
 
 		return "notice/modify";
 	}
 
-	@PostMapping("/modify")
+	@PostMapping("/modifyPost")
 	public String modifySubmit(@ModelAttribute NoticeVO notice) {
 		noticeService.updateNotice(notice);
-		return "redirect:/notice/detail/" + notice.getNno();
+		return "redirect:/notice/detail?nno=" + notice.getNno();
 	}
 
 	@GetMapping("/delete/{nno}")

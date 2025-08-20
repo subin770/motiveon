@@ -16,7 +16,7 @@ public class NoticeDAOImpl implements NoticeDAO {
 	private SqlSession sqlSession;
 
 	@Autowired
-    public NoticeDAOImpl(SqlSession session) { // ✅ 파라미터명 session
+    public NoticeDAOImpl(SqlSession session) { 
         this.sqlSession = session;
     }
 

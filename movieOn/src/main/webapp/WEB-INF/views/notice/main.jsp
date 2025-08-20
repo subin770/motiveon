@@ -76,7 +76,7 @@
           </c:choose>
         </td>
         <td>
-          <a href="${pageContext.request.contextPath}/notice/detail/${n.nno}"
+          <a href="${pageContext.request.contextPath}/notice/detail?nno=${n.nno}"
              class="${n.fixed eq '1' ? 'notice-title' : ''}">${n.title}</a>
         </td>
         <td>${n.ename}</td>

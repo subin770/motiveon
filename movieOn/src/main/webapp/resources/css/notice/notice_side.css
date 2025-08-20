@@ -1,0 +1,31 @@
+.sidebar-section {
+  padding: 20px;
+  background-color: #f3f3f3;
+  height: 100%;
+   color: #333;
+  border-right: 1px solid #ddd;
+  width: 200px;
+}
+
+.sidebar-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+.sidebar-divider {
+  border: none;
+  margin-bottom: 12px;
+}
+
+.important-notice {
+  display: flex;
+  align-items: center;
+  color: #d13f3f;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 4px;
+  margin-left: 15px;
+}

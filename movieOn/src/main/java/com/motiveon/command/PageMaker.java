@@ -107,6 +107,28 @@ public class PageMaker {
 		prev = startPage == 1 ? false : true;
 		next = endPage < realEndPage ? true : false;
 	}
+	
+	 // ===== 페이징 계산 메서드 =====
+    private void calcPageInfo() {
+        endPage = (int) (Math.ceil(page / (double) displayPageNum)) * displayPageNum;
+        startPage = endPage - displayPageNum + 1;
+
+        realEndPage = (int) (Math.ceil(totalCount / (double) perPageNum));
+
+        if (endPage > realEndPage) {
+            endPage = realEndPage;
+        }
+
+        prev = startPage > 1;
+        next = endPage < realEndPage;
+    }
+
+  
+
+    // ===== 실제 쿼리의 끝 row 번호 =====
+    public int getEndRow() {
+        return page * perPageNum;
+    }
 
 }
 

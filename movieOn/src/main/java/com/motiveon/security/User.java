@@ -22,7 +22,8 @@ private EmployeeVO employee;
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<GrantedAuthority> roles = new ArrayList<GrantedAuthority>();
 		
-		List<String> authorities = employee.getAuthorities();
+		List<String> authorities = new ArrayList<String>();
+		authorities.add(employee.getAuthority());
 		
 		if(authorities!=null) for(String authority : authorities) {
 			roles.add(new SimpleGrantedAuthority(authority));

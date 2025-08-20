@@ -1,7 +1,6 @@
 package com.motiveon.service;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -192,14 +191,16 @@ public class WorkServiceImpl implements WorkService {
 
     /** ================== 요청자 / 담당자 ================== */
     @Override
-    public List<WorkListDTO> getMyWorkList(int managerEno) {
-        return workDAO.selectMyWorkList(managerEno); // DAO + Mapper 필요
+    public List<WorkListDTO> getMyWorkList(int eno) {
+        return workDAO.selectMyWorkList(eno);
+    }
+    
+    @Override
+    public List<WorkListDTO> getToReqList(int eno) {
+        return workDAO.selectToReqList(eno);
     }
 
-    @Override
-    public List<WorkListDTO> getRequestedWorkList(int requesterEno) {
-        return workDAO.selectRequestedWorkList(requesterEno); // DAO + Mapper 필요
-    }
+    
     /** ================== 부서 ================== */
     @Override
     public List<WorkListDTO> depWorkList(int dno) {
@@ -224,6 +225,8 @@ public class WorkServiceImpl implements WorkService {
     public List<WorkListDTO> selectWaitingRequestedList(int eno) {
         return workDAO.selectWaitingRequestedList(eno);
     }
+
+	
     
     
     

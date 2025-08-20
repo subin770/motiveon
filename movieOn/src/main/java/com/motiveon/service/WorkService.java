@@ -35,6 +35,8 @@ public interface WorkService {
     List<WorkListDTO> requestedList(int eno, String status);     // 상태별 요청한 업무
     List<WorkListDTO> depWorkList(int dno);                      // 부서 업무
     List<WorkListDTO> getWorkList();                             // 전체 업무 목록
+    
+    
 
     // ================== 수정 ==================
     void modify(WorkVO work, int eno);
@@ -52,8 +54,9 @@ public interface WorkService {
     void updateWorkStatus(String wcode, String status);              // 단순 상태 변경
 
     // ================== 요청자 / 담당자 ==================
-    List<WorkListDTO> getMyWorkList(int managerEno);     // 내가 담당자인 업무
-    List<WorkListDTO> getRequestedWorkList(int requesterEno); // 내가 요청한 업무
+    
+    List<WorkListDTO> getToReqList(int eno);
+    List<WorkListDTO> getMyWorkList(int eno);
     
     
     List<WorkListDTO> getWaitingRequestedList(int requesterEno) ;

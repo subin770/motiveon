@@ -114,17 +114,7 @@ public class WorkDAOImpl implements WorkDAO {
 	    return sqlSession.selectList("Work-Mapper.selectDepWorkList", dno);
 	}
 
-	@Override
-	public void updateWorkStatus(String wcode, String status) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public List<WorkListDTO> selectMyWorkList(int managerEno) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	@Override
 	public List<WorkListDTO> selectRequestedWorkList(int requesterEno) {
@@ -156,6 +146,26 @@ public class WorkDAOImpl implements WorkDAO {
 		public List<WorkVO> selectPendingApprovalList() throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
+		}
+		
+		 @Override
+		    public List<WorkListDTO> selectMyWorkList(int eno) {
+		        return sqlSession.selectList(NAMESPACE + "selectMyWorkList", eno);
+		    }
+
+
+		@Override
+	    public List<WorkListDTO> selectToReqList(int eno) {
+	        return sqlSession.selectList(NAMESPACE + "selectToReqList", eno);
+	    }
+		
+		
+		@Override
+		public void updateWorkStatus(String wcode, String status) {
+		    Map<String, Object> param = new HashMap<>();
+		    param.put("wcode", wcode);
+		    param.put("status", status);
+		    sqlSession.update(NAMESPACE + "updateWorkStatusSimple", param);
 		}
 
 }

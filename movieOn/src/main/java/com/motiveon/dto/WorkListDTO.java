@@ -10,10 +10,13 @@ public class WorkListDTO {
 	private Date wdate;
 	private Date wend;
 	private String ownerName; // EMPLOYEE.NAME 매핑용
-	 private String wstate;
+	private String wstate;
 	private int eno;
 	private int dno;
+	private int requesterEno;
 	private String requesterName;
+	private int managerEno;
+	private String wstatus;
 	private String managerName;
 	private String statusName;
 	private String id;
@@ -22,6 +25,33 @@ public class WorkListDTO {
 	private String assigneeName;
 	private String answer;
 	private String statusLabel;
+	
+	
+	
+	public String getWstatus() {
+		return wstatus;
+	}
+
+	public void setWstatus(String wstatus) {
+		this.wstatus = wstatus;
+	}
+
+	public int getRequesterEno() {
+		return requesterEno;
+	}
+
+	public void setRequesterEno(int requesterEno) {
+		this.requesterEno = requesterEno;
+	}
+
+	public int getManagerEno() {
+		return managerEno;
+	}
+
+	public void setManagerEno(int managerEno) {
+		this.managerEno = managerEno;
+	}
+
 
 	public String getStatusLabel() {
 		return statusLabel;

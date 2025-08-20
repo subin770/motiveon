@@ -241,7 +241,7 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 </style>
 </head>
 <body class="hold-transition layout-top-nav">
-	<body class="hold-transition layout-top-nav">
+<body class="hold-transition layout-top-nav">
 	<div class="content-wrapper">
 		<section class="content-header">
 			<div class="container-fluid">
@@ -312,8 +312,7 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 									<option value="title">제목</option>
 									<option value="requester">요청자</option>
 									<option value="assignee">담당자</option>
-								</select> 
-								<input id="keyword" type="text" class="form-control"
+								</select> <input id="keyword" type="text" class="form-control"
 									placeholder="검색어를 입력하세요."
 									style="flex: 1 1 auto; font-size: 13px;">
 								<div class="input-group-append">
@@ -337,37 +336,42 @@ body, .content-wrapper, .main-footer, .main-header, .content {
 								</tr>
 							</thead>
 							<tbody id="tbody">
-								<c:forEach var="w" items="${workList}">
-									<tr data-wcode="${w.wcode}" data-status="${w.wstate}"
-										data-title="${w.wtitle}" data-requester="${w.eno}"
-										data-assignee="${w.eno}">
-										<td class="t-title">${w.wtitle}</td>
-										<td>${w.eno}</td> <!-- requesterName 대신 ENO 표시 -->
-										<td>${w.eno}</td> <!-- managerName 대신 ENO 표시 -->
-										<td><fmt:formatDate value="${w.wdate}" pattern="yyyy-MM-dd" /></td>
-										<td><fmt:formatDate value="${w.wend}" pattern="yyyy-MM-dd" /></td>
+								<c:forEach var="work" items="${myList}">
+									<tr data-wcode="${work.wcode}" data-status="${work.wstate }"
+										data-title="${work.wtitle}" data-requester="${work.requesterName}"
+										data-assignee="${work.managerName}">
+										<td class="t-title">${work.wtitle}</td>
+										<td>${work.requesterName}</td>
+										<!-- 요청자 이름 -->
+										<td>${work.managerName}</td>
+										<!-- 담당자 이름 -->
+										<td><fmt:formatDate value="${work.wdate}"
+												pattern="yyyy-MM-dd" /></td>
+										<td><fmt:formatDate value="${work.wend}"
+												pattern="yyyy-MM-dd" /></td>
 										<td><c:choose>
-												<c:when test="${w.wstate eq 'WAIT'}">
+												<c:when test="${work.wstate  eq 'WAIT'}">
 													<span class="badge-pill badge-wait">대기</span>
 												</c:when>
-												<c:when test="${w.wstate eq 'ING'}">
+												<c:when test="${work.wstate  eq 'ING'}">
 													<span class="badge-pill badge-prog">진행</span>
 												</c:when>
-												<c:when test="${w.wstate eq 'DONE'}">
+												<c:when test="${work.wstate  eq 'DONE'}">
 													<span class="badge-pill badge-done">완료</span>
 												</c:when>
-												<c:when test="${w.wstate eq 'DELEGATE'}">
+												<c:when test="${work.wstate  eq 'DELEGATE'}">
 													<span class="badge-pill badge-dele">대리</span>
 												</c:when>
-												<c:when test="${w.wstate eq 'REJECT'}">
+												<c:when test="${work.wstate  eq 'REJECT'}">
 													<span class="badge-pill badge-wait">반려</span>
 												</c:when>
-												<c:otherwise>${w.wstate}</c:otherwise>
+												<c:otherwise>${work.wstatus }</c:otherwise>
 											</c:choose></td>
 									</tr>
 								</c:forEach>
 
-								<c:if test="${empty workList}">
+
+								<c:if test="${empty myList}">
 									<tr>
 										<td colspan="6" class="text-center"
 											style="padding: 40px 0; color: #95A1AF; font-size: 14px;">

@@ -123,23 +123,24 @@ public class WorkController {
 
     // 내가 담당자인 업무
     @GetMapping("/myWorkList")
-    public String myWorkList(Model model, HttpSession session) {
+    public String myWorkList(HttpSession session, Model model) {
         EmployeeVO loginUser = (EmployeeVO) session.getAttribute("loginUser");
         int eno = loginUser.getEno();
 
-        List<WorkListDTO> list = workService.getMyWorkList(eno);
-        model.addAttribute("workList", list);
+        List<WorkListDTO> myList = workService.getMyWorkList(eno);
+
+        // JSP에서 쓸 이름을 myList 로 고정
+        model.addAttribute("myList", myList);
+
         return "work/myWorkList";
     }
 
     // 내가 요청한 업무
     @GetMapping("/toReqList")
-    public String toReqList(Model model, HttpSession session) {
-        EmployeeVO loginUser = (EmployeeVO) session.getAttribute("loginUser");
-        int eno = loginUser.getEno();
-
-        List<WorkListDTO> list = workService.getRequestedWorkList(eno);
-        model.addAttribute("workList", list);
+    public String toReqList(HttpSession session, Model model) {
+        int eno = ((EmployeeVO) session.getAttribute("loginUser")).getEno();
+        List<WorkListDTO> reqList = workService.getToReqList(eno);
+        model.addAttribute("reqList", reqList);
         return "work/toReqList";
     }
 
@@ -188,7 +189,7 @@ public class WorkController {
     }
 
     /** ================== 메인 대시보드 ================== */
-    /** ================== 메인 대시보드 ================== */
+   
     @GetMapping("/main")
     public String main(Model model, HttpSession session) {
         EmployeeVO loginUser = (EmployeeVO) session.getAttribute("loginUser");

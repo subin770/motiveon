@@ -12,48 +12,52 @@ import com.motiveon.dto.WorkReplyVO;
 import com.motiveon.dto.WorkVO;
 
 public interface WorkDAO {
-    String getNextWcode();
+	String getNextWcode();
 
-    void insertWork(WorkVO work);
+	void insertWork(WorkVO work);
 
-    WorkVO selectWorkDetail(String wcode);
+	WorkVO selectWorkDetail(String wcode);
 
-    int updateApproval(String wcode, int eno);
+	int updateApproval(String wcode, int eno);
 
-    void insertObjection(ObjectionDTO dto);
+	void insertObjection(ObjectionDTO dto);
 
-    List<WorkListDTO> selectMyList(Map<String, Object> params);
+	List<WorkListDTO> selectMyList(Map<String, Object> params);
 
-    List<WorkListDTO> selectRequestedList(Map<String, Object> params);
+	List<WorkListDTO> selectRequestedList(Map<String, Object> params);
 
-    int updateWork(WorkVO work);
+	int updateWork(WorkVO work);
 
-   
+	List<WorkListDTO> selectWorkList();
 
-    List<WorkListDTO> selectWorkList();
+	void insertObjection(WorkReplyVO reply);
 
-    void insertObjection(WorkReplyVO reply);
+	List<WorkListDTO> selectDepWorkList(int dno);
 
-    List<WorkListDTO> selectDepWorkList(int dno);
-    void updateWorkStatus(@Param("wcode") String wcode, @Param("status") String status);
-    void updateWorkStatusApproved(String wcode);
-    
-    void updateStatus(@Param("wcode") String wcode, @Param("status") String status);
+	void updateWorkStatus(@Param("wcode") String wcode, @Param("status") String status);
 
+	void updateWorkStatusApproved(String wcode);
 
-    void updateManagerAnswer(Map<String, Object> param);
+	void updateStatus(@Param("wcode") String wcode, @Param("status") String status);
 
-    List<WorkListDTO> selectMyWorkList(int managerEno);
-    List<WorkListDTO> selectRequestedWorkList(int requesterEno);
+	void updateManagerAnswer(Map<String, Object> param);
 
-    
-    public int updateWorkStatus(String wcode, String status, String state);
+	List<WorkListDTO> selectRequestedWorkList(int requesterEno);
 
-    List<WorkVO> selectPendingApprovalList() throws SQLException;
-    
-    List<WorkListDTO> selectWeeklyClosingList(int eno);
-    List<WorkListDTO> selectWeeklyRequestedList(int eno);
-    List<WorkListDTO> selectPendingApprovalList(int eno);
-    List<WorkListDTO> selectWaitingRequestedList(int eno);
+	public int updateWorkStatus(String wcode, String status, String state);
+
+	List<WorkVO> selectPendingApprovalList() throws SQLException;
+
+	List<WorkListDTO> selectWeeklyClosingList(int eno);
+
+	List<WorkListDTO> selectWeeklyRequestedList(int eno);
+
+	List<WorkListDTO> selectPendingApprovalList(int eno);
+
+	List<WorkListDTO> selectWaitingRequestedList(int eno);
+
+	List<WorkListDTO> selectMyWorkList(int eno);
+
+	List<WorkListDTO> selectToReqList(int eno);
 
 }

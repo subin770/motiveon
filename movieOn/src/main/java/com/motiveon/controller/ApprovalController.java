@@ -24,212 +24,312 @@ import com.motiveon.service.ApprovalService;
 @RequestMapping("/approval")
 public class ApprovalController {
 
-    @Autowired
-    private ApprovalService approvalService;
+	@Autowired
+	private ApprovalService approvalService;
 
-    private static final Long FIXED_ENO = 10330125L;
+	private static final Long FIXED_ENO = 10330125L;
 
-    private Long getLoginEno(HttpSession session) {
-        Long eno = (session != null) ? (Long) session.getAttribute("loginEno") : null;
-        return (eno != null) ? eno : FIXED_ENO;
-    }
-    private Long getLoginDno(HttpSession session) {
-        return (session != null) ? (Long) session.getAttribute("loginDno") : null;
-    }
-    private String getLoginDeptName(HttpSession session) {
-        return (session != null) ? (String) session.getAttribute("loginDeptName") : null;
-    }
-    private String getLoginName(HttpSession session) {
-        return (session != null) ? (String) session.getAttribute("loginName") : null;
-    }
-    private void ensureLoginEmp(HttpSession session) {
-        Long eno = getLoginEno(session);
-        String name = getLoginName(session);
-        String dept = getLoginDeptName(session);
-        Long dno = getLoginDno(session);
-        if (name == null || dept == null || dno == null) {
-            Map<String, Object> emp = approvalService.getEmpBasic(eno);
-            if (emp != null) {
-                if (name == null) session.setAttribute("loginName", (String) emp.get("NAME"));
-                if (dept == null) session.setAttribute("loginDeptName", (String) emp.get("DEPTNAME"));
-                if (dno == null) {
-                    Object v = emp.get("DNO");
-                    if (v instanceof Number) session.setAttribute("loginDno", ((Number) v).longValue());
-                }
-                if (session.getAttribute("loginEno") == null) session.setAttribute("loginEno", eno);
-            }
-        }
-    }
+	private Long getLoginEno(HttpSession session) {
+		Long eno = (session != null) ? (Long) session.getAttribute("loginEno") : null;
+		return (eno != null) ? eno : FIXED_ENO;
+	}
 
-    @GetMapping("/main")
-    public String main(@RequestParam(value = "period", required = false, defaultValue = "all") String period,
-                       @RequestParam(value = "field", required = false, defaultValue = "title") String field,
-                       @RequestParam(value = "q", required = false, defaultValue = "") String q,
-                       Model model, HttpSession session) {
-        model.addAttribute("urgentCount",   approvalService.countUrgent());
-        model.addAttribute("returnedCount", approvalService.countReturned());
-        model.addAttribute("waitingCount",  approvalService.countWaiting());
-        model.addAttribute("holdCount",     approvalService.countOnHold());
-        model.addAttribute("recentDrafts",  approvalService.findRecentDrafts(period, field, q));
-        model.addAttribute("ongoingDrafts", approvalService.findOngoingDrafts());
-        model.addAttribute("toApprove",     approvalService.findMyTodo(getLoginEno(session)));
-        return "approval/main";
-    }
+	private Long getLoginDno(HttpSession session) {
+		return (session != null) ? (Long) session.getAttribute("loginDno") : null;
+	}
 
-    @GetMapping("/viewerList")
-    public String viewerList(@RequestParam(value = "period", required = false, defaultValue = "all") String period,
-                             @RequestParam(value = "field", required = false, defaultValue = "title") String field,
-                             @RequestParam(value = "q", required = false, defaultValue = "") String q,
-                             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-                             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-                             HttpSession session, Model model) {
-        Long eno = getLoginEno(session);
-        int totalCount = approvalService.viewerListCount(eno, period, field, q);
-        if (size <= 0) size = 10;
-        int totalPages = (int) Math.ceil(totalCount / (double) size);
-        if (page < 1) page = 1;
-        if (totalPages > 0 && page > totalPages) page = totalPages;
-        int start = (page - 1) * size + 1;
-        int end   = page * size;
+	private String getLoginDeptName(HttpSession session) {
+		return (session != null) ? (String) session.getAttribute("loginDeptName") : null;
+	}
 
-        model.addAttribute("list", approvalService.viewerList(eno, period, field, q, start, end));
-        model.addAttribute("period", period);
-        model.addAttribute("field", field);
-        model.addAttribute("q", q);
-        model.addAttribute("page", page);
-        model.addAttribute("size", size);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("totalCount", totalCount);
-        return "approval/viewerList";
-    }
+	private String getLoginName(HttpSession session) {
+		return (session != null) ? (String) session.getAttribute("loginName") : null;
+	}
 
-    @GetMapping("/draftList")
-    public String draftList(@RequestParam(value = "period", required = false, defaultValue = "all") String period,
-                            @RequestParam(value = "field", required = false, defaultValue = "title") String field,
-                            @RequestParam(value = "q", required = false, defaultValue = "") String q,
-                            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-                            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-                            HttpSession session, Model model) {
-        Long eno = getLoginEno(session);
-        int totalCount = approvalService.draftListCount(eno, period, field, q);
-        if (size <= 0) size = 10;
-        int totalPages = (int) Math.ceil(totalCount / (double) size);
-        if (page < 1) page = 1;
-        if (totalPages > 0 && page > totalPages) page = totalPages;
-        int start = (page - 1) * size + 1;
-        int end   = page * size;
+	private void ensureLoginEmp(HttpSession session) {
+		Long eno = getLoginEno(session);
+		String name = getLoginName(session);
+		String dept = getLoginDeptName(session);
+		Long dno = getLoginDno(session);
+		if (name == null || dept == null || dno == null) {
+			Map<String, Object> emp = approvalService.getEmpBasic(eno);
+			if (emp != null) {
+				if (name == null)
+					session.setAttribute("loginName", (String) emp.get("NAME"));
+				if (dept == null)
+					session.setAttribute("loginDeptName", (String) emp.get("DEPTNAME"));
+				if (dno == null) {
+					Object v = emp.get("DNO");
+					if (v instanceof Number)
+						session.setAttribute("loginDno", ((Number) v).longValue());
+				}
+				if (session.getAttribute("loginEno") == null)
+					session.setAttribute("loginEno", eno);
+			}
+		}
+	}
 
-        model.addAttribute("list", approvalService.draftList(eno, period, field, q, start, end));
-        model.addAttribute("period", period);
-        model.addAttribute("field", field);
-        model.addAttribute("q", q);
-        model.addAttribute("page", page);
-        model.addAttribute("size", size);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("totalCount", totalCount);
-        return "approval/draftList";
-    }
+	@GetMapping("/main")
+	public String main(@RequestParam(value = "period", required = false, defaultValue = "all") String period,
+			@RequestParam(value = "field", required = false, defaultValue = "title") String field,
+			@RequestParam(value = "q", required = false, defaultValue = "") String q, Model model,
+			HttpSession session) {
+		model.addAttribute("urgentCount", approvalService.countUrgent());
+		model.addAttribute("returnedCount", approvalService.countReturned());
+		model.addAttribute("waitingCount", approvalService.countWaiting());
+		model.addAttribute("holdCount", approvalService.countOnHold());
+		model.addAttribute("recentDrafts", approvalService.findRecentDrafts(period, field, q));
+		model.addAttribute("ongoingDrafts", approvalService.findOngoingDrafts());
+		model.addAttribute("toApprove", approvalService.findMyTodo(getLoginEno(session)));
+		return "approval/main";
+	}
 
-    @GetMapping("/new")
-    public String newDraftLauncher() {
-        return "redirect:/approval/formPicker";
-    }
+	@GetMapping("/viewerList")
+	public String viewerList(@RequestParam(value = "period", required = false, defaultValue = "all") String period,
+			@RequestParam(value = "field", required = false, defaultValue = "title") String field,
+			@RequestParam(value = "q", required = false, defaultValue = "") String q,
+			@RequestParam(value = "page", required = false, defaultValue = "1") int page,
+			@RequestParam(value = "size", required = false, defaultValue = "10") int size, HttpSession session,
+			Model model) {
+		Long eno = getLoginEno(session);
+		int totalCount = approvalService.viewerListCount(eno, period, field, q);
+		if (size <= 0)
+			size = 10;
+		int totalPages = (int) Math.ceil(totalCount / (double) size);
+		if (page < 1)
+			page = 1;
+		if (totalPages > 0 && page > totalPages)
+			page = totalPages;
+		int start = (page - 1) * size + 1;
+		int end = page * size;
 
-    @GetMapping("/formPicker")
-    public String formPicker(Model model) {
-        model.addAttribute("classes", approvalService.findFormClasses());
-        model.addAttribute("formsAll", approvalService.findFormsAll());
-        return "approval/formPicker";
-    }
+		model.addAttribute("list", approvalService.viewerList(eno, period, field, q, start, end));
+		model.addAttribute("period", period);
+		model.addAttribute("field", field);
+		model.addAttribute("q", q);
+		model.addAttribute("page", page);
+		model.addAttribute("size", size);
+		model.addAttribute("totalPages", totalPages);
+		model.addAttribute("totalCount", totalCount);
+		return "approval/viewerList";
+	}
 
-    @GetMapping("/compose")
-    public String compose(@RequestParam("sformno") String sformNo, Model model, HttpSession session) {
-        ensureLoginEmp(session);
+	@GetMapping("/draftList")
+	public String draftList(@RequestParam(value = "period", required = false, defaultValue = "all") String period,
+			@RequestParam(value = "field", required = false, defaultValue = "title") String field,
+			@RequestParam(value = "q", required = false, defaultValue = "") String q,
+			@RequestParam(value = "page", required = false, defaultValue = "1") int page,
+			@RequestParam(value = "size", required = false, defaultValue = "10") int size, HttpSession session,
+			Model model) {
+		Long eno = getLoginEno(session);
+		int totalCount = approvalService.draftListCount(eno, period, field, q);
+		if (size <= 0)
+			size = 10;
+		int totalPages = (int) Math.ceil(totalCount / (double) size);
+		if (page < 1)
+			page = 1;
+		if (totalPages > 0 && page > totalPages)
+			page = totalPages;
+		int start = (page - 1) * size + 1;
+		int end = page * size;
 
-        Map<String, Object> f = approvalService.getForm(sformNo);
-        Map<String, Object> form = new HashMap<>();
-        if (f != null) {
-            form.put("formName", f.get("FORMNAME"));
-            form.put("formHtml", f.get("FORMHTML"));
-            form.put("sformNo",  f.get("SFORMNO"));
-        }
-        model.addAttribute("form", form);
-        model.addAttribute("signNoPreview", approvalService.newDocNo());
+		model.addAttribute("list", approvalService.draftList(eno, period, field, q, start, end));
+		model.addAttribute("period", period);
+		model.addAttribute("field", field);
+		model.addAttribute("q", q);
+		model.addAttribute("page", page);
+		model.addAttribute("size", size);
+		model.addAttribute("totalPages", totalPages);
+		model.addAttribute("totalCount", totalCount);
+		return "approval/draftList";
+	}
 
-        Map<String, Object> loginEmp = new HashMap<>();
-        loginEmp.put("name",     getLoginName(session));
-        loginEmp.put("deptName", getLoginDeptName(session));
-        loginEmp.put("eno",      getLoginEno(session));
-        loginEmp.put("dno",      getLoginDno(session));
-        model.addAttribute("loginEmp", loginEmp);
+	@GetMapping("/new")
+	public String newDraftLauncher() {
+		return "redirect:/approval/formPicker";
+	}
 
-        model.addAttribute("today", java.time.LocalDate.now().toString());
-        return "approval/compose";
-    }
+	@GetMapping("/formPicker")
+	public String formPicker(Model model) {
+		model.addAttribute("classes", approvalService.findFormClasses());
+		model.addAttribute("formsAll", approvalService.findFormsAll());
+		return "approval/formPicker";
+	}
 
-    @PostMapping("/tempSave")
-    public String tempSave(ApprovalVO vo, HttpSession session, RedirectAttributes rttr) {
-        ensureLoginEmp(session);
-        vo.setEno(getLoginEno(session));
-        if (vo.getDno() == null) vo.setDno(getLoginDno(session));
-        if (vo.getEmergency() == null) vo.setEmergency(0);
-        String signNo = approvalService.saveTemp(vo);
-        rttr.addFlashAttribute("savedSignNo", signNo);
-        return "redirect:/approval/tempList";
-    }
+	@GetMapping("/compose")
+	public String compose(@RequestParam("sformno") String sformNo, Model model, HttpSession session) {
+		ensureLoginEmp(session);
 
-    @GetMapping("/tempList")
-    public String tempList(@RequestParam(value = "period", required = false, defaultValue = "all") String period,
-                           @RequestParam(value = "field", required = false, defaultValue = "title") String field,
-                           @RequestParam(value = "q", required = false, defaultValue = "") String q,
-                           @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-                           HttpSession session, Model model) {
-        Long eno = getLoginEno(session);
-        int pageSize = 10;
-        int start = (page - 1) * pageSize + 1;
-        int end   = page * pageSize;
+		Map<String, Object> f = approvalService.getForm(sformNo);
+		Map<String, Object> form = new HashMap<>();
+		if (f != null) {
+			form.put("formName", f.get("FORMNAME"));
+			form.put("formHtml", f.get("FORMHTML"));
+			form.put("sformNo", f.get("SFORMNO"));
+		}
+		model.addAttribute("form", form);
+		model.addAttribute("signNoPreview", approvalService.newDocNo());
 
-        Map<String, Object> p = new HashMap<>();
-        p.put("eno", eno);
-        p.put("period", period);
-        p.put("field", field);
-        p.put("q", q);
-        p.put("start", start);
-        p.put("end", end);
+		Map<String, Object> loginEmp = new HashMap<>();
+		loginEmp.put("name", getLoginName(session));
+		loginEmp.put("deptName", getLoginDeptName(session));
+		loginEmp.put("eno", getLoginEno(session));
+		loginEmp.put("dno", getLoginDno(session));
+		model.addAttribute("loginEmp", loginEmp);
 
-        int totalCount = approvalService.tempListCount(p);
-        List<ApprovalVO> list = approvalService.tempList(p);
+		model.addAttribute("today", java.time.LocalDate.now().toString());
+		return "approval/compose";
+	}
 
-        model.addAttribute("list", list);
-        model.addAttribute("totalCount", totalCount);
-        model.addAttribute("page", page);
-        model.addAttribute("pageSize", pageSize);
-        model.addAttribute("period", period);
-        model.addAttribute("field", field);
-        model.addAttribute("q", q);
-        return "approval/tempList";
-    }
+	@PostMapping("/tempSave")
+	public String tempSave(ApprovalVO vo, HttpSession session, RedirectAttributes rttr) {
+		ensureLoginEmp(session);
+		vo.setEno(getLoginEno(session));
+		if (vo.getDno() == null)
+			vo.setDno(getLoginDno(session));
+		if (vo.getEmergency() == null)
+			vo.setEmergency(0);
+		String signNo = approvalService.saveTemp(vo);
+		rttr.addFlashAttribute("savedSignNo", signNo);
+		return "redirect:/approval/tempList";
+	}
 
-    @PostMapping(value = "/temp-save", consumes = "application/json", produces = "application/json")
-    @ResponseBody
-    public Map<String, Object> tempSaveJson(@RequestBody ApprovalVO vo, HttpSession session) {
-        Map<String, Object> res = new HashMap<>();
-        try {
-            ensureLoginEmp(session);
-            Long eno = getLoginEno(session);
-            Long dno = getLoginDno(session);
+	@GetMapping("/tempList")
+	public String tempList(@RequestParam(value = "period", required = false, defaultValue = "all") String period,
+			@RequestParam(value = "field", required = false, defaultValue = "title") String field,
+			@RequestParam(value = "q", required = false, defaultValue = "") String q,
+			@RequestParam(value = "page", required = false, defaultValue = "1") int page, HttpSession session,
+			Model model) {
+		Long eno = getLoginEno(session);
+		int pageSize = 10;
+		int start = (page - 1) * pageSize + 1;
+		int end = page * pageSize;
 
-            vo.setEno(eno);
-            vo.setDno(dno);
-            if (vo.getEmergency() == null) vo.setEmergency(0);
+		Map<String, Object> p = new HashMap<>();
+		p.put("eno", eno);
+		p.put("period", period);
+		p.put("field", field);
+		p.put("q", q);
+		p.put("start", start);
+		p.put("end", end);
 
-            String signNo = approvalService.saveTemp(vo);
-            res.put("ok", true);
-            res.put("signNo", signNo);
-        } catch (Exception e) {
-            res.put("ok", false);
-            res.put("message", e.getMessage());
-        }
-        return res;
-    }
+		int totalCount = approvalService.tempListCount(p);
+		List<ApprovalVO> list = approvalService.tempList(p);
+
+		model.addAttribute("list", list);
+		model.addAttribute("totalCount", totalCount);
+		model.addAttribute("page", page);
+		model.addAttribute("pageSize", pageSize);
+		model.addAttribute("period", period);
+		model.addAttribute("field", field);
+		model.addAttribute("q", q);
+		return "approval/tempList";
+	}
+
+	@PostMapping(value = "/temp-save", consumes = "application/json", produces = "application/json")
+	@ResponseBody
+	public Map<String, Object> tempSaveJson(@RequestBody ApprovalVO vo, HttpSession session) {
+		Map<String, Object> res = new HashMap<>();
+		try {
+			ensureLoginEmp(session);
+			Long eno = getLoginEno(session);
+			Long dno = getLoginDno(session);
+
+			vo.setEno(eno);
+			vo.setDno(dno);
+			if (vo.getEmergency() == null)
+				vo.setEmergency(0);
+
+			String signNo = approvalService.saveTemp(vo);
+			res.put("ok", true);
+			res.put("signNo", signNo);
+		} catch (Exception e) {
+			res.put("ok", false);
+			res.put("message", e.getMessage());
+		}
+		return res;
+	}
+
+	@PostMapping("/temp/delete")
+	public String deleteTempDocs(@RequestParam("ids") List<String> ids, // ← Long → String
+			@RequestParam(required = false) String period, @RequestParam(required = false) String field,
+			@RequestParam(required = false) String q, @RequestParam(required = false, defaultValue = "1") int page,
+			@RequestParam(required = false, defaultValue = "10") int size, RedirectAttributes ra) {
+
+		int deleted = (ids == null || ids.isEmpty()) ? 0 : approvalService.deleteTempDocs(ids);
+		ra.addFlashAttribute("msg", deleted + "건이 삭제되었습니다.");
+
+		ra.addAttribute("period", period);
+		ra.addAttribute("field", field);
+		ra.addAttribute("q", q);
+		ra.addAttribute("page", page);
+		ra.addAttribute("size", size);
+		return "redirect:/approval/tempList";
+	}
+	
+	@PostMapping("/save")
+	@ResponseBody
+	public Map<String,Object> saveApproval(@RequestBody ApprovalVO vo, HttpSession session) {
+	    try {
+	        ensureLoginEmp(session);
+	        Long eno = getLoginEno(session);
+	        Long dno = getLoginDno(session);
+
+	        vo.setEno(eno);
+	        if (vo.getDno() == null) vo.setDno(dno);
+	        if (vo.getEmergency() == null) vo.setEmergency(0);
+	        if ((vo.getSigncontent()==null || vo.getSigncontent().isEmpty()) && vo.getContent()!=null) {
+	            vo.setSigncontent(vo.getContent());
+	        }
+
+	        String signNo = approvalService.saveApproval(vo);
+	        return Map.of("ok", true, "signNo", signNo);
+	    } catch (Exception e) {
+	        return Map.of("ok", false, "message", e.getMessage());
+	    }
+	}
+
+	
+	
+	@GetMapping("/approveList")
+	public String approveList(
+	        @RequestParam(value = "tab", required = false, defaultValue = "mine") String tab, // mine, wait, approved, rejected, all
+	        @RequestParam(value = "period", required = false, defaultValue = "all") String period,
+	        @RequestParam(value = "field", required = false, defaultValue = "title") String field,
+	        @RequestParam(value = "q", required = false, defaultValue = "") String q,
+	        @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+	        @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+	        HttpSession session,
+	        Model model) {
+
+	    Long eno = getLoginEno(session);
+
+	    // 총 건수
+	    int totalCount = approvalService.approveListCount(eno, tab, period, field, q);
+
+	    // 페이징 보정
+	    if (size <= 0) size = 10;
+	    int totalPages = (int) Math.ceil(totalCount / (double) size);
+	    if (page < 1) page = 1;
+	    if (totalPages > 0 && page > totalPages) page = totalPages;
+
+	    int start = (page - 1) * size + 1; // Oracle ROWNUM 시작
+	    int end   = page * size;
+
+	    // 목록 조회
+	    model.addAttribute("list", approvalService.approveList(eno, tab, period, field, q, start, end));
+
+	    // 뷰 파라미터
+	    model.addAttribute("tab", tab);
+	    model.addAttribute("period", period);
+	    model.addAttribute("field", field);
+	    model.addAttribute("q", q);
+	    model.addAttribute("page", page);
+	    model.addAttribute("size", size);
+	    model.addAttribute("totalPages", totalPages);
+	    model.addAttribute("totalCount", totalCount);
+
+	    return "approval/approveList";
+	}
+
 }

@@ -25,12 +25,8 @@ String ctx = request.getContextPath();
 	-text: #2B2F3A;
 }
 
-body,
-.content-wrapper,
-.main-footer,
-.main-header,
-.content {
-    background-color: #fff !important;
+body, .content-wrapper, .main-footer, .main-header, .content {
+	background-color: #fff !important;
 }
 
 /* 페이지 타이틀 (내일정 스타일과 통일) */
@@ -92,42 +88,41 @@ body,
 } /* 전체 연그레이블루 */
 
 /* 탭 */
-
 .tabs {
-    display: flex;
-    margin: 0; /* 위아래 여백 제거 */
-    padding: 0;
+	display: flex;
+	margin: 0; /* 위아래 여백 제거 */
+	padding: 0;
 }
 
 .tab {
-    padding: 8px 16px;
-    font-weight: 600;
-    color: #333;
-    background-color: #ddd;
-    border: 1px solid #ccc;
-    border-bottom: none; /* 아래쪽 선 제거해서 표와 연결 */
-    border-radius: 6px 6px 0 0;
-    cursor: pointer;
-    font-size: 13px; 
-    font-weight: 400;
+	padding: 8px 16px;
+	font-weight: 600;
+	color: #333;
+	background-color: #ddd;
+	border: 1px solid #ccc;
+	border-bottom: none; /* 아래쪽 선 제거해서 표와 연결 */
+	border-radius: 6px 6px 0 0;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 400;
 }
 
 .tab.active {
-    background-color: #6ec1e4;
-    color: #000;
+	background-color: #6ec1e4;
+	color: #000;
 }
-.tab + .tab {
-    margin-left: -1px; /* 옆 탭과 경계선 겹치게 */
+
+.tab+.tab {
+	margin-left: -1px; /* 옆 탭과 경계선 겹치게 */
 }
 
 .tab:hover {
-    background-color: #d0d0d0;
+	background-color: #d0d0d0;
 }
 
 .table-clean {
-    border-top: none; /* 탭과 붙도록 위 테이블 선 제거 */
+	border-top: none; /* 탭과 붙도록 위 테이블 선 제거 */
 }
-
 
 /* 검색 (오른쪽 끝 정렬) */
 .header-row {
@@ -154,10 +149,9 @@ body,
 }
 
 .btn-search {
-    background-color: #2C3E50; 
-    color: white; 
+	background-color: #2C3E50;
+	color: white;
 }
-
 
 /* 테이블 */
 .table-clean {
@@ -319,7 +313,8 @@ body,
 									<option value="requester">요청자</option>
 									<option value="assignee">담당자</option>
 								</select> <input id="keyword" type="text" class="form-control"
-									placeholder="검색어를 입력하세요." style="flex: 1 1 auto; font-size: 13px;">
+									placeholder="검색어를 입력하세요."
+									style="flex: 1 1 auto; font-size: 13px;">
 								<div class="input-group-append">
 									<button id="btnSearch" class="btn btn-search">
 										<i class="fas fa-search"></i>
@@ -340,38 +335,41 @@ body,
 								</tr>
 							</thead>
 							<tbody id="tbody">
-								<c:forEach var="w" items="${workList}">
-    <tr data-status="${w.wstate}">
-        <td>${w.wtitle}</td>
-        <td>${w.requesterName}</td>
-        <td>${w.managerName}</td>
-        
-        <td><fmt:formatDate value="${w.wend}" pattern="yyyy-MM-dd"/></td>
-        <td>
-            <c:choose>
-                <c:when test="${w.wstate eq 'PROG'}">
-                    <span class="badge-pill badge-prog">${w.statusName}</span>
-                </c:when>
-                <c:when test="${w.wstate eq 'DONE'}">
-                    <span class="badge-pill badge-done">${w.statusName}</span>
-                </c:when>
-                <c:when test="${w.wstate eq 'DELEGATE'}">
-                    <span class="badge-pill badge-dele">${w.statusName}</span>
-                </c:when>
-                <c:when test="${w.wstate eq 'REJECT'}">
-                    <span class="badge-pill badge-reject">${w.statusName}</span>
-                </c:when>
-                <c:otherwise>
-                    <span class="badge-pill badge-wait">${w.statusName}</span>
-                </c:otherwise>
-            </c:choose>
-        </td>
-    </tr>
-</c:forEach>
+								<c:forEach var="work" items="${workList}">
+									<tr data-status="${work.wstatus}">
+										<td>${work.wtitle}</td>
+										<td>${work.requesterName}</td>
+										<td>${work.managerName}</td>
+
+										<td><fmt:formatDate value="${work.wend}"
+												pattern="yyyy-MM-dd" /></td>
+										
+
+										<td><c:choose>
+												<c:when test="${work.wstatus  eq 'WAIT'}">
+													<span class="badge-pill badge-wait">대기</span>
+												</c:when>
+												<c:when test="${work.wstatus  eq 'ING'}">
+													<span class="badge-pill badge-prog">진행</span>
+												</c:when>
+												<c:when test="${work.wstatus  eq 'DONE'}">
+													<span class="badge-pill badge-done">완료</span>
+												</c:when>
+												<c:when test="${work.wstatus  eq 'DELEGATE'}">
+													<span class="badge-pill badge-dele">대리</span>
+												</c:when>
+												<c:when test="${work.wstatus  eq 'REJECT'}">
+													<span class="badge-pill badge-wait">반려</span>
+												</c:when>
+												<c:otherwise>${work.wstatus }</c:otherwise>
+											</c:choose></td>
+									</tr>
+								</c:forEach>
 								<c:if test="${empty workList}">
 									<tr>
 										<td colspan="5" class="text-center"
-											style="padding: 40px 0; color: #95A1AF; font-size: 14px;">표시할 업무가 없습니다.</td>
+											style="padding: 40px 0; color: #95A1AF; font-size: 14px;">표시할
+											업무가 없습니다.</td>
 									</tr>
 								</c:if>
 							</tbody>

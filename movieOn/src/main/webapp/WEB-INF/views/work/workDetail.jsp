@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -22,33 +23,37 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h4>상세보기</h4>
     <div class="btn-group btn-group-right">
-      <!-- ✅ 승인자/담당자 -->
-      <c:if test="${role eq 'approver'}">
-        <button class="btn btn-success btn-sm" id="btnApprove">승인</button>
-        <button class="btn btn-danger btn-sm" id="btnReject">반려</button>
-        <button class="btn btn-info btn-sm" id="btnCooperate">협업요청</button>
-        <button class="btn btn-secondary btn-sm" id="btnDelegate">대리요청</button>
-      </c:if>
+      <c:choose>
+       
+        <c:when test="${role eq 'approver'}">
+          <button class="btn btn-success btn-sm action-btn" data-action="approve">승인</button>
+          <button class="btn btn-danger btn-sm action-btn" data-action="reject">반려</button>
+          <button class="btn btn-info btn-sm action-btn" data-action="cooperate">협업요청</button>
+          <button class="btn btn-secondary btn-sm action-btn" data-action="delegate">대리요청</button>
+        </c:when>
 
-      <!-- ✅ 요청자 -->
-      <c:if test="${role eq 'requester'}">
-        <!-- 진행 전 -->
-        <c:if test="${status eq '대기중'}">
-          <button class="btn btn-warning btn-sm" id="btnModify">수정</button>
-          <button class="btn btn-danger btn-sm" id="btnDelete">삭제</button>
-        </c:if>
-        <!-- 결과 확인 후 -->
-        <c:if test="${status eq '승인' or status eq '반려'}">
-          <button class="btn btn-outline-danger btn-sm" id="btnObjection">이의신청</button>
-        </c:if>
-      </c:if>
+      
+        <c:when test="${role eq 'requester'}">
+          <c:choose>
+            
+            <c:when test="${wstatus  eq '대기중'}">
+              <button class="btn btn-warning btn-sm action-btn" data-action="modify">수정</button>
+              <button class="btn btn-danger btn-sm action-btn" data-action="delete">삭제</button>
+            </c:when>
+            
+            <c:when test="${wstatus  eq '승인' or wstatus  eq '반려'}">
+              <button class="btn btn-outline-danger btn-sm action-btn" data-action="objection">이의신청</button>
+            </c:when>
+          </c:choose>
+        </c:when>
+      </c:choose>
     </div>
   </div>
 
-  <!-- 상세 정보 테이블 -->
+
   <table class="table table-bordered detail-table">
     <tr>
-      <th>등록자</th>
+      <th>요청자</th>
       <td>${work.requesterName}</td>
     </tr>
     <tr>
@@ -57,14 +62,11 @@
     </tr>
     <tr>
       <th>담당자</th>
-      <td>
-        
-        ${work.managerName}
-      </td>
+      <td>${work.managerName}</td>
     </tr>
     <tr>
       <th>기한</th>
-      <td>${work.wend}</td>
+      <td><fmt:formatDate value="${work.wend}" pattern="yyyy-MM-dd" /></td>
     </tr>
     <tr>
       <th>상태</th>
@@ -76,73 +78,44 @@
     </tr>
   </table>
 
-  <!-- jQuery -->
+
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <script>
-    // 승인
-    $("#btnApprove").on("click", function(){
-      $.post("<c:url value='/work/approve'/>", { wcode: "${work.wcode}" }, function(){
-        alert("업무가 승인되었습니다.");
-        window.opener.location.reload();
-        window.close();
-      });
-    });
+    $(".action-btn").on("click", function(){
+      let action = $(this).data("action");
+      let wcode = "${work.wcode}";
+      let url = "";
+      let msg = "";
 
-    // 반려
-    $("#btnReject").on("click", function(){
-      $.post("<c:url value='/work/reject'/>", { wcode: "${work.wcode}" }, function(){
-        alert("업무가 반려되었습니다.");
-        window.opener.location.reload();
-        window.close();
-      });
-    });
+      switch(action){
+        case "approve":   url = "<c:url value='/work/approve'/>";   msg="승인되었습니다."; break;
+        case "reject":    url = "<c:url value='/work/reject'/>";    msg="반려되었습니다."; break;
+        case "cooperate": url = "<c:url value='/work/cooperate'/>"; msg="협업요청 완료."; break;
+        case "delegate":  url = "<c:url value='/work/delegate'/>";  msg="대리요청 완료."; break;
+        case "objection": url = "<c:url value='/work/objection'/>"; msg="이의신청 등록."; break;
+        case "delete":    url = "<c:url value='/work/delete'/>";    msg="삭제되었습니다."; break;
+        case "modify":
+          window.open("<c:url value='/work/modify'/>?wcode="+wcode, "workModify",
+            "width=850,height=650,scrollbars=yes,resizable=yes");
+          return; 
+      }
 
-    // 협업요청
-    $("#btnCooperate").on("click", function(){
-      $.post("<c:url value='/work/cooperate'/>", { wcode: "${work.wcode}" }, function(){
-        alert("협업 요청이 완료되었습니다.");
-        window.opener.location.reload();
-        window.close();
-      });
-    });
+      if(action==="delete" && !confirm("정말 삭제하시겠습니까?")) return;
 
-    // 대리요청
-    $("#btnDelegate").on("click", function(){
-      $.post("<c:url value='/work/delegate'/>", { wcode: "${work.wcode}" }, function(){
-        alert("대리 요청이 완료되었습니다.");
-        window.opener.location.reload();
-        window.close();
-      });
-    });
-
-    // 이의신청
-    $("#btnObjection").on("click", function(){
-      $.post("<c:url value='/work/objection'/>", { wcode: "${work.wcode}" }, function(){
-        alert("이의신청이 등록되었습니다.");
-        window.opener.location.reload();
-        window.close();
-      });
-    });
-
-    // 수정
-    $("#btnModify").on("click", function(){
-      window.open(
-        "<c:url value='/work/modify'/>?wcode=${work.wcode}",
-        "workModify",
-        "width=850,height=650,scrollbars=yes,resizable=yes"
-      );
-    });
-
-    // 삭제
-    $("#btnDelete").on("click", function(){
-      if(confirm("정말 삭제하시겠습니까?")){
-        $.post("<c:url value='/work/delete'/>", { wcode: "${work.wcode}" }, function(){
-          alert("업무가 삭제되었습니다.");
+      $.ajax({
+        url: url,
+        type: "POST",
+        data: { wcode: wcode },
+        success: function(){
+          alert("업무가 " + msg);
           window.opener.location.reload();
           window.close();
-        });
-      }
+        },
+        error: function(){
+          alert("처리 중 오류가 발생했습니다.");
+        }
+      });
     });
   </script>
 </body>

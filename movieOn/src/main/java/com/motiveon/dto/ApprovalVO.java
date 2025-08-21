@@ -2,6 +2,7 @@ package com.motiveon.dto;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class ApprovalVO implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -45,6 +46,18 @@ public class ApprovalVO implements Serializable {
     private String  drafterName;
     private String  deptName;
     private Integer attachCnt;
+    
+    
+    private String content;     // 내용
+    private Date regDate;       // 등록일
+    private Date updateDate;    // 수정일
+    
+ // 결재선 (결재자 목록)
+    private List<Long> approvers;
+
+    // 참조자 (참조자 목록)
+    private List<Long> refs;
+
 
     public ApprovalVO() {}
 
@@ -172,9 +185,6 @@ public class ApprovalVO implements Serializable {
     public Integer getTempsave() { return tempsave; }
     public void setTempsave(Integer tempsave) { this.tempsave = tempsave; if (this.tempSave == null) this.tempSave = tempsave; }
 
-    public Integer getState() { return state; }
-    public void setState(Integer state) { this.state = state; if (this.docStatus == null) this.docStatus = state; }
-
     /* -------- 보조 -------- */
     public String getFormName() { return formName; }
     public void setFormName(String formName) { this.formName = formName; }
@@ -187,6 +197,23 @@ public class ApprovalVO implements Serializable {
 
     public Integer getAttachCnt() { return attachCnt; }
     public void setAttachCnt(Integer attachCnt) { this.attachCnt = attachCnt; }
+    
+
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+
+    public Date getRegDate() { return regDate; }
+    public void setRegDate(Date regDate) { this.regDate = regDate; }
+
+    public Date getUpdateDate() { return updateDate; }
+    public void setUpdateDate(Date updateDate) { this.updateDate = updateDate; }
+
+
+    public List<Long> getApprovers() { return approvers; }
+    public void setApprovers(List<Long> approvers) { this.approvers = approvers; }
+
+    public List<Long> getRefs() { return refs; }
+    public void setRefs(List<Long> refs) { this.refs = refs; }
 
     @Override
     public String toString() {

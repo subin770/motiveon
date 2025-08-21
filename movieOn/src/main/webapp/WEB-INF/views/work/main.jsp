@@ -122,74 +122,26 @@ body {
 	font-size: 14px;
 }
 
-/* 4컬럼 폭 : 40/20/20/20 */
-#tbl-weekly thead th:nth-child(1), #tbl-weekly-req thead th:nth-child(1)
-	{
-	width: 40%;
-}
-
-#tbl-weekly thead th:nth-child(2), #tbl-weekly-req thead th:nth-child(2)
-	{
-	width: 20%;
-}
-
-#tbl-weekly thead th:nth-child(3), #tbl-weekly-req thead th:nth-child(3)
-	{
-	width: 20%;
-}
-
-#tbl-weekly thead th:nth-child(4), #tbl-weekly-req thead th:nth-child(4)
-	{
-	width: 20%;
-}
+/* 4컬럼 폭 */
+#tbl-weekly thead th:nth-child(1), #tbl-weekly-req thead th:nth-child(1) {width: 40%;}
+#tbl-weekly thead th:nth-child(2), #tbl-weekly-req thead th:nth-child(2) {width: 20%;}
+#tbl-weekly thead th:nth-child(3), #tbl-weekly-req thead th:nth-child(3) {width: 20%;}
+#tbl-weekly thead th:nth-child(4), #tbl-weekly-req thead th:nth-child(4) {width: 20%;}
 
 /* 페이지 여백 */
-.content .container-fluid {
-	padding-left: 20px;
-	padding-right: 20px;
-}
+.content .container-fluid { padding-left: 20px; padding-right: 20px; }
 
-/* pagination 커스텀 */
-.pagination {
-	margin: 0;
-	margin-top: 20px;
-}
-
-.pagination .page-link {
-	min-width: 36px;
-	text-align: center;
-	border: 1px solid #dee2e6;
-	background: #fff;
-}
-
-.pagination .page-item:first-child .page-link {
-	border-top-left-radius: 8px;
-	border-bottom-left-radius: 8px;
-}
-
-.pagination .page-item:last-child .page-link {
-	border-top-right-radius: 8px;
-	border-bottom-right-radius: 8px;
-}
-
-.pagination .page-item.active .page-link {
-	background: #fff;
-	color: #0d6efd;
-	border-color: #dee2e6;
-}
-
-.pagination .page-link:focus {
-	box-shadow: none;
-}
+/* pagination */
+.pagination { margin: 0; margin-top: 20px; }
+.pagination .page-link { min-width: 36px; text-align: center; border: 1px solid #dee2e6; background: #fff; }
+.pagination .page-item.active .page-link { color: #0d6efd; }
 
 /* 탑내비 흰색 */
-.content-wrapper {
-	margin-left: 0 !important;
-}
+.content-wrapper { margin-left: 0 !important; }
+.content-wrapper, .main-header { background: #fff !important; }
 
-.content-wrapper, .main-header {
-	background: #fff !important;
-}
+/* 버튼 */
+.btn-sm { padding: 2px 6px; font-size: 12px; }
 </style>
 </head>
 <body class="hold-transition layout-top-nav">
@@ -229,17 +181,15 @@ body {
 								</thead>
 								<tbody>
 									<c:if test="${empty weeklyClosingList}">
-										<tr>
-											<td colspan="4" class="empty-text">금주 마감 업무가 존재하지 않습니다.</td>
-										</tr>
+										<tr><td colspan="4" class="empty-text">금주 마감 업무가 존재하지 않습니다.</td></tr>
 									</c:if>
 									<c:forEach var="w" items="${weeklyClosingList}">
 										<tr>
 											<td class="text-truncate">
-												<a href="<%=ctx%>/work/detail?wid=${w.wcode}">${w.wtitle}</a>
+												<a href="javascript:void(0);" onclick="openDetail('<%=ctx%>/work/detail?wcode=${w.wcode}')">${w.wtitle}</a>
 											</td>
-											<td>${w.ownerName}</td>
-											<td>${w.statusName}</td>
+											<td>${w.managerName}</td>
+<td>${w.statusName}</td>
 											<td><fmt:formatDate value="${w.wend}" pattern="yyyy-MM-dd"/></td>
 										</tr>
 									</c:forEach>
@@ -260,16 +210,14 @@ body {
 								</thead>
 								<tbody>
 									<c:if test="${empty weeklyRequestedList}">
-										<tr>
-											<td colspan="4" class="empty-text">금주 마감 업무가 존재하지 않습니다.</td>
-										</tr>
+										<tr><td colspan="4" class="empty-text">금주 마감 업무가 존재하지 않습니다.</td></tr>
 									</c:if>
 									<c:forEach var="r" items="${weeklyRequestedList}">
 										<tr>
 											<td class="text-truncate">
-												<a href="<%=ctx%>/work/detail?wid=${r.wcode}">${r.wtitle}</a>
+												<a href="javascript:void(0);" onclick="openDetail('<%=ctx%>/work/detail?wcode=${r.wcode}')">${r.wtitle}</a>
 											</td>
-											<td>${r.ownerName}</td>
+											<td>${r.managerName}</td>
 											<td>${r.statusName}</td>
 											<td><fmt:formatDate value="${r.wend}" pattern="yyyy-MM-dd"/></td>
 										</tr>
@@ -298,14 +246,12 @@ body {
 									</thead>
 									<tbody>
 										<c:if test="${empty pendingApprovalList}">
-											<tr>
-												<td colspan="3" class="empty-text">미승인 업무가 존재하지 않습니다.</td>
-											</tr>
+											<tr><td colspan="3" class="empty-text">미승인 업무가 존재하지 않습니다.</td></tr>
 										</c:if>
 										<c:forEach var="p" items="${pendingApprovalList}">
 											<tr>
 												<td class="text-truncate">
-													<a href="<%=ctx%>/approval/detail?wid=${p.wcode}">${p.wtitle}</a>
+													<a href="javascript:void(0);" onclick="openDetail('<%=ctx%>/approval/detail?wcode=${p.wcode}')">${p.wtitle}</a>
 												</td>
 												<td>${p.requesterName}</td>
 												<td><fmt:formatDate value="${p.wend}" pattern="yyyy-MM-dd"/></td>
@@ -313,6 +259,17 @@ body {
 										</c:forEach>
 									</tbody>
 								</table>
+
+								<!-- 버튼 영역 (승인/이의신청) -->
+								<c:forEach var="p" items="${pendingApprovalList}">
+									<div class="mt-2">
+										<c:if test="${p.status eq 'PENDING'}">
+											<button class="btn btn-primary btn-sm">승인</button>
+											<button class="btn btn-danger btn-sm">이의신청</button>
+										</c:if>
+									</div>
+								</c:forEach>
+
 							</div>
 						</div>
 					</div>
@@ -332,14 +289,12 @@ body {
 									</thead>
 									<tbody>
 										<c:if test="${empty waitingRequestedList}">
-											<tr>
-												<td colspan="3" class="empty-text">대기중인 요청업무가 존재하지 않습니다.</td>
-											</tr>
+											<tr><td colspan="3" class="empty-text">대기중인 요청업무가 존재하지 않습니다.</td></tr>
 										</c:if>
 										<c:forEach var="x" items="${waitingRequestedList}">
 											<tr>
 												<td class="text-truncate">
-													<a href="<%=ctx%>/wait/detail?wid=${x.wcode}">${x.wtitle}</a>
+													<a href="javascript:void(0);" onclick="openDetail('<%=ctx%>/wait/detail?wcode=${x.wcode}')">${x.wtitle}</a>
 												</td>
 												<td>${x.ownerName}</td>
 												<td><fmt:formatDate value="${x.wend}" pattern="yyyy-MM-dd"/></td>
@@ -347,6 +302,17 @@ body {
 										</c:forEach>
 									</tbody>
 								</table>
+
+								<!-- 버튼 영역 (협업요청/대리요청) -->
+								<c:forEach var="x" items="${waitingRequestedList}">
+									<div class="mt-2">
+										<c:if test="${x.wstatus eq 'WAITING'}">
+											<button class="btn btn-secondary btn-sm">협업요청</button>
+											<button class="btn btn-warning btn-sm">대리요청</button>
+										</c:if>
+									</div>
+								</c:forEach>
+
 							</div>
 						</div>
 					</div>
@@ -373,6 +339,11 @@ body {
 				$('#tab-req').show();
 			}
 		});
+
+		// 팝업 오픈
+		function openDetail(url) {
+			window.open(url, "workDetail", "width=900,height=700,scrollbars=yes,resizable=yes");
+		}
 	</script>
 </body>
 </html>

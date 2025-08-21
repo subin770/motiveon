@@ -1,6 +1,7 @@
 package com.motiveon.controller;
 
 import java.util.List;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
@@ -18,7 +19,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.motiveon.dto.EmployeeVO;
 import com.motiveon.dto.WorkListDTO;
-import com.motiveon.dto.WorkManagerVO;
 import com.motiveon.dto.WorkReplyVO;
 import com.motiveon.dto.WorkVO;
 import com.motiveon.service.WorkService;
@@ -64,15 +64,15 @@ public class WorkController {
     }
 
     /** ================== 상세 ================== */
+ // WorkController.java
     @GetMapping("/detail")
     public String workDetail(@RequestParam("wcode") String wcode, Model model) {
         WorkVO work = workService.getWorkDetail(wcode);
-        List<WorkManagerVO> managers = workService.getWorkManagersByWcode(wcode);
-
         model.addAttribute("work", work);
-        model.addAttribute("managers", managers);
-        return "work/workDetail";
+        return "work/workDetail"; // JSP 경로
     }
+
+
 
     /** 승인 처리 */
     @PostMapping("/approve")

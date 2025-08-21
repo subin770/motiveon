@@ -13,7 +13,7 @@
     <result property="wopen" column="WOPEN" />
     <result property="walarm" column="WALARM" />
     <result property="eno" column="ENO" />
-    <result property="wstatus" column="WSTATUS" />   <!-- ✅ 컬럼명 맞춤 -->
+    <result property="wstatus" column="WSTATUS" />
     <result property="dno" column="DNO" />
     <result property="wcontent" column="WCONTENT" />
     <result property="requesterEno" column="REQUESTER_ENO" />
@@ -64,27 +64,21 @@
   </select>
 
   <!-- ================== 등록 ================== -->
-  <insert id="insertWork" parameterType="com.motiveon.dto.WorkVO">
-   INSERT INTO WORK (
-  WCODE, WTITLE, WDATE, WEND, ENO, DNO, REQUESTER_ENO, MANAGER_ENO, WSTATUS
-)
-VALUES (
-  #{wcode}, #{wtitle}, SYSDATE, #{wend}, #{eno}, #{dno},
-  #{requesterEno}, #{managerEno},
-  NVL(#{wstatus}, '대기')
-)
-  </insert>
+<insert id="insertWork" parameterType="com.motiveon.dto.WorkVO">
+  INSERT INTO WORK (WCODE, WTITLE, WCONTENT, WEND, ENO, WDATE, WSTATUS, DNO)
+  VALUES (#{wcode}, #{wtitle}, #{wcontent}, #{wend}, #{eno}, SYSDATE, '진행중', #{dno})
+</insert>
 
   <!-- ================== 상세 ================== -->
   <select id="selectWorkDetail" parameterType="string" resultMap="workMap">
-    SELECT 
-      W.*, 
-      E1.ENAME AS REQUESTERNAME,
-      E2.ENAME AS MANAGERNAME
-    FROM WORK W
-      LEFT JOIN EMPLOYEE E1 ON W.REQUESTER_ENO = E1.ENO
-      LEFT JOIN EMPLOYEE E2 ON W.MANAGER_ENO = E2.ENO
-    WHERE W.WCODE = #{wcode}
+   SELECT
+    W.*,
+    E1.NAME AS REQUESTERNAME,
+    E2.NAME AS MANAGERNAME
+   FROM WORK W
+    LEFT JOIN EMPLOYEE E1 ON W.REQUESTER_ENO = E1.ENO
+    LEFT JOIN EMPLOYEE E2 ON W.MANAGER_ENO = E2.ENO
+   WHERE W.WCODE = #{wcode}
   </select>
 
   <!-- ================== 상태 변경 ================== -->
@@ -104,26 +98,34 @@ VALUES (
 
   <!-- ================== 목록 조회 ================== -->
   <select id="selectMyList" resultMap="workListMap" parameterType="map">
-    SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
-    FROM WORK
-    WHERE ENO = #{eno}
-       OR REQUESTER_ENO = #{eno}
+    SELECT W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.WSTATUS, W.ENO, W.DNO,
+           E1.NAME AS REQUESTERNAME,
+           E2.NAME AS MANAGERNAME
+    FROM WORK W
+      LEFT JOIN EMPLOYEE E1 ON W.REQUESTER_ENO = E1.ENO
+      LEFT JOIN EMPLOYEE E2 ON W.MANAGER_ENO = E2.ENO
+    WHERE W.ENO = #{eno}
+       OR W.REQUESTER_ENO = #{eno}
   </select>
 
-  <select id="selectMyWorkList" parameterType="int" resultType="com.motiveon.dto.WorkListDTO">
+  <select id="selectMyWorkList" parameterType="int" resultMap="workListMap">
     SELECT 
-        w.wcode,
-        w.wtitle,
-        w.wstatus,
-        w.wdate      AS wdate,        -- DTO 필드명에 맞춤
-        w.wend       AS wend,         -- 마감일
-        w.manager_eno AS managerEno,  -- DTO 필드명에 맞춤
-        w.requester_eno AS requesterEno
-    FROM work w
-    WHERE w.manager_eno = #{value}
-       OR w.requester_eno = #{value}
-    ORDER BY w.wdate DESC
-</select>
+        W.WCODE,
+        W.WTITLE,
+        W.WSTATUS,
+        W.WDATE,
+        W.WEND,
+        W.MANAGER_ENO,
+        W.REQUESTER_ENO,
+        E1.NAME AS REQUESTERNAME,
+        E2.NAME AS MANAGERNAME
+    FROM WORK W
+      LEFT JOIN EMPLOYEE E1 ON W.REQUESTER_ENO = E1.ENO
+      LEFT JOIN EMPLOYEE E2 ON W.MANAGER_ENO = E2.ENO
+    WHERE W.MANAGER_ENO = #{value}
+       OR W.REQUESTER_ENO = #{value}
+    ORDER BY W.WDATE DESC
+  </select>
   
   <select id="selectWorkList" resultMap="workListMap">
     SELECT 
@@ -134,41 +136,51 @@ VALUES (
       W.WSTATUS,
       W.REQUESTER_ENO,
       W.MANAGER_ENO,
-      E1.ENAME AS REQUESTERNAME,
-      E2.ENAME AS MANAGERNAME
+      E1.NAME AS REQUESTERNAME,
+      E2.NAME AS MANAGERNAME
     FROM WORK W
       LEFT JOIN EMPLOYEE E1 ON W.REQUESTER_ENO = E1.ENO
       LEFT JOIN EMPLOYEE E2 ON W.MANAGER_ENO = E2.ENO
   </select>
   
   <!-- 내가 요청한 업무 -->
-  <select id="selectToReqList" parameterType="int" resultType="com.motiveon.dto.WorkListDTO">
+  <select id="selectToReqList" parameterType="int" resultMap="workListMap">
     SELECT 
-      w.wcode,
-      w.wtitle,
-      w.wstatus,
-      w.wdate      AS wdate,
-      w.wend       AS wend,          <!-- ✅ 마감일 추가 -->
-      w.manager_eno AS managerEno,
-      w.requester_eno AS requesterEno
-    FROM work w
-    WHERE w.requester_eno = #{value}
-    ORDER BY w.wdate DESC
-</select>
+      W.WCODE,
+      W.WTITLE,
+      W.WSTATUS,
+      W.WDATE,
+      W.WEND,
+      W.MANAGER_ENO,
+      W.REQUESTER_ENO,
+      E1.NAME AS REQUESTERNAME,
+      E2.NAME AS MANAGERNAME
+    FROM WORK W
+      LEFT JOIN EMPLOYEE E1 ON W.REQUESTER_ENO = E1.ENO
+      LEFT JOIN EMPLOYEE E2 ON W.MANAGER_ENO = E2.ENO
+    WHERE W.REQUESTER_ENO = #{value}
+    ORDER BY W.WDATE DESC
+  </select>
 
   <update id="updateWork" parameterType="com.motiveon.dto.WorkVO">
     UPDATE WORK
-    SET WTITLE = #{wtitle},
-        WEND = #{wend},
-        WSTATUS = #{wstatus},
-        WCONTENT = #{wcontent}
+    SET
+      WTITLE = #{wtitle},
+      WCONTENT = #{wcontent},
+      WDATE = #{wdate},
+      WEND = #{wend},
+      WOPEN = #{wopen},
+      WALARM = #{walarm},
+      WSTATUS = #{wstatus},
+      DNO = #{dno}
     WHERE WCODE = #{wcode}
   </update>
+
 
   <!-- ================== 이의신청/댓글 ================== -->
   <select id="selectObjectionList" resultMap="workReplyMap">
     SELECT R.WRNO, R.WCODE, R.ENO, R.WRCONTENT, R.WRREGDATE,
-           E.ENAME AS WRITERNAME
+           E.NAME AS WRITERNAME
     FROM WORKREPLY R
       JOIN EMPLOYEE E ON R.ENO = E.ENO
     WHERE R.WCODE = #{wcode}
@@ -177,7 +189,7 @@ VALUES (
 
   <select id="selectObjectionByWrno" resultMap="workReplyMap">
     SELECT R.WRNO, R.WCODE, R.ENO, R.WRCONTENT, R.WRREGDATE,
-           E.ENAME AS WRITERNAME
+           E.NAME AS WRITERNAME
     FROM WORKREPLY R
       JOIN EMPLOYEE E ON R.ENO = E.ENO
     WHERE R.WRNO = #{wrno}
@@ -188,49 +200,117 @@ VALUES (
     VALUES (WORKREPLY_SEQ.NEXTVAL, #{wcode}, #{eno}, #{wrcontent}, SYSDATE)
   </insert>
 
-  <select id="selectDepWorkList" resultMap="workListMap" parameterType="int">
-    SELECT W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.WSTATUS, W.ENO, W.DNO,
-           R.ENAME AS REQUESTERNAME,
-           M.ENAME AS MANAGERNAME
+  <select id="selectDepWorkList" parameterType="int" resultMap="workListMap">
+    SELECT W.WCODE,
+           W.WTITLE,
+           W.WDATE,
+           W.WEND,
+           W.WSTATUS,
+           W.ENO,
+           W.DNO,
+           R.NAME AS REQUESTERNAME,
+           M.NAME AS MANAGERNAME
     FROM WORK W
-      LEFT JOIN EMPLOYEE R ON W.REQUESTER_ENO = R.ENO
-      LEFT JOIN EMPLOYEE M ON W.MANAGER_ENO = M.ENO
-    WHERE DNO = #{dno}
-  </select>
+         LEFT JOIN EMPLOYEE R ON W.REQUESTER_ENO = R.ENO
+         LEFT JOIN EMPLOYEE M ON W.MANAGER_ENO = M.ENO
+    WHERE W.DNO = #{dno}
+</select>
+
 
   <!-- 담당자 목록 -->
   <select id="selectWorkManagersByWcode" parameterType="string" resultType="com.motiveon.dto.WorkManagerVO">
-    SELECT WM.WCODE, WM.ENO, E.ENAME
+    SELECT WM.WCODE, WM.ENO, E.NAME
     FROM WORKMANAGER WM
       JOIN EMPLOYEE E ON WM.ENO = E.ENO
     WHERE WM.WCODE = #{wcode}
   </select>
 
-  <select id="selectPendingApprovalList" parameterType="int" resultMap="workListMap">
-    SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
-    FROM WORK
-    WHERE ENO = #{eno}
-      AND WSTATUS = 'PENDING'
-  </select>
 
-  <select id="selectWaitingRequestedList" parameterType="int" resultMap="workListMap">
-    SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
-    FROM WORK
-    WHERE ENO = #{eno}
-      AND WSTATUS = 'WAITING'
-  </select>
+<select id="selectMainWorkList" resultMap="workListMap">
+    SELECT W.WCODE, W.WTITLE, W.WDATE, W.WEND, W.WSTATUS, W.ENO, W.DNO,
+           W.REQUESTER_ENO, W.MANAGER_ENO, W.ANSWER,
+           E1.NAME AS REQUESTERNAME,
+           E2.NAME AS MANAGERNAME,
+           S.STATUS_NAME AS STATUSNAME
+    FROM WORK W
+    JOIN EMPLOYEE E1 ON W.REQUESTER_ENO = E1.ENO
+    JOIN EMPLOYEE E2 ON W.MANAGER_ENO = E2.ENO
+    JOIN STATUS_TABLE S ON W.WSTATUS = S.STATUS_CODE
+</select>
 
-  <select id="selectWeeklyRequestedList" parameterType="int" resultMap="workListMap">
-    SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
-    FROM WORK
-    WHERE ENO = #{eno}
-      AND WDATE BETWEEN TRUNC(SYSDATE, 'IW') AND TRUNC(SYSDATE, 'IW')+6
-  </select>
+ <!-- ================== 메인화면 : 미승인 업무 ================== -->
+<select id="selectPendingApprovalList" parameterType="int" resultMap="workListMap">
+    SELECT 
+        W.WCODE, 
+        W.WTITLE, 
+        W.WDATE, 
+        W.WEND, 
+        W.WSTATUS, 
+        W.ENO, 
+        W.DNO,
+        R.NAME AS REQUESTERNAME,
+        M.NAME AS MANAGERNAME
+    FROM WORK W
+      LEFT JOIN EMPLOYEE R ON W.REQUESTER_ENO = R.ENO
+      LEFT JOIN EMPLOYEE M ON W.MANAGER_ENO = M.ENO
+    WHERE (W.ENO = #{eno} OR W.REQUESTER_ENO = #{eno})
+      AND W.WSTATUS = 'PENDING'
+</select>
 
-  <select id="selectWeeklyClosingList" parameterType="int" resultType="com.motiveon.dto.WorkVO">
-    SELECT WCODE, WTITLE, WDATE, WEND, WSTATUS, ENO, DNO
-    FROM WORK
-    WHERE ENO = #{eno}
-  </select>
+  <!-- ================== 메인화면 : 대기중 요청한 업무 ================== -->
+<select id="selectWaitingRequestedList" parameterType="int" resultMap="workListMap">
+    SELECT 
+        W.WCODE, 
+        W.WTITLE, 
+        W.WDATE, 
+        W.WEND, 
+        W.WSTATUS, 
+        W.ENO, 
+        W.DNO,
+        R.NAME AS REQUESTERNAME,
+        M.NAME AS MANAGERNAME
+    FROM WORK W
+      LEFT JOIN EMPLOYEE R ON W.REQUESTER_ENO = R.ENO
+      LEFT JOIN EMPLOYEE M ON W.MANAGER_ENO = M.ENO
+    WHERE (W.ENO = #{eno} OR W.REQUESTER_ENO = #{eno})
+      AND W.WSTATUS = 'WAITING'
+</select>
+
+<!-- ================== 메인화면 : 주간 요청한 업무 ================== -->
+<select id="selectWeeklyRequestedList" parameterType="int" resultMap="workListMap">
+    SELECT 
+        W.WCODE, 
+        W.WTITLE, 
+        W.WDATE, 
+        W.WEND, 
+        W.WSTATUS, 
+        W.ENO, 
+        W.DNO,
+        R.NAME AS REQUESTERNAME,
+        M.NAME AS MANAGERNAME
+    FROM WORK W
+      LEFT JOIN EMPLOYEE R ON W.REQUESTER_ENO = R.ENO
+      LEFT JOIN EMPLOYEE M ON W.MANAGER_ENO = M.ENO
+    WHERE (W.ENO = #{eno} OR W.REQUESTER_ENO = #{eno})
+      AND W.WDATE BETWEEN TRUNC(SYSDATE, 'IW') AND TRUNC(SYSDATE, 'IW')+6
+</select>
+
+<!-- ================== 메인화면 : 주간 마감 업무 ================== -->
+<select id="selectWeeklyClosingList" parameterType="int" resultMap="workListMap">
+    SELECT 
+        W.WCODE, 
+        W.WTITLE, 
+        W.WDATE, 
+        W.WEND, 
+        W.WSTATUS, 
+        W.ENO, 
+        W.DNO,
+        R.NAME AS REQUESTERNAME,
+        M.NAME AS MANAGERNAME
+    FROM WORK W
+      LEFT JOIN EMPLOYEE R ON W.REQUESTER_ENO = R.ENO
+      LEFT JOIN EMPLOYEE M ON W.MANAGER_ENO = M.ENO
+    WHERE (W.ENO = #{eno} OR W.REQUESTER_ENO = #{eno})
+</select>
 
 </mapper>

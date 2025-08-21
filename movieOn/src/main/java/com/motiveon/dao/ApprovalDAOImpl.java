@@ -177,7 +177,56 @@ public class ApprovalDAOImpl implements ApprovalDAO {
         p.put("content", content);
         return session.insert(NS + "insertHistory", p);
     }
+    
+    
+    @Override
+    public int deleteHistoryBySignNos(List<String> signNos) {
+        if (signNos == null || signNos.isEmpty()) return 0;
+        return session.delete("Approval-Mapper.deleteHistoryBySignNos", signNos);
+    }
+    
+    @Override
+    public int deleteTempBySignNos(List<String> signNos) {
+        return session.delete("Approval-Mapper.deleteTempBySignNos", signNos);
+    }
 
+    
+    
+    // ---------- 문서/결재선/참조자 저장 ----------
+    @Override
+    public int insertSignDoc(ApprovalVO vo) {
+        return session.insert(NS + "insertSignDoc", vo);
+    }
+
+    @Override
+    public int insertSignLines(ApprovalVO vo) {
+        return session.insert(NS + "insertSignLines", vo);
+    }
+
+    @Override
+    public int insertSignRefs(ApprovalVO vo) {
+        return session.insert(NS + "insertSignRefs", vo);
+    }
+
+    @Override
+    public List<ApprovalVO> getSignLines(String signNo) {
+        return session.selectList(NS + "selectSignLines", signNo);
+    }
+
+    @Override
+    public List<ApprovalVO> getSignRefs(String signNo) {
+        return session.selectList(NS + "selectSignRefs", signNo);
+    }
+    
+    @Override
+    public int approveListCount(Map<String, Object> p) {
+        return session.selectOne(NS + "approveListCount", p);
+    }
+
+    @Override
+    public List<Map<String, Object>> approveList(Map<String, Object> p) {
+        return session.selectList(NS + "approveList", p);
+    }
 
 
     /* ===== 정리 메모 =====

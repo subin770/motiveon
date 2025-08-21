@@ -84,5 +84,26 @@ public interface ApprovalDAO {
     
 
     int insertHistory(@Param("signno") String signno, @Param("content") String content);
+    
+    int deleteHistoryBySignNos(@Param("ids") List<String> signNos);
+    int deleteTempBySignNos(@Param("ids") List<String> signNos);
+    
 
+    // ===== 문서/결재선/참조자 저장 =====
+    int insertSignDoc(ApprovalVO vo);
+
+    /** approvers 리스트 기반 일괄 INSERT */
+    int insertSignLines(ApprovalVO vo);
+
+    /** refs 리스트 기반 일괄 INSERT */
+    int insertSignRefs(ApprovalVO vo);
+
+    List<ApprovalVO> getSignLines(@Param("signNo") String signNo);
+    List<ApprovalVO> getSignRefs(@Param("signNo") String signNo);
+    
+    /** 내가 결재자인 문서함 총 건수 */
+    int approveListCount(Map<String, Object> p);
+
+    /** 내가 결재자인 문서함 목록 (start/end: 1-base, Oracle ROWNUM) */
+    List<Map<String, Object>> approveList(Map<String, Object> p);
 }

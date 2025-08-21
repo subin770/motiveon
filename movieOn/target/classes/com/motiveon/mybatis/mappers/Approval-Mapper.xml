@@ -4,32 +4,33 @@
 <mapper namespace="Approval-Mapper">
 
 	<!-- ===================== 공통 ResultMap ===================== -->
-	<resultMap id="ApprovalVOMap" type="com.motiveon.dto.ApprovalVO">
-  <!-- SIGNDOC -->
-  <result property="signNo"     column="SIGNNO"   jdbcType="VARCHAR"/>
-  <result property="title"      column="TITLE"/>
-  <result property="drafterNo"  column="DOC_ENO"/>
-  <result property="deptNo"     column="DOC_DNO"/>
-  <result property="formNo"  column="SFORMNO" jdbcType="VARCHAR"/>
-<result property="sformno" column="SFORMNO" jdbcType="VARCHAR"/>
-  
-  <result property="draftAt"    column="DDATE"/>
-  <result property="completeAt" column="EDATE"/>
-  <result property="tempSave"   column="TEMPSAVE"/>
-  <result property="docStatus"  column="DOC_STATE"/>
-  <result property="emergency"  column="EMERGENCY"/>
+	<resultMap id="ApprovalVOMap"
+		type="com.motiveon.dto.ApprovalVO">
+		<!-- SIGNDOC -->
+		<result property="signNo" column="SIGNNO" jdbcType="VARCHAR" />
+		<result property="title" column="TITLE" />
+		<result property="drafterNo" column="DOC_ENO" />
+		<result property="deptNo" column="DOC_DNO" />
+		<result property="formNo" column="SFORMNO" jdbcType="VARCHAR" />
+		<result property="sformno" column="SFORMNO" jdbcType="VARCHAR" />
 
-  <!-- SIGNLINE -->
-  <result property="routeNo"     column="SIGNLINENO"/>
-  <result property="approverNo"  column="APPROVER_ENO"/>
-  <result property="orderSeq"    column="ORDER_SEQ"/>
-  <result property="routeStatus" column="ROUTE_STATE"/>
-  <result property="actionAt"    column="SIGNDATE"/>
+		<result property="draftAt" column="DDATE" />
+		<result property="completeAt" column="EDATE" />
+		<result property="tempSave" column="TEMPSAVE" />
+		<result property="docStatus" column="DOC_STATE" />
+		<result property="emergency" column="EMERGENCY" />
 
-  <!-- EMPLOYEE -->
-  <result property="approverName" column="EMP_NAME"/>
-  <result property="approverDept" column="EMP_DNO"/>
-</resultMap>
+		<!-- SIGNLINE -->
+		<result property="routeNo" column="SIGNLINENO" />
+		<result property="approverNo" column="APPROVER_ENO" />
+		<result property="orderSeq" column="ORDER_SEQ" />
+		<result property="routeStatus" column="ROUTE_STATE" />
+		<result property="actionAt" column="SIGNDATE" />
+
+		<!-- EMPLOYEE -->
+		<result property="approverName" column="EMP_NAME" />
+		<result property="approverDept" column="EMP_DNO" />
+	</resultMap>
 
 
 
@@ -467,7 +468,8 @@
 	</select>
 
 	<select id="newDocNo" resultType="string">
-		SELECT TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS') AS DOCNO FROM DUAL
+		SELECT
+		TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS') AS DOCNO FROM DUAL
 	</select>
 
 
@@ -587,15 +589,298 @@
 	<select id="getEmpBasic" parameterType="long" resultType="map">
 		SELECT
 		e.ENO AS ENO, e.NAME AS NAME, e.DNO AS DNO, d.NAME AS DEPTNAME
-		FROM EMPLOYEE e
+		FROM
+		EMPLOYEE e
 		LEFT JOIN DEPARTMENT d ON d.DNO = e.DNO
 		WHERE e.ENO = #{eno}
 	</select>
 
 	<insert id="insertHistory">
-		INSERT INTO SIGNHISTORY (HISTORYNO, REGDATE, CONTENT, SIGNNO)
+		INSERT INTO SIGNHISTORY (HISTORYNO, REGDATE, CONTENT,
+		SIGNNO)
 		VALUES (HISTORY_SQ.NEXTVAL, SYSDATE, #{content}, #{signNo})
 	</insert>
+
+
+
+	<delete id="deleteHistoryBySignNos" parameterType="list">
+		DELETE FROM SIGNHISTORY
+		WHERE SIGNNO IN
+		<foreach collection="list" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<!-- 부모 삭제 (임시보관 한정) -->
+	<delete id="deleteTempBySignNos" parameterType="list">
+		DELETE FROM SIGNDOC
+		WHERE TEMPSAVE = 1
+		AND SIGNNO IN
+		<foreach collection="list" item="id" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<insert id="insertSignLine">
+		INSERT INTO SIGNLINE (SIGNLINENO, SIGNNO, ENO, STATE)
+		VALUES (SIGNLINE_SEQ.NEXTVAL, #{signNo}, #{eno}, 'PENDING')
+	</insert>
+
+	<insert id="insertSignRef">
+		INSERT INTO SIGNREF (SIGNNO, ENO)
+		VALUES (#{signNo},
+		#{eno})
+	</insert>
+
+	<!-- SIGNDOC 등록 -->
+	<insert id="insertSignDoc"
+		parameterType="com.motiveon.dto.ApprovalVO">
+		INSERT INTO SIGNDOC
+		(SIGNNO, ENO, DNO, SFORMNO, TITLE,
+		SIGNCONTENT, DDATE, EDATE, EMERGENCY,
+		TEMPSAVE, STATE)
+		VALUES
+		(#{signNo}, #{eno}, #{dno}, #{sformno}, #{title}, #{signcontent},
+		#{ddate},
+		#{edate}, #{emergency}, #{tempsave}, #{state})
+	</insert>
+
+	<!-- 결재선 등록 (approvers 리스트) -->
+	<insert id="insertSignLines"
+		parameterType="com.motiveon.dto.ApprovalVO">
+		<foreach collection="approvers" item="eno" index="idx"
+			separator=";">
+			INSERT INTO SIGNLINE
+			(SIGNLINENO, SIGNNO, ENO, ORDERNO,
+			STATE)
+			VALUES
+			(SIGNLINE_SEQ.NEXTVAL, #{signNo}, #{eno}, #{idx + 1},
+			'PENDING')
+		</foreach>
+	</insert>
+
+	<!-- 참조자 등록 (refs 리스트) -->
+	<insert id="insertSignRefs"
+		parameterType="com.motiveon.dto.ApprovalVO">
+		<foreach collection="refs" item="eno" separator=";">
+			INSERT INTO
+			SIGNREF
+			(SIGNNO, ENO)
+			VALUES
+			(#{signNo}, #{eno})
+		</foreach>
+	</insert>
+
+	<!-- 결재선 조회 -->
+	<select id="selectSignLines" parameterType="string"
+		resultType="com.motiveon.dto.ApprovalVO">
+		SELECT L.SIGNLINENO AS routeNo,
+		L.SIGNNO AS signNo,
+		L.ENO AS
+		approverNo,
+		L.ORDERNO AS orderSeq,
+		L.STATE AS routeStatus,
+		L.SIGNDATE AS
+		actionAt,
+		E.NAME AS approverName,
+		E.DNO AS approverDept
+		FROM SIGNLINE L
+		JOIN EMPLOYEE E ON L.ENO = E.ENO
+		WHERE L.SIGNNO = #{signNo}
+		ORDER BY
+		L.ORDERNO
+	</select>
+
+	<!-- 참조자 조회 -->
+	<select id="selectSignRefs" parameterType="string"
+		resultType="com.motiveon.dto.ApprovalVO">
+		SELECT R.SIGNNO AS signNo,
+		R.ENO AS approverNo,
+		E.NAME AS
+		approverName,
+		E.DNO AS approverDept
+		FROM SIGNREF R
+		JOIN EMPLOYEE E ON
+		R.ENO = E.ENO
+		WHERE R.SIGNNO = #{signNo}
+	</select>
+
+
+	<!-- 내가 결재자인 문서함 총 건수 -->
+	<select id="approveListCount" parameterType="map"
+		resultType="int">
+		SELECT COUNT(*)
+		FROM SIGNLINE l
+		JOIN SIGNDOC d ON d.SIGNNO = l.SIGNNO
+		JOIN EMPLOYEE we ON we.ENO = d.ENO
+		JOIN DEPARTMENT dd ON dd.DNO = d.DNO
+		WHERE l.ENO = #{eno}
+		<!-- 탭 필터 -->
+		<choose>
+			<when test="tab == 'wait'">
+				AND NVL(l.STATE,0) = 0
+			</when>
+			<when test="tab == 'mine'">
+				AND NVL(l.STATE,0) = 0
+				AND NOT EXISTS (
+				SELECT 1 FROM SIGNLINE l2
+				WHERE l2.SIGNNO = l.SIGNNO
+				AND l2.SIGNRANK &lt; l.SIGNRANK
+				AND NVL(l2.STATE,0) &lt;&gt; 1
+				)
+			</when>
+			<when test="tab == 'approved'">
+				AND l.STATE = 1
+			</when>
+			<when test="tab == 'rejected'">
+				AND l.STATE = 2
+			</when>
+			<!-- all: 조건 없음 -->
+		</choose>
+
+		<!-- 기간 필터: today, 7d, 1m, 3m, 1y, all -->
+		<choose>
+			<when test="period == 'today'">
+				AND TRUNC(d.DDATE) = TRUNC(SYSDATE)
+			</when>
+			<when test="period == '7d' or period == 'week'">
+				AND d.DDATE &gt;= TRUNC(SYSDATE) - 7
+			</when>
+			<when test="period == '1m' or period == 'month'">
+				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -1)
+			</when>
+			<when test="period == '3m'">
+				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -3)
+			</when>
+			<when test="period == '1y' or period == 'year'">
+				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -12)
+			</when>
+		</choose>
+
+		<!-- 검색: field=title|writer|dept|all, q 키워드 -->
+		<if test="q != null and q != ''">
+			<choose>
+				<when test="field == 'title'">
+					AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
+				</when>
+				<when test="field == 'writer'">
+					AND LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%'
+				</when>
+				<when test="field == 'dept'">
+					AND LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%'
+				</when>
+				<otherwise>
+					AND (
+					LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
+					OR LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%'
+					OR LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%'
+					)
+				</otherwise>
+			</choose>
+		</if>
+	</select>
+
+	<!-- 내가 결재자인 문서함 목록 -->
+	<select id="approveList" parameterType="map" resultType="map">
+		SELECT * FROM (
+		SELECT t.*, ROWNUM rn FROM (
+		SELECT
+		d.SIGNNO AS signNo,
+		d.TITLE AS title,
+		d.ENO AS docEno,
+		we.NAME AS docName,
+		dd.NAME AS docDept,
+		d.DDATE AS ddate,
+		d.EDATE AS edate,
+		l.STATE AS myState,
+		l.SIGNRANK AS myRank,
+		l.SIGNDATE AS mySignDate,
+		CASE
+		WHEN NVL(l.STATE,0)=0 AND NOT EXISTS (
+		SELECT 1 FROM SIGNLINE l2
+		WHERE l2.SIGNNO = l.SIGNNO
+		AND l2.SIGNRANK &lt; l.SIGNRANK
+		AND NVL(l2.STATE,0) &lt;&gt; 1
+		) THEN 1 ELSE 0
+		END AS myTurn
+		FROM SIGNLINE l
+		JOIN SIGNDOC d ON d.SIGNNO = l.SIGNNO
+		JOIN EMPLOYEE we ON we.ENO = d.ENO
+		JOIN DEPARTMENT dd ON dd.DNO = d.DNO
+		WHERE l.ENO = #{eno}
+
+		<!-- 탭 필터 -->
+		<choose>
+			<when test="tab == 'wait'">
+				AND NVL(l.STATE,0) = 0
+			</when>
+			<when test="tab == 'mine'">
+				AND NVL(l.STATE,0) = 0
+				AND NOT EXISTS (
+				SELECT 1 FROM SIGNLINE l2
+				WHERE l2.SIGNNO = l.SIGNNO
+				AND l2.SIGNRANK &lt; l.SIGNRANK
+				AND NVL(l2.STATE,0) &lt;&gt; 1
+				)
+			</when>
+			<when test="tab == 'approved'">
+				AND l.STATE = 1
+			</when>
+			<when test="tab == 'rejected'">
+				AND l.STATE = 2
+			</when>
+		</choose>
+
+		<!-- 기간 필터 -->
+		<choose>
+			<when test="period == 'today'">
+				AND TRUNC(d.DDATE) = TRUNC(SYSDATE)
+			</when>
+			<when test="period == '7d' or period == 'week'">
+				AND d.DDATE &gt;= TRUNC(SYSDATE) - 7
+			</when>
+			<when test="period == '1m' or period == 'month'">
+				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -1)
+			</when>
+			<when test="period == '3m'">
+				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -3)
+			</when>
+			<when test="period == '1y' or period == 'year'">
+				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -12)
+			</when>
+		</choose>
+
+		<!-- 검색 -->
+		<if test="q != null and q != ''">
+			<choose>
+				<when test="field == 'title'">
+					AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
+				</when>
+				<when test="field == 'writer'">
+					AND LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%'
+				</when>
+				<when test="field == 'dept'">
+					AND LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%'
+				</when>
+				<otherwise>
+					AND (
+					LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
+					OR LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%'
+					OR LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%'
+					)
+				</otherwise>
+			</choose>
+		</if>
+
+		ORDER BY d.DDATE DESC, d.SIGNNO DESC
+		) t
+		WHERE ROWNUM &lt;= #{end}
+		)
+		WHERE rn &gt;= #{start}
+	</select>
+
 
 
 </mapper>

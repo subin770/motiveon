@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%
 String ctx = request.getContextPath();
 %>
@@ -19,16 +19,16 @@ String ctx = request.getContextPath();
 	href="<%=ctx%>/resources/bootstrap/dist/css/adminlte.min.css">
 
 <style>
-:root { 
-	--primary: #3A8DFE; 
-	--navy: #1d3557; 
-	--line: rgba(0, 0, 0, .08); 
-	--text: #2B2F3A;
+:root { -
+	-primary: #3A8DFE; -
+	-navy: #1d3557; -
+	-line: rgba(0, 0, 0, .08); -
+	-text: #2B2F3A;
 }
 
 body {
 	background: #f4f6f9;
-	color: var(--text);
+	color: var(- -text);
 }
 
 /* 페이지 타이틀 */
@@ -43,7 +43,7 @@ body {
 .card-header {
 	font-weight: 800;
 	font-size: 15px;
-	border-bottom: 1px solid var(--line);
+	border-bottom: 1px solid var(- -line);
 }
 
 /* 탭 */
@@ -95,13 +95,14 @@ body {
 	font-weight: 700;
 	padding: 12px 16px;
 	text-align: center;
-	border-bottom: 1px solid var(--line);
+	border-bottom: 1px solid var(- -line);
 }
 
 .table-clean tbody td {
 	padding: 30px 16px;
-	border-bottom: 1px solid var(--line);
+	border-bottom: 1px solid var(- -line);
 	vertical-align: middle;
+	text-align: center;
 }
 
 /* 높이 통일 */
@@ -123,25 +124,91 @@ body {
 }
 
 /* 4컬럼 폭 */
-#tbl-weekly thead th:nth-child(1), #tbl-weekly-req thead th:nth-child(1) {width: 40%;}
-#tbl-weekly thead th:nth-child(2), #tbl-weekly-req thead th:nth-child(2) {width: 20%;}
-#tbl-weekly thead th:nth-child(3), #tbl-weekly-req thead th:nth-child(3) {width: 20%;}
-#tbl-weekly thead th:nth-child(4), #tbl-weekly-req thead th:nth-child(4) {width: 20%;}
+#tbl-weekly thead th:nth-child(1), #tbl-weekly-req thead th:nth-child(1)
+	{
+	width: 40%;
+}
+
+#tbl-weekly thead th:nth-child(2), #tbl-weekly-req thead th:nth-child(2)
+	{
+	width: 20%;
+}
+
+#tbl-weekly thead th:nth-child(3), #tbl-weekly-req thead th:nth-child(3)
+	{
+	width: 20%;
+}
+
+#tbl-weekly thead th:nth-child(4), #tbl-weekly-req thead th:nth-child(4)
+	{
+	width: 20%;
+}
 
 /* 페이지 여백 */
-.content .container-fluid { padding-left: 20px; padding-right: 20px; }
+.content .container-fluid {
+	padding-left: 20px;
+	padding-right: 20px;
+}
 
 /* pagination */
-.pagination { margin: 0; margin-top: 20px; }
-.pagination .page-link { min-width: 36px; text-align: center; border: 1px solid #dee2e6; background: #fff; }
-.pagination .page-item.active .page-link { color: #0d6efd; }
+.pagination {
+	margin: 0;
+	margin-top: 20px;
+}
+
+.pagination .page-link {
+	min-width: 36px;
+	text-align: center;
+	border: 1px solid #dee2e6;
+	background: #fff;
+}
+
+.pagination .page-item.active .page-link {
+	color: #0d6efd;
+}
 
 /* 탑내비 흰색 */
-.content-wrapper { margin-left: 0 !important; }
-.content-wrapper, .main-header { background: #fff !important; }
+.content-wrapper {
+	margin-left: 0 !important;
+}
+
+.content-wrapper, .main-header {
+	background: #fff !important;
+}
 
 /* 버튼 */
-.btn-sm { padding: 2px 6px; font-size: 12px; }
+.btn-sm {
+	padding: 2px 6px;
+	font-size: 12px;
+}
+
+/* 상태 배지 */
+.badge-pill {
+	border-radius: 999px;
+	padding: 6px 12px;
+	font-weight: 800;
+	font-size: 12px;
+}
+
+.badge-wait {
+	background: #EEF2F6;
+	color: #6B7280;
+}
+
+.badge-prog {
+	background: rgba(58, 141, 254, .12);
+	color: #3A8DFE;
+}
+
+.badge-done {
+	background: rgba(39, 174, 96, .12);
+	color: #27AE60;
+}
+
+.badge-dele {
+	background: rgba(244, 180, 0, .16);
+	color: #C48A00;
+}
 </style>
 </head>
 <body class="hold-transition layout-top-nav">
@@ -181,16 +248,36 @@ body {
 								</thead>
 								<tbody>
 									<c:if test="${empty weeklyClosingList}">
-										<tr><td colspan="4" class="empty-text">금주 마감 업무가 존재하지 않습니다.</td></tr>
+										<tr>
+											<td colspan="4" class="empty-text">금주 마감 업무가 존재하지 않습니다.</td>
+										</tr>
 									</c:if>
 									<c:forEach var="w" items="${weeklyClosingList}">
 										<tr>
-											<td class="text-truncate">
-												<a href="javascript:void(0);" onclick="openDetail('<%=ctx%>/work/detail?wcode=${w.wcode}')">${w.wtitle}</a>
-											</td>
+											<td class="text-truncate"><a href="javascript:void(0);"
+												onclick="openDetail('${pageContext.request.contextPath}/work/workDetail?wcode=${w.wcode}')">
+													${w.wtitle} </a></td>
 											<td>${w.managerName}</td>
-<td>${w.statusName}</td>
-											<td><fmt:formatDate value="${w.wend}" pattern="yyyy-MM-dd"/></td>
+											<td><c:choose>
+													<c:when test="${w.wstatus eq 'WAIT'}">
+														<span class="badge-pill badge-wait">대기</span>
+													</c:when>
+													<c:when test="${w.wstatus eq 'ING'}">
+														<span class="badge-pill badge-prog">진행</span>
+													</c:when>
+													<c:when test="${w.wstatus eq 'DONE'}">
+														<span class="badge-pill badge-done">완료</span>
+													</c:when>
+													<c:when test="${w.wstatus eq 'DELEGATE'}">
+														<span class="badge-pill badge-dele">대리</span>
+													</c:when>
+													<c:when test="${w.wstatus eq 'REJECT'}">
+														<span class="badge-pill badge-wait">반려</span>
+													</c:when>
+													<c:otherwise>${w.statusName}</c:otherwise>
+												</c:choose></td>
+											<td><fmt:formatDate value="${w.wend}"
+													pattern="yyyy-MM-dd" /></td>
 										</tr>
 									</c:forEach>
 								</tbody>
@@ -210,16 +297,36 @@ body {
 								</thead>
 								<tbody>
 									<c:if test="${empty weeklyRequestedList}">
-										<tr><td colspan="4" class="empty-text">금주 마감 업무가 존재하지 않습니다.</td></tr>
+										<tr>
+											<td colspan="4" class="empty-text">금주 마감 업무가 존재하지 않습니다.</td>
+										</tr>
 									</c:if>
 									<c:forEach var="r" items="${weeklyRequestedList}">
 										<tr>
-											<td class="text-truncate">
-												<a href="javascript:void(0);" onclick="openDetail('<%=ctx%>/work/detail?wcode=${r.wcode}')">${r.wtitle}</a>
+											<td class="text-truncate"><a href="javascript:void(0);"
+												onclick="openDetail('<%=ctx%>/work/workDetail?wcode=${r.wcode}')">${r.wtitle}</a>
 											</td>
 											<td>${r.managerName}</td>
-											<td>${r.statusName}</td>
-											<td><fmt:formatDate value="${r.wend}" pattern="yyyy-MM-dd"/></td>
+											<td><c:choose>
+													<c:when test="${r.wstatus eq 'WAIT'}">
+														<span class="badge-pill badge-wait">대기</span>
+													</c:when>
+													<c:when test="${r.wstatus eq 'ING'}">
+														<span class="badge-pill badge-prog">진행</span>
+													</c:when>
+													<c:when test="${r.wstatus eq 'DONE'}">
+														<span class="badge-pill badge-done">완료</span>
+													</c:when>
+													<c:when test="${r.wstatus eq 'DELEGATE'}">
+														<span class="badge-pill badge-dele">대리</span>
+													</c:when>
+													<c:when test="${r.wstatus eq 'REJECT'}">
+														<span class="badge-pill badge-wait">반려</span>
+													</c:when>
+													<c:otherwise>${r.statusName}</c:otherwise>
+												</c:choose></td>
+											<td><fmt:formatDate value="${r.wend}"
+													pattern="yyyy-MM-dd" /></td>
 										</tr>
 									</c:forEach>
 								</tbody>
@@ -241,35 +348,46 @@ body {
 										<tr>
 											<th>제목</th>
 											<th>요청자</th>
+											<th>상태</th>
 											<th>기한</th>
 										</tr>
 									</thead>
 									<tbody>
 										<c:if test="${empty pendingApprovalList}">
-											<tr><td colspan="3" class="empty-text">미승인 업무가 존재하지 않습니다.</td></tr>
+											<tr>
+												<td colspan="4" class="empty-text">미승인 업무가 존재하지 않습니다.</td>
+											</tr>
 										</c:if>
 										<c:forEach var="p" items="${pendingApprovalList}">
 											<tr>
-												<td class="text-truncate">
-													<a href="javascript:void(0);" onclick="openDetail('<%=ctx%>/approval/detail?wcode=${p.wcode}')">${p.wtitle}</a>
+												<td class="text-truncate"><a href="javascript:void(0);"
+													onclick="openDetail('<%=ctx%>/approval/detail?wcode=${p.wcode}')">${p.wtitle}</a>
 												</td>
 												<td>${p.requesterName}</td>
-												<td><fmt:formatDate value="${p.wend}" pattern="yyyy-MM-dd"/></td>
+												<td><c:choose>
+														<c:when test="${p.wstatus eq 'WAIT'}">
+															<span class="badge-pill badge-wait">대기</span>
+														</c:when>
+														<c:when test="${p.wstatus eq 'ING'}">
+															<span class="badge-pill badge-prog">진행</span>
+														</c:when>
+														<c:when test="${p.wstatus eq 'DONE'}">
+															<span class="badge-pill badge-done">완료</span>
+														</c:when>
+														<c:when test="${p.wstatus eq 'DELEGATE'}">
+															<span class="badge-pill badge-dele">대리</span>
+														</c:when>
+														<c:when test="${p.wstatus eq 'REJECT'}">
+															<span class="badge-pill badge-wait">반려</span>
+														</c:when>
+														<c:otherwise>${p.statusName}</c:otherwise>
+													</c:choose></td>
+												<td><fmt:formatDate value="${p.wend}"
+														pattern="yyyy-MM-dd" /></td>
 											</tr>
 										</c:forEach>
 									</tbody>
 								</table>
-
-								<!-- 버튼 영역 (승인/이의신청) -->
-								<c:forEach var="p" items="${pendingApprovalList}">
-									<div class="mt-2">
-										<c:if test="${p.status eq 'PENDING'}">
-											<button class="btn btn-primary btn-sm">승인</button>
-											<button class="btn btn-danger btn-sm">이의신청</button>
-										</c:if>
-									</div>
-								</c:forEach>
-
 							</div>
 						</div>
 					</div>
@@ -284,35 +402,47 @@ body {
 										<tr>
 											<th>제목</th>
 											<th>담당자</th>
+											<th>상태</th>
 											<th>기한</th>
 										</tr>
 									</thead>
 									<tbody>
 										<c:if test="${empty waitingRequestedList}">
-											<tr><td colspan="3" class="empty-text">대기중인 요청업무가 존재하지 않습니다.</td></tr>
+											<tr>
+												<td colspan="4" class="empty-text">대기중인 요청업무가 존재하지
+													않습니다.</td>
+											</tr>
 										</c:if>
 										<c:forEach var="x" items="${waitingRequestedList}">
 											<tr>
-												<td class="text-truncate">
-													<a href="javascript:void(0);" onclick="openDetail('<%=ctx%>/wait/detail?wcode=${x.wcode}')">${x.wtitle}</a>
+												<td class="text-truncate"><a href="javascript:void(0);"
+													onclick="openDetail('<%=ctx%>/wait/detail?wcode=${x.wcode}')">${x.wtitle}</a>
 												</td>
 												<td>${x.ownerName}</td>
-												<td><fmt:formatDate value="${x.wend}" pattern="yyyy-MM-dd"/></td>
+												<td><c:choose>
+														<c:when test="${x.wstatus eq 'WAIT'}">
+															<span class="badge-pill badge-wait">대기</span>
+														</c:when>
+														<c:when test="${x.wstatus eq 'ING'}">
+															<span class="badge-pill badge-prog">진행</span>
+														</c:when>
+														<c:when test="${x.wstatus eq 'DONE'}">
+															<span class="badge-pill badge-done">완료</span>
+														</c:when>
+														<c:when test="${x.wstatus eq 'DELEGATE'}">
+															<span class="badge-pill badge-dele">대리</span>
+														</c:when>
+														<c:when test="${x.wstatus eq 'REJECT'}">
+															<span class="badge-pill badge-wait">반려</span>
+														</c:when>
+														<c:otherwise>${x.statusName}</c:otherwise>
+													</c:choose></td>
+												<td><fmt:formatDate value="${x.wend}"
+														pattern="yyyy-MM-dd" /></td>
 											</tr>
 										</c:forEach>
 									</tbody>
 								</table>
-
-								<!-- 버튼 영역 (협업요청/대리요청) -->
-								<c:forEach var="x" items="${waitingRequestedList}">
-									<div class="mt-2">
-										<c:if test="${x.wstatus eq 'WAITING'}">
-											<button class="btn btn-secondary btn-sm">협업요청</button>
-											<button class="btn btn-warning btn-sm">대리요청</button>
-										</c:if>
-									</div>
-								</c:forEach>
-
 							</div>
 						</div>
 					</div>
@@ -342,7 +472,8 @@ body {
 
 		// 팝업 오픈
 		function openDetail(url) {
-			window.open(url, "workDetail", "width=900,height=700,scrollbars=yes,resizable=yes");
+			window.open(url, "workDetail",
+					"width=900,height=700,scrollbars=yes,resizable=yes");
 		}
 	</script>
 </body>

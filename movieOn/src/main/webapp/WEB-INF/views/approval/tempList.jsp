@@ -13,20 +13,10 @@
 }
 
 body {
-	margin: 0;
 	font-family: "Pretendard", "맑은 고딕", system-ui, -apple-system, Segoe UI,
 		Roboto, Apple SD Gothic Neo, sans-serif;
 	background: #ffffff; /* fix: #fffff -> #ffffff */
 	color: #52586B;
-}
-
-a {
-	color: inherit;
-	text-decoration: none;
-}
-
-.wrap {
-	padding: 0 20px;
 }
 
 .btn {
@@ -201,7 +191,7 @@ tbody tr:hover {
 </style>
 </head>
 <body>
-	<div class="wrap">
+	<div class="context-wrap">
 		<h3 class="font-weight-bold"
 			style="padding-left: 10px; margin-left: 20px; margin-top: 10px; font-size: 22px;">임시
 			문서함</h3>

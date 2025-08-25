@@ -6,7 +6,7 @@ public class WorkListDTO {
 
 	private String wcode;
 	private String wtitle;
-	private String title;
+
 	private Date wdate;
 	private Date wend;
 	private String ownerName; // EMPLOYEE.NAME 매핑용
@@ -101,13 +101,7 @@ public class WorkListDTO {
 		this.dueDate = dueDate;
 	}
 
-	public String getTitle() {
-		return title;
-	}
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
 
 	public String getId() {
 		return id;

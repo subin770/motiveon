@@ -13,24 +13,10 @@
 }
 
 body {
-	margin: 0;
 	font-family: "Pretendard", "맑은 고딕", system-ui, -apple-system, Segoe UI,
 		Roboto, Apple SD Gothic Neo, sans-serif;
 	background: #fffff;
-	color: #52586B;
-}
-
-a {
-	color: inherit;
-	text-decoration: none;
-}
-
-.wrap {
-	padding: 0 20px;
-}
-
-.btn {
-	display: inline-block;
+	color: #52586B; . btn { display : inline-block;
 	padding: 8px 14px;
 	border-radius: 0;
 	font-weight: 700;
@@ -209,7 +195,7 @@ tbody tr:hover {
 </style>
 </head>
 <body>
-	<div class="wrap">
+	<div class="context-wrap">
 		<h3 class="font-weight-bold"
 			style="padding-left: 10px; margin-left: 20px; margin-top: 10px; font-size: 22px;">기안
 			문서함</h3>
@@ -268,7 +254,7 @@ function openFormPicker(){
   const y=window.top.outerHeight/2 + window.top.screenY - (h/2);
   const x=window.top.outerWidth/2 + window.top.screenX - (w/2);
   window.open('${pageContext.request.contextPath}/approval/formPicker','formPicker',
-    `width=${w},height=${h},left=${x},top=${y},resizable=no,scrollbars=yes`);
+    `width=750,height=600,left=${x},top=${y},resizable=yes,scrollbars=yes`);
 }
 </script>
 

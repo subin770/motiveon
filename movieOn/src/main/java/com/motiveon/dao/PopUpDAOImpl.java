@@ -8,15 +8,13 @@ import java.util.Map;
 import org.apache.ibatis.session.SqlSession;
 
 import com.motiveon.command.PageMaker;
+import com.motiveon.dto.AttachmentVO;
 import com.motiveon.dto.PopUpVO;
 
 public class PopUpDAOImpl implements PopUpDAO {
 
     private SqlSession session;
-
-    public PopUpDAOImpl(SqlSession session) {
-        this.session = session;
-    }
+    public PopUpDAOImpl(SqlSession session) { this.session = session; }
 
     @Override
     public List<PopUpVO> selectPopupList(PageMaker pageMaker) throws SQLException {
@@ -31,8 +29,6 @@ public class PopUpDAOImpl implements PopUpDAO {
 
         return session.selectList("Popup-Mapper.selectSearchPopupList", params);
     }
-
-    
 
     @Override
     public void insertPopup(PopUpVO popup) throws SQLException {
@@ -49,15 +45,21 @@ public class PopUpDAOImpl implements PopUpDAO {
         session.delete("Popup-Mapper.deletePopup", popNo);
     }
 
-	@Override
-	public int selectPopUpSequenceNextValue() throws SQLException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	
-	@Override
-	public PopUpVO selectPopupByPopNo(String popNo) throws SQLException {
-	    return session.selectOne("Popup-Mapper.selectPopupByPopNo", popNo);
-	}
-	
+    @Override
+    public int selectPopUpSequenceNextValue() throws SQLException { return 0; }
+
+    @Override
+    public PopUpVO selectPopupByPopNo(String popNo) throws SQLException {
+        return session.selectOne("Popup-Mapper.selectPopupByPopNo", popNo);
+    }
+
+    @Override
+    public void insertAttachment(AttachmentVO attach) throws SQLException {
+        session.insert("Popup-Mapper.insertAttachment", attach);
+    }
+
+    @Override
+    public List<AttachmentVO> selectAttachmentsByPopNo(int popNo) throws SQLException {
+        return session.selectList("Popup-Mapper.selectAttachmentsByPopNo", popNo);
+    }
 }

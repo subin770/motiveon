@@ -159,6 +159,11 @@ public class ApprovalController {
 	@GetMapping("/compose")
 	public String compose(@RequestParam("sformno") String sformNo, Model model, HttpSession session) {
 		ensureLoginEmp(session);
+		
+		getLoginEno(session);
+		getLoginName(session);
+		getLoginDeptName(session);
+		getLoginDno(session);
 
 		Map<String, Object> f = approvalService.getForm(sformNo);
 		Map<String, Object> form = new HashMap<>();
@@ -297,6 +302,7 @@ public class ApprovalController {
 	        @RequestParam(value = "period", required = false, defaultValue = "all") String period,
 	        @RequestParam(value = "field", required = false, defaultValue = "title") String field,
 	        @RequestParam(value = "q", required = false, defaultValue = "") String q,
+	        @RequestParam(value="urgent",  required=false, defaultValue="0") int urgent,
 	        @RequestParam(value = "page", required = false, defaultValue = "1") int page,
 	        @RequestParam(value = "size", required = false, defaultValue = "10") int size,
 	        HttpSession session,
@@ -315,6 +321,14 @@ public class ApprovalController {
 
 	    int start = (page - 1) * size + 1; // Oracle ROWNUM 시작
 	    int end   = page * size;
+	    
+	    Map<String, Object> p = new HashMap<>();
+	    p.put("eno", eno);
+	    p.put("tab", tab);
+	    p.put("period", period);
+	    p.put("field", field);
+	    p.put("q", q);
+	    p.put("urgent", urgent); // ★ 서비스/DAO까지 전달
 
 	    // 목록 조회
 	    model.addAttribute("list", approvalService.approveList(eno, tab, period, field, q, start, end));
@@ -328,8 +342,46 @@ public class ApprovalController {
 	    model.addAttribute("size", size);
 	    model.addAttribute("totalPages", totalPages);
 	    model.addAttribute("totalCount", totalCount);
+	    model.addAttribute("urgent", urgent);
 
 	    return "approval/approveList";
 	}
+	
+	@GetMapping("/detail")
+	public String detail(@RequestParam("signNo") String signNo, Model model, HttpSession session) {
+	    Map<String,Object> data = approvalService.getDetail(signNo);  // ← 여기!
+	    getLoginEno(session);
+	    if (data == null) return "approval/not-found";
+	    model.addAttribute("doc",   data.get("doc"));
+	    model.addAttribute("lines", data.get("lines"));
+	    model.addAttribute("refs",  data.get("refs"));
+	    return "approval/detail";
+	}
+	
+	@PostMapping("/line/act")
+	public String actLine(
+	        @RequestParam String signNo,
+	        @RequestParam String action,      // approve or reject
+	        @RequestParam(required=false) String comment,
+	        HttpSession session,
+	        RedirectAttributes ra) {
+
+	    // ★ 하드코딩 로그인 보정 (세션 값 없으면 기본 사번 사용)
+	    ensureLoginEmp(session);
+	    Long eno = getLoginEno(session); // 없으면 FIXED_ENO(10330125L) 반환
+
+	    try {
+	        approvalService.actLine(signNo, eno, action, comment);
+	        ra.addFlashAttribute("msg",
+	                "결재가 처리되었습니다. (" + ("approve".equalsIgnoreCase(action) ? "승인" : "반려") + ")");
+	    } catch (IllegalStateException e) {
+	        ra.addFlashAttribute("error", e.getMessage());
+	    } catch (Exception e) {
+	        ra.addFlashAttribute("error", "처리 중 오류가 발생했습니다.");
+	    }
+
+	    return "redirect:/approval/approveList?tab=mine";
+	}
+
 
 }

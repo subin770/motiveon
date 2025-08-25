@@ -9,24 +9,15 @@
 <title>참조 문서함 - viewerList</title>
 <style>
 * {
-	box-sizing: border-box;
+	box-sizing: border-box
 }
 
 body {
-	margin: 0;
 	font-family: "Pretendard", "맑은 고딕", system-ui, -apple-system, Segoe UI,
 		Roboto, Apple SD Gothic Neo, sans-serif;
-	background: #fffff;
+	background: #ffffff; /* ← 오타 수정(#fffff → #ffffff) */
 	color: #52586B;
-}
-
-a {
-	color: inherit;
-	text-decoration: none;
-}
-
-.wrap {
-	padding: 0 20px;
+	margin: 0;
 }
 
 .btn {
@@ -66,7 +57,7 @@ a {
 	background: #fff;
 	border: 1px solid #e9ecf3;
 	border-radius: 0;
-	padding: 8px 12px;
+	padding: 8px 12px
 }
 
 select {
@@ -174,7 +165,7 @@ tbody tr:hover {
 	background: #fff;
 	color: #52586B;
 	text-decoration: none;
-	font-weight: 700;
+	font-weight: 700
 }
 
 .paging .on {
@@ -190,15 +181,16 @@ tbody tr:hover {
 </style>
 </head>
 <body>
-	<div class="wrap">
+	<c:set var="ctx" value="${pageContext.request.contextPath}" />
+	<div class="context-wrap">
 		<h3 class="font-weight-bold"
-			style="padding-left: 10px; margin-left: 20px; margin-top: 10px; font-size: 22px;">
-			참조 문서함</h3>
+			style="padding-left: 10px; margin-left: 20px; margin-top: 10px; font-size: 22px;">참조
+			문서함</h3>
 
 		<!-- 필터 -->
 		<div class="toolbar">
-			<form action="${pageContext.request.contextPath}/approval/viewerList"
-				method="get" style="display: flex; gap: 10px; align-items: center;">
+			<form action="${ctx}/approval/viewerList" method="get"
+				style="display: flex; gap: 10px; align-items: center;">
 				<div class="select">
 					<select name="period">
 						<option value="all" ${period=='all'?'selected':''}>전체기간</option>
@@ -211,6 +203,7 @@ tbody tr:hover {
 					<select name="field">
 						<option value="title" ${field=='title'?'selected':''}>제목</option>
 						<option value="form" ${field=='form'?'selected':''}>결재양식</option>
+						<!-- 매퍼 조건명과 일치하도록 'drafter' 사용 -->
 						<option value="drafter" ${field=='drafter'?'selected':''}>기안자</option>
 					</select>
 				</div>
@@ -228,8 +221,7 @@ tbody tr:hover {
 				<input type="hidden" name="page" value="${page}" /> <input
 					type="hidden" name="size" value="${size}" />
 				<button type="submit" class="btn btn-ok">검색</button>
-				<a href="${pageContext.request.contextPath}/approval/viewerList"
-					class="btn btn-cancel">초기화</a>
+				<a href="${ctx}/approval/viewerList" class="btn btn-cancel">초기화</a>
 			</form>
 		</div>
 
@@ -258,15 +250,18 @@ tbody tr:hover {
 					<c:forEach var="d" items="${list}">
 						<tr>
 							<td><input type="checkbox"></td>
-							<td><fmt:formatDate value="${d.draftAt}"
-									pattern="yyyy-MM-dd" /></td>
+							<td>
+								<!-- draftAt(null)일 땐 completeAt로 보강 표시 --> <fmt:formatDate
+									value="${d.draftAt != null ? d.draftAt : d.completeAt}"
+									pattern="yyyy-MM-dd" />
+							</td>
 							<td><c:out value="${d.formNo}" /></td>
 							<td><c:if test="${d.emergency == 1}">
 									<span class="txt-em">긴급</span>
 								</c:if></td>
-							<td><a
-								href="${pageContext.request.contextPath}/approval/detail?signNo=${d.signNo}"><c:out
-										value="${d.title}" /></a></td>
+							<td><a href="${ctx}/approval/detail?signNo=${d.signNo}">
+									<c:out value="${d.title}" />
+							</a></td>
 							<td><c:out value="${d.signNo}" /></td>
 							<td><c:choose>
 									<c:when test="${d.docStatus == 3}">
@@ -289,7 +284,6 @@ tbody tr:hover {
 
 			<!-- 페이지네이션 -->
 			<div class="paging">
-				<c:set var="ctx" value="${pageContext.request.contextPath}" />
 				<c:url var="baseUrl" value="/approval/viewerList">
 					<c:param name="period" value="${period}" />
 					<c:param name="field" value="${field}" />
@@ -297,7 +291,6 @@ tbody tr:hover {
 					<c:param name="size" value="${size}" />
 				</c:url>
 
-				<!-- 이전 -->
 				<c:choose>
 					<c:when test="${page <= 1}">
 						<span class="dim">&laquo;</span>
@@ -307,7 +300,6 @@ tbody tr:hover {
 					</c:otherwise>
 				</c:choose>
 
-				<!-- 페이지 번호 (현재 기준 -2 ~ +2) -->
 				<c:set var="startP" value="${page-2 < 1 ? 1 : page-2}" />
 				<c:set var="endP"
 					value="${page+2 > totalPages ? totalPages : page+2}" />
@@ -322,7 +314,6 @@ tbody tr:hover {
 					</c:choose>
 				</c:forEach>
 
-				<!-- 다음 -->
 				<c:choose>
 					<c:when test="${page >= totalPages || totalPages == 0}">
 						<span class="dim">&raquo;</span>
@@ -337,11 +328,10 @@ tbody tr:hover {
 
 	<script>
 		function toggleAll(chk) {
-			var boxes = document
-					.querySelectorAll('tbody input[type="checkbox"]');
-			boxes.forEach(function(b) {
-				b.checked = chk.checked;
-			});
+			document.querySelectorAll('tbody input[type="checkbox"]').forEach(
+					function(b) {
+						b.checked = chk.checked;
+					});
 		}
 	</script>
 </body>

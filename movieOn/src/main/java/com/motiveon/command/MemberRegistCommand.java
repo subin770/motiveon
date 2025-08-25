@@ -1,7 +1,5 @@
 	package com.motiveon.command;
 
-import java.util.List;
-
 import org.springframework.web.multipart.MultipartFile;
 
 import com.motiveon.dto.EmployeeVO;
@@ -21,7 +19,7 @@ public class MemberRegistCommand {
 	private int signtype;   // 서명 방식
 	private MultipartFile signFile; // 서명 이미지
 	private String condition; // 조건 또는 상태
-	private List<String> authorities; // 권한
+	private String authority; // 권한
 
 	// Getter & Setter 생략 없이 모두 작성
 	public int getEno() {
@@ -102,13 +100,12 @@ public class MemberRegistCommand {
 	public void setCondition(String condition) {
 		this.condition = condition;
 	}
-	public List<String> getAuthorities() {
-		return authorities;
+	public String getAuthority() {
+		return authority;
 	}
-	public void setAuthorities(List<String> authorities) {
-		this.authorities = authorities;
+	public void setAuthority(String authority) {
+		this.authority = authority;
 	}
-
 	// VO로 변환
 	public EmployeeVO toEmployeeVO() {
 		EmployeeVO employee = new EmployeeVO();
@@ -123,7 +120,7 @@ public class MemberRegistCommand {
 		employee.setSigntype(signtype);
 		employee.setCondition(condition);
 		employee.setEnabled(1);
-		employee.setAuthorities(authorities);
+		employee.setAuthority(authority);
 
 		// 전화번호 조합
 		if (phone != null) {

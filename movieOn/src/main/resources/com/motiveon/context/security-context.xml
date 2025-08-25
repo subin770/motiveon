@@ -42,9 +42,9 @@
 		<intercept-url pattern="/member/remove*" access="hasAnyRole('ROLE_ADMIN','MEMBER_REMOVE')"/>
 
 		<!-- [FIX] hasAnyRole 문법 수정 -->
-		<intercept-url pattern="/notice/write**" access="hasAnyRole('ROLE_MANAGER','NOTICE_CREATE')"/>
+		<intercept-url pattern="/notice/write**" access="hasAnyRole('ROLE_MANAGER','ROLE_USER','NOTICE_CREATE')"/>
 		<intercept-url pattern="/notice/modify**" access="hasAnyRole('ROLE_MANAGER','ROLE_USER','NOTICE_UPDATE')"/>
-		<intercept-url pattern="/notice/delete/**" access="hasAnyRole('ROLE_MANAGER','NOTICE_REMOVE')"/>
+		<intercept-url pattern="/notice/delete/**" access="hasAnyRole('ROLE_MANAGER','ROLE_USER','NOTICE_REMOVE')"/>
 
 		<!-- [ADD] work 보호: 시큐리티가 자동으로 로그인 페이지로 보냄 -->
 		<intercept-url pattern="/work/**"   access="isAuthenticated()"/>

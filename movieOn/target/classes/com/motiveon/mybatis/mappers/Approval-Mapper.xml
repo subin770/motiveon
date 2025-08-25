@@ -3,884 +3,963 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="Approval-Mapper">
 
-	<!-- ===================== 공통 ResultMap ===================== -->
-	<resultMap id="ApprovalVOMap"
-		type="com.motiveon.dto.ApprovalVO">
-		<!-- SIGNDOC -->
-		<result property="signNo" column="SIGNNO" jdbcType="VARCHAR" />
-		<result property="title" column="TITLE" />
-		<result property="drafterNo" column="DOC_ENO" />
-		<result property="deptNo" column="DOC_DNO" />
-		<result property="formNo" column="SFORMNO" jdbcType="VARCHAR" />
-		<result property="sformno" column="SFORMNO" jdbcType="VARCHAR" />
+  <!-- ===================== 공통 ResultMap ===================== -->
+  <resultMap id="ApprovalVOMap" type="com.motiveon.dto.ApprovalVO">
+    <!-- SIGNDOC -->
+    <result property="signNo"       column="SIGNNO"      jdbcType="VARCHAR"/>
+    <result property="title"        column="TITLE"/>
+    <result property="drafterNo"    column="DOC_ENO"/>
+    <result property="deptNo"       column="DOC_DNO"/>
+    <result property="formNo"       column="SFORMNO"     jdbcType="VARCHAR"/>
+    <result property="sformno"      column="SFORMNO"     jdbcType="VARCHAR"/>
+    <result property="draftAt"      column="DDATE"/>
+    <result property="completeAt"   column="EDATE"/>
+    <result property="tempSave"     column="TEMPSAVE"/>
+    <result property="docStatus"    column="DOC_STATE"/>
+    <result property="emergency"    column="EMERGENCY"/>
+    <result property="signcontent"  column="SIGNCONTENT" />
 
-		<result property="draftAt" column="DDATE" />
-		<result property="completeAt" column="EDATE" />
-		<result property="tempSave" column="TEMPSAVE" />
-		<result property="docStatus" column="DOC_STATE" />
-		<result property="emergency" column="EMERGENCY" />
+    <!-- SIGNLINE -->
+    <result property="routeNo"      column="SIGNLINENO"/>
+    <result property="approverNo"   column="APPROVER_ENO"/>
+    <result property="orderSeq"     column="ORDER_SEQ"/>
+    <result property="routeStatus"  column="ROUTE_STATE"/>
+    <result property="actionAt"     column="SIGNDATE"/>
 
-		<!-- SIGNLINE -->
-		<result property="routeNo" column="SIGNLINENO" />
-		<result property="approverNo" column="APPROVER_ENO" />
-		<result property="orderSeq" column="ORDER_SEQ" />
-		<result property="routeStatus" column="ROUTE_STATE" />
-		<result property="actionAt" column="SIGNDATE" />
+    <!-- EMPLOYEE -->
+    <result property="approverName" column="EMP_NAME"/>
+    <result property="approverDept" column="EMP_DNO"/>
+  </resultMap>
 
-		<!-- EMPLOYEE -->
-		<result property="approverName" column="EMP_NAME" />
-		<result property="approverDept" column="EMP_DNO" />
-	</resultMap>
+  <!-- ===================== KPI ===================== -->
+  <!-- ===================== KPI ===================== -->
+<select id="countUrgent" resultType="int">
+  <![CDATA[
+  SELECT COUNT(*)
+  FROM SIGNDOC d
+  WHERE NVL(d.EMERGENCY, 0) = 1
+    AND NVL(d.TEMPSAVE, 0) = 0
+  ]]>
+</select>
 
+<select id="countReturned" resultType="int">
+  <![CDATA[
+  SELECT COUNT(DISTINCT d.SIGNNO)
+  FROM SIGNDOC d
+  JOIN SIGNLINE r ON r.SIGNNO = d.SIGNNO
+  WHERE r.STATE = 4
+  ]]>
+</select>
 
+<select id="countWaiting" resultType="int">
+  <![CDATA[
+  SELECT COUNT(*)
+  FROM SIGNLINE r
+  WHERE NVL(r.STATE,0) = 2
+  ]]>
+</select>
 
-	<!-- ===================== KPI ===================== -->
-	<select id="countUrgent" resultType="int">
-		SELECT COUNT(*)
-		FROM SIGNDOC
-		d
-		WHERE NVL(d.EMERGENCY, 0) = 1
-		AND NVL(d.TEMPSAVE, 0) = 0
-	</select>
-
-	<select id="countReturned" resultType="int">
-		SELECT COUNT(DISTINCT
-		d.SIGNNO)
-		FROM SIGNDOC d
-		JOIN SIGNLINE r ON r.SIGNNO = d.SIGNNO
-		WHERE
-		r.STATE = 4
-	</select>
-
-	<select id="countWaiting" resultType="int">
-		SELECT COUNT(*)
-		FROM
-		SIGNLINE r
-		WHERE r.STATE = 2
-	</select>
-
-	<select id="countOnHold" resultType="int">
-		SELECT COUNT(*)
-		FROM SIGNLINE
-		WHERE STATE = 6
-	</select>
-
-	<!-- ===================== 대시보드 목록 ===================== -->
-
-	<!-- 최근 기안(상태 0,1) TOP 20 -->
-	<select id="selectRecentDrafts" resultMap="ApprovalVOMap"
-		parameterType="map">
-		SELECT *
-		FROM (
-		SELECT
-		d.SIGNNO,
-		d.TITLE,
-		d.ENO AS DOC_ENO,
-		d.DNO AS
-		DOC_DNO,
-		d.SFORMNO,
-		NVL(d.DDATE, d.EDATE) AS UPDATED_OR_END,
-		d.DDATE,
-		d.EDATE,
-		d.TEMPSAVE,
-		d.STATE AS DOC_STATE,
-		NVL(d.EMERGENCY, 0) AS
-		EMERGENCY,
-		CAST(NULL AS NUMBER) AS SIGNLINENO,
-		CAST(NULL AS NUMBER) AS
-		APPROVER_ENO,
-		CAST(NULL AS NUMBER) AS ORDER_SEQ,
-		CAST(NULL AS NUMBER) AS
-		ROUTE_STATE,
-		CAST(NULL AS DATE) AS SIGNDATE,
-		CAST(NULL AS VARCHAR2(100))
-		AS EMP_NAME,
-		CAST(NULL AS NUMBER) AS EMP_DNO
-		FROM SIGNDOC d
-		WHERE d.STATE
-		IN (0, 1)
-		<if test="q != null and q != ''">
-			<choose>
-				<when test="field == 'form'">
-					AND TO_CHAR(d.SFORMNO) LIKE '%' || #{q} || '%'
-				</when>
-				<when test="field == 'title'">
-					AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
-				</when>
-				<otherwise>
-					AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
-				</otherwise>
-			</choose>
-		</if>
-		<if test="period != null and period != '' and period != 'all'">
-			<choose>
-				<when test="period == '1m'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-1)
-				</when>
-				<when test="period == '6m'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-6)
-				</when>
-				<when test="period == '1y'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-12)
-				</when>
-			</choose>
-		</if>
-		ORDER BY NVL(d.DDATE, d.EDATE) DESC NULLS LAST, d.SIGNNO DESC
-		)
-		WHERE
-		ROWNUM &lt;= 20
-	</select>
-
-	<!-- 진행중 목록 -->
-	<select id="selectOngoingDrafts" resultMap="ApprovalVOMap">
-		SELECT
-		r.SIGNLINENO,
-		r.ENO AS APPROVER_ENO,
-		r.STATE AS ROUTE_STATE,
-		r.SIGNDATE,
-		r.SIGNRANK AS
-		ORDER_SEQ,
-		d.SIGNNO,
-		d.TITLE,
-		d.ENO AS DOC_ENO,
-		d.DNO AS DOC_DNO,
-		d.SFORMNO,
-		NVL(d.DDATE, d.EDATE) AS UPDATED_OR_END,
-		d.DDATE,
-		d.EDATE,
-		d.TEMPSAVE,
-		d.STATE AS DOC_STATE,
-		NVL(d.EMERGENCY,0) AS EMERGENCY,
-		e.NAME AS EMP_NAME,
-		e.DNO AS EMP_DNO
-		FROM SIGNLINE r
-		JOIN SIGNDOC d ON
-		d.SIGNNO = r.SIGNNO
-		JOIN EMPLOYEE e ON e.ENO = r.ENO
-		WHERE d.STATE = 1
-		ORDER BY NVL(d.DDATE, d.EDATE) DESC, r.SIGNRANK ASC
-	</select>
-
-	<!-- 내 결재 할일 -->
-	<select id="selectMyTodo" resultMap="ApprovalVOMap"
-		parameterType="long">
-		SELECT
-		r.SIGNLINENO,
-		r.ENO AS APPROVER_ENO,
-		r.STATE AS
-		ROUTE_STATE,
-		r.SIGNDATE,
-		r.SIGNRANK AS ORDER_SEQ,
-		d.SIGNNO,
-		d.TITLE,
-		d.ENO
-		AS DOC_ENO,
-		d.DNO AS DOC_DNO,
-		d.SFORMNO,
-		NVL(d.DDATE, d.EDATE) AS
-		UPDATED_OR_END,
-		d.DDATE,
-		d.EDATE,
-		d.TEMPSAVE,
-		d.STATE AS DOC_STATE,
-		NVL(d.EMERGENCY,0) AS EMERGENCY,
-		e.NAME AS EMP_NAME,
-		e.DNO AS EMP_DNO
-		FROM SIGNLINE r
-		JOIN SIGNDOC d ON d.SIGNNO = r.SIGNNO
-		JOIN EMPLOYEE e ON
-		e.ENO = r.ENO
-		WHERE r.STATE = 2
-		AND r.ENO = #{eno}
-		ORDER BY NVL(d.DDATE,
-		d.EDATE) DESC, r.SIGNRANK ASC
-	</select>
-
-	<!-- ===================== 열람자(참조자) 목록 ===================== -->
-
-	<!-- count -->
-	<select id="viewerListCount" resultType="int"
-		parameterType="map">
-		SELECT COUNT(*)
-		FROM SIGNREF r
-		JOIN SIGNDOC d ON d.SIGNNO = r.SIGNNO
-		WHERE r.ENO = #{eno}
-		<if test="q != null and q != ''">
-			<choose>
-				<when test="field == 'form'">
-					AND TO_CHAR(d.SFORMNO) LIKE '%' || #{q} || '%'
-				</when>
-				<when test="field == 'writer'">
-					AND EXISTS (
-					SELECT 1 FROM EMPLOYEE e
-					WHERE e.ENO =
-					d.ENO
-					AND LOWER(e.NAME) LIKE '%' || LOWER(#{q}) || '%'
-					)
-				</when>
-				<otherwise>
-					AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
-				</otherwise>
-			</choose>
-		</if>
-		<if test="period != null and period != '' and period != 'all'">
-			<choose>
-				<when test="period == '1m'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-1)
-				</when>
-				<when test="period == '6m'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-6)
-				</when>
-				<when test="period == '1y'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-12)
-				</when>
-			</choose>
-		</if>
-	</select>
-
-	<!-- page -->
-	<select id="viewerList" resultMap="ApprovalVOMap"
-		parameterType="map">
-		SELECT *
-		FROM (
-		SELECT t.*, ROWNUM AS rn
-		FROM (
-		SELECT
-		d.SIGNNO,
-		d.TITLE,
-		d.SFORMNO,
-		NVL(d.DDATE, d.EDATE) AS UPDATED_OR_END,
-		d.DDATE,
-		d.EDATE,
-		d.STATE AS DOC_STATE,
-		NVL(d.EMERGENCY,0) AS EMERGENCY,
-		CAST(NULL AS
-		NUMBER) AS SIGNLINENO,
-		CAST(NULL AS NUMBER) AS APPROVER_ENO,
-		CAST(NULL
-		AS NUMBER) AS ORDER_SEQ,
-		CAST(NULL AS NUMBER) AS ROUTE_STATE,
-		CAST(NULL
-		AS DATE) AS SIGNDATE,
-		CAST(NULL AS VARCHAR2(100)) AS EMP_NAME,
-		CAST(NULL AS NUMBER) AS EMP_DNO
-		FROM SIGNREF r
-		JOIN SIGNDOC d ON
-		d.SIGNNO = r.SIGNNO
-		WHERE r.ENO = #{eno}
-		<if test="q != null and q != ''">
-			<choose>
-				<when test="field == 'form'">
-					AND TO_CHAR(d.SFORMNO) LIKE '%' || #{q} || '%'
-				</when>
-				<when test="field == 'writer'">
-					AND EXISTS (
-					SELECT 1 FROM EMPLOYEE e
-					WHERE e.ENO =
-					d.ENO
-					AND LOWER(e.NAME) LIKE '%' || LOWER(#{q}) || '%'
-					)
-				</when>
-				<otherwise>
-					AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
-				</otherwise>
-			</choose>
-		</if>
-		<if test="period != null and period != '' and period != 'all'">
-			<choose>
-				<when test="period == '1m'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-1)
-				</when>
-				<when test="period == '6m'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-6)
-				</when>
-				<when test="period == '1y'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-12)
-				</when>
-			</choose>
-		</if>
-		ORDER BY NVL(d.DDATE, d.EDATE) DESC, d.SIGNNO DESC
-		) t
-		WHERE ROWNUM
-		&lt;= #{end}
-		)
-		WHERE rn &gt;= #{start}
-	</select>
-
-	<!-- ===================== 내가 기안한 문서 목록 ===================== -->
-
-	<!-- count -->
-	<select id="draftListCount" resultType="int" parameterType="map">
-		SELECT COUNT(*)
-		FROM SIGNDOC d
-		WHERE d.ENO = #{eno}
-		AND NVL(d.TEMPSAVE,0)
-		= 0
-		<if test="q != null and q != ''">
-			<choose>
-				<when test="field == 'form'">
-					AND TO_CHAR(d.SFORMNO) LIKE '%' || #{q} || '%'
-				</when>
-				<when test="field == 'singno'">
-					AND TO_CHAR(d.SIGNNO) LIKE '%' || #{q} || '%'
-				</when>
-				<otherwise>
-					AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
-				</otherwise>
-			</choose>
-		</if>
-		<if test="period != null and period != '' and period != 'all'">
-			<choose>
-				<when test="period == '1m'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-1)
-				</when>
-				<when test="period == '6m'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-6)
-				</when>
-				<when test="period == '1y'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-12)
-				</when>
-			</choose>
-		</if>
-	</select>
-
-	<!-- page -->
-	<select id="draftList" resultMap="ApprovalVOMap"
-		parameterType="map">
-		SELECT *
-		FROM (
-		SELECT t.*, ROWNUM rn
-		FROM (
-		SELECT
-		d.SIGNNO,
-		d.TITLE,
-		d.SFORMNO,
-		NVL(d.DDATE, d.EDATE) AS UPDATED_OR_END,
-		d.DDATE,
-		d.EDATE,
-		d.ENO AS DOC_ENO,
-		d.DNO AS DOC_DNO,
-		d.STATE AS DOC_STATE,
-		NVL(d.EMERGENCY,0) AS EMERGENCY,
-		CAST(NULL AS NUMBER) AS SIGNLINENO,
-		CAST(NULL AS NUMBER) AS APPROVER_ENO,
-		CAST(NULL AS NUMBER) AS
-		ORDER_SEQ,
-		CAST(NULL AS NUMBER) AS ROUTE_STATE,
-		CAST(NULL AS DATE) AS
-		SIGNDATE,
-		CAST(NULL AS VARCHAR2(100)) AS EMP_NAME,
-		CAST(NULL AS NUMBER)
-		AS EMP_DNO
-		FROM SIGNDOC d
-		WHERE d.ENO = #{eno}
-		AND NVL(d.TEMPSAVE,0) = 0
-		<if test="q != null and q != ''">
-			<choose>
-				<when test="field == 'form'">
-					AND TO_CHAR(d.SFORMNO) LIKE '%' || #{q} || '%'
-				</when>
-				<when test="field == 'singno'">
-					AND TO_CHAR(d.SIGNNO) LIKE '%' || #{q} || '%'
-				</when>
-				<otherwise>
-					AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
-				</otherwise>
-			</choose>
-		</if>
-		<if test="period != null and period != '' and period != 'all'">
-			<choose>
-				<when test="period == '1m'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-1)
-				</when>
-				<when test="period == '6m'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-6)
-				</when>
-				<when test="period == '1y'">AND NVL(d.DDATE, d.EDATE) &gt;=
-					ADD_MONTHS(SYSDATE,-12)
-				</when>
-			</choose>
-		</if>
-		ORDER BY NVL(d.DDATE, d.EDATE) DESC, d.SIGNNO DESC
-		) t
-		WHERE ROWNUM
-		&lt;= #{end}
-		)
-		WHERE rn &gt;= #{start}
-	</select>
-
-	<!-- ===================== 폼 선택/작성 ===================== -->
-
-	<select id="findFormClasses" resultType="map">
-		SELECT CLASSID,
-		CLASSNAME
-		FROM (
-		SELECT DENSE_RANK() OVER (ORDER BY f.FORMCLASS) AS
-		CLASSID,
-		f.FORMCLASS AS CLASSNAME
-		FROM SIGNFORM f
-		)
-		GROUP BY CLASSID,
-		CLASSNAME
-		ORDER BY CLASSID
-	</select>
-
-	<select id="findFormsAll" resultType="map">
-		WITH C AS (
-		SELECT DISTINCT
-		f.FORMCLASS,
-		DENSE_RANK() OVER (ORDER BY f.FORMCLASS) AS CLASSID
-		FROM
-		SIGNFORM f
-		)
-		SELECT
-		f.SFORMNO AS SFORMNO,
-		NVL('양식 ' || f.SFORMNO,
-		f.SFORMNO) AS FORMNAME,
-		c.CLASSID AS CLASSID,
-		c.FORMCLASS AS CLASSNAME
-		FROM SIGNFORM f
-		JOIN C ON C.FORMCLASS = f.FORMCLASS
-		ORDER BY c.CLASSID,
-		FORMNAME
-	</select>
-
-	<select id="getForm" parameterType="string" resultType="map">
-		WITH C AS
-		(
-		SELECT DISTINCT f.FORMCLASS,
-		DENSE_RANK() OVER (ORDER BY f.FORMCLASS)
-		AS CLASSID
-		FROM SIGNFORM f
-		)
-		SELECT
-		f.SFORMNO AS SFORMNO,
-		NVL('양식 ' ||
-		f.SFORMNO, f.SFORMNO) AS FORMNAME,
-		f.FORMTEXT AS FORMHTML,
-		c.CLASSID AS
-		CLASSID,
-		c.FORMCLASS AS CLASSNAME
-		FROM SIGNFORM f
-		LEFT JOIN C ON
-		C.FORMCLASS = f.FORMCLASS
-		WHERE f.SFORMNO = #{value}
-	</select>
-
-	<select id="newDocNo" resultType="string">
-		SELECT
-		TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS') AS DOCNO FROM DUAL
-	</select>
+<select id="countOnHold" resultType="int">
+  <![CDATA[
+  SELECT COUNT(*)
+  FROM SIGNLINE r
+  WHERE NVL(r.STATE,0) = 6
+  ]]>
+</select>
 
 
-	<!-- ===================== 임시보관(임시저장) ===================== -->
 
-	<!-- PK 생성 + INSERT (ApprovalVO) -->
-	<insert id="insertTempSave"
-		parameterType="com.motiveon.dto.ApprovalVO">
-		<selectKey resultType="string" keyProperty="signNo"
-			order="BEFORE"><![CDATA[
-      SELECT 'SG' || TO_CHAR(SYSDATE,'YYMMDD') || LPAD(SIGNSQ.NEXTVAL,4,'0') FROM DUAL
-    ]]></selectKey>
+<!-- (옵션2 권장) 문서 반려 수 -->
+  <!-- ===================== 대시보드 목록 ===================== -->
+
+  <!-- 최근 기안(상태 0,1) TOP 20 -->
+  <select id="selectRecentDrafts" resultMap="ApprovalVOMap" parameterType="map">
     <![CDATA[
-      INSERT INTO SIGNDOC
-        (SIGNNO, ENO, DNO, SFORMNO, DDATE, EMERGENCY, TITLE, EDATE, SIGNCONTENT, TEMPSAVE, STATE)
-      VALUES
-        (#{signNo}, #{eno}, #{dno}, #{sformno}, SYSDATE, NVL(#{emergency},0),
-         #{title}, NULL, #{signcontent}, 1, 0)
-    ]]>
-	</insert>
-
-	<!-- 임시보관함 카운트 -->
-	<select id="tempListCount" parameterType="map" resultType="int">
-    <![CDATA[
-      SELECT COUNT(*)
-      FROM SIGNDOC d
-      JOIN SIGNHISTORY h ON d.SIGNNO = h.SIGNNO
-      WHERE d.ENO = #{eno}
-        AND NVL(d.TEMPSAVE, 0) = 1
-    ]]>
-		<if test="period != null and period != '' and period != 'all'">
-      <![CDATA[
-        AND h.REGDATE BETWEEN #{startDate} AND #{endDate}
-      ]]>
-		</if>
-	</select>
-
-	<!-- 임시보관함 목록 (최근순, 기간필터) -->
-	<select id="selectTempList" parameterType="map"
-		resultType="com.motiveon.dto.ApprovalVO">
-    <![CDATA[
-      SELECT
-          d.SIGNNO,
-          d.ENO,
-          d.TITLE,
-          d.TEMPSAVE,
-          h.REGDATE
-          d.SFORMNO AS formNo
-      FROM SIGNDOC d
-      JOIN SIGNHISTORY h ON d.SIGNNO = h.SIGNNO
-      WHERE d.ENO = #{eno}
-        AND NVL(d.TEMPSAVE, 0) = 1
-    ]]>
-		<if test="period != null and period != '' and period != 'all'">
-      <![CDATA[
-        AND h.REGDATE BETWEEN #{startDate} AND #{endDate}
-      ]]>
-		</if>
-    <![CDATA[
-      ORDER BY h.REGDATE DESC
-    ]]>
-	</select>
-
-	<!-- 임시보관함 목록 (페이징) -->
-	<select id="tempList" resultMap="ApprovalVOMap"
-		parameterType="map"><![CDATA[
     SELECT *
     FROM (
-      SELECT t.*, ROWNUM rnum
-      FROM (
-        SELECT
-          SIGNNO      AS SIGNNO,
-          ENO         AS ENO,
-          DNO         AS DNO,
-          SFORMNO     AS SFORMNO,
-          DDATE       AS DDATE,
-          EDATE       AS EDATE,
-          NVL(EMERGENCY,0) AS EMERGENCY,
-          TITLE       AS TITLE,
-          SIGNCONTENT AS SIGNCONTENT,
-          TEMPSAVE    AS TEMPSAVE,
-          STATE       AS STATE,
-          CAST(NULL AS NUMBER)        AS SIGNLINENO,
-          CAST(NULL AS NUMBER)        AS APPROVER_ENO,
-          CAST(NULL AS NUMBER)        AS ORDER_SEQ,
-          CAST(NULL AS NUMBER)        AS ROUTE_STATE,
-          CAST(NULL AS DATE)          AS SIGNDATE,
-          CAST(NULL AS VARCHAR2(100)) AS EMP_NAME,
-          CAST(NULL AS NUMBER)        AS EMP_DNO
-        FROM SIGNDOC
-        WHERE TEMPSAVE = 1
-          AND ENO = #{eno}
-  ]]>
-		<if test="q != null and q != ''">
-			<choose>
-				<when test="field == 'title'"><![CDATA[ AND LOWER(TITLE) LIKE '%'||LOWER(#{q})||'%' ]]></when>
-				<when test="field == 'form'"><![CDATA[ AND SFORMNO LIKE '%'||#{q}||'%' ]]></when>
-				<when test="field == 'drafter'"><![CDATA[ AND TO_CHAR(ENO) LIKE '%'||#{q}||'%' ]]></when>
-				<otherwise><![CDATA[ AND (LOWER(TITLE) LIKE '%'||LOWER(#{q})||'%' OR LOWER(SIGNCONTENT) LIKE '%'||LOWER(#{q})||'%') ]]></otherwise>
-			</choose>
-		</if>
-		<if test="period != null and period != '' and period != 'all'">
-			<choose>
-				<when test="period == '1m'"><![CDATA[ AND DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -1) ]]></when>
-				<when test="period == '6m'"><![CDATA[ AND DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -6) ]]></when>
-				<when test="period == '1y'"><![CDATA[ AND DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -12) ]]></when>
-			</choose>
-		</if>
+      SELECT
+        d.SIGNNO,
+        d.TITLE,
+        d.ENO AS DOC_ENO,
+        d.DNO AS DOC_DNO,
+        d.SFORMNO,
+        NVL(d.DDATE, d.EDATE) AS UPDATED_OR_END,
+        d.DDATE,
+        d.EDATE,
+        d.TEMPSAVE,
+        d.STATE AS DOC_STATE,
+        NVL(d.EMERGENCY, 0) AS EMERGENCY,
+        CAST(NULL AS NUMBER)        AS SIGNLINENO,
+        CAST(NULL AS NUMBER)        AS APPROVER_ENO,
+        CAST(NULL AS NUMBER)        AS ORDER_SEQ,
+        CAST(NULL AS NUMBER)        AS ROUTE_STATE,
+        CAST(NULL AS DATE)          AS SIGNDATE,
+        CAST(NULL AS VARCHAR2(100)) AS EMP_NAME,
+        CAST(NULL AS NUMBER)        AS EMP_DNO
+      FROM SIGNDOC d
+      WHERE d.STATE IN (0, 1)
+    ]]>
+      <if test="q != null and q != ''">
+        <choose>
+          <when test="field == 'form'">
+            <![CDATA[ AND TO_CHAR(d.SFORMNO) LIKE '%' || #{q} || '%' ]]>
+          </when>
+          <when test="field == 'title'">
+            <![CDATA[ AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%' ]]>
+          </when>
+          <otherwise>
+            <![CDATA[ AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%' ]]>
+          </otherwise>
+        </choose>
+      </if>
+      <if test="period != null and period != '' and period != 'all'">
+        <choose>
+          <when test="period == '1m'">
+            <![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-1) ]]>
+          </when>
+          <when test="period == '6m'">
+            <![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-6) ]]>
+          </when>
+          <when test="period == '1y'">
+            <![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-12) ]]>
+          </when>
+        </choose>
+      </if>
     <![CDATA[
-        ORDER BY DDATE DESC
-      ) t
-      WHERE ROWNUM <= #{end}
+      ORDER BY NVL(d.DDATE, d.EDATE) DESC NULLS LAST, d.SIGNNO DESC
     )
-    WHERE rnum >= #{start}
-  ]]></select>
+    WHERE ROWNUM <= 20
+    ]]>
+  </select>
 
-	<select id="getEmpBasic" parameterType="long" resultType="map">
-		SELECT
-		e.ENO AS ENO, e.NAME AS NAME, e.DNO AS DNO, d.NAME AS DEPTNAME
-		FROM
-		EMPLOYEE e
-		LEFT JOIN DEPARTMENT d ON d.DNO = e.DNO
-		WHERE e.ENO = #{eno}
-	</select>
+  <!-- 진행중 목록 -->
+  <select id="selectOngoingDrafts" resultMap="ApprovalVOMap">
+    <![CDATA[
+    SELECT
+      r.SIGNLINENO,
+      r.ENO AS APPROVER_ENO,
+      r.STATE AS ROUTE_STATE,
+      r.SIGNDATE,
+      r.SIGNRANK AS ORDER_SEQ,
+      d.SIGNNO,
+      d.TITLE,
+      d.ENO AS DOC_ENO,
+      d.DNO AS DOC_DNO,
+      d.SFORMNO,
+      NVL(d.DDATE, d.EDATE) AS UPDATED_OR_END,
+      d.DDATE,
+      d.EDATE,
+      d.TEMPSAVE,
+      d.STATE AS DOC_STATE,
+      NVL(d.EMERGENCY,0) AS EMERGENCY,
+      e.NAME AS EMP_NAME,
+      e.DNO AS EMP_DNO
+    FROM SIGNLINE r
+    JOIN SIGNDOC d ON d.SIGNNO = r.SIGNNO
+    JOIN EMPLOYEE e ON e.ENO = r.ENO
+    WHERE d.STATE = 1
+    ORDER BY NVL(d.DDATE, d.EDATE) DESC, r.SIGNRANK ASC
+    ]]>
+  </select>
 
-	<insert id="insertHistory">
-		INSERT INTO SIGNHISTORY (HISTORYNO, REGDATE, CONTENT,
-		SIGNNO)
-		VALUES (HISTORY_SQ.NEXTVAL, SYSDATE, #{content}, #{signNo})
-	</insert>
-
-
-
-	<delete id="deleteHistoryBySignNos" parameterType="list">
-		DELETE FROM SIGNHISTORY
-		WHERE SIGNNO IN
-		<foreach collection="list" item="id" open="(" separator=","
-			close=")">
-			#{id}
-		</foreach>
-	</delete>
-
-	<!-- 부모 삭제 (임시보관 한정) -->
-	<delete id="deleteTempBySignNos" parameterType="list">
-		DELETE FROM SIGNDOC
-		WHERE TEMPSAVE = 1
-		AND SIGNNO IN
-		<foreach collection="list" item="id" open="(" separator=","
-			close=")">
-			#{id}
-		</foreach>
-	</delete>
-
-	<insert id="insertSignLine">
-		INSERT INTO SIGNLINE (SIGNLINENO, SIGNNO, ENO, STATE)
-		VALUES (SIGNLINE_SEQ.NEXTVAL, #{signNo}, #{eno}, 'PENDING')
-	</insert>
-
-	<insert id="insertSignRef">
-		INSERT INTO SIGNREF (SIGNNO, ENO)
-		VALUES (#{signNo},
-		#{eno})
-	</insert>
-
-	<!-- SIGNDOC 등록 -->
-	<insert id="insertSignDoc"
-		parameterType="com.motiveon.dto.ApprovalVO">
-		INSERT INTO SIGNDOC
-		(SIGNNO, ENO, DNO, SFORMNO, TITLE,
-		SIGNCONTENT, DDATE, EDATE, EMERGENCY,
-		TEMPSAVE, STATE)
-		VALUES
-		(#{signNo}, #{eno}, #{dno}, #{sformno}, #{title}, #{signcontent},
-		#{ddate},
-		#{edate}, #{emergency}, #{tempsave}, #{state})
-	</insert>
-
-	<!-- 결재선 등록 (approvers 리스트) -->
-	<insert id="insertSignLines"
-		parameterType="com.motiveon.dto.ApprovalVO">
-		<foreach collection="approvers" item="eno" index="idx"
-			separator=";">
-			INSERT INTO SIGNLINE
-			(SIGNLINENO, SIGNNO, ENO, ORDERNO,
-			STATE)
-			VALUES
-			(SIGNLINE_SEQ.NEXTVAL, #{signNo}, #{eno}, #{idx + 1},
-			'PENDING')
-		</foreach>
-	</insert>
-
-	<!-- 참조자 등록 (refs 리스트) -->
-	<insert id="insertSignRefs"
-		parameterType="com.motiveon.dto.ApprovalVO">
-		<foreach collection="refs" item="eno" separator=";">
-			INSERT INTO
-			SIGNREF
-			(SIGNNO, ENO)
-			VALUES
-			(#{signNo}, #{eno})
-		</foreach>
-	</insert>
-
-	<!-- 결재선 조회 -->
-	<select id="selectSignLines" parameterType="string"
-		resultType="com.motiveon.dto.ApprovalVO">
-		SELECT L.SIGNLINENO AS routeNo,
-		L.SIGNNO AS signNo,
-		L.ENO AS
-		approverNo,
-		L.ORDERNO AS orderSeq,
-		L.STATE AS routeStatus,
-		L.SIGNDATE AS
-		actionAt,
-		E.NAME AS approverName,
-		E.DNO AS approverDept
-		FROM SIGNLINE L
-		JOIN EMPLOYEE E ON L.ENO = E.ENO
-		WHERE L.SIGNNO = #{signNo}
-		ORDER BY
-		L.ORDERNO
-	</select>
-
-	<!-- 참조자 조회 -->
-	<select id="selectSignRefs" parameterType="string"
-		resultType="com.motiveon.dto.ApprovalVO">
-		SELECT R.SIGNNO AS signNo,
-		R.ENO AS approverNo,
-		E.NAME AS
-		approverName,
-		E.DNO AS approverDept
-		FROM SIGNREF R
-		JOIN EMPLOYEE E ON
-		R.ENO = E.ENO
-		WHERE R.SIGNNO = #{signNo}
-	</select>
+  <!-- 내 결재 할일 -->
+  <select id="selectMyTodo" resultMap="ApprovalVOMap" parameterType="long">
+  <![CDATA[
+  SELECT
+    r.SIGNLINENO,
+    r.ENO AS APPROVER_ENO,
+    r.STATE AS ROUTE_STATE,
+    r.SIGNDATE,
+    r.SIGNRANK AS ORDER_SEQ,
+    d.SIGNNO,
+    d.TITLE,
+    d.ENO AS DOC_ENO,
+    d.DNO AS DOC_DNO,
+    d.SFORMNO,
+    NVL(d.DDATE, d.EDATE) AS UPDATED_OR_END,
+    d.DDATE,
+    d.EDATE,
+    d.TEMPSAVE,
+    d.STATE AS DOC_STATE,
+    NVL(d.EMERGENCY,0) AS EMERGENCY,
+    e.NAME AS EMP_NAME,
+    e.DNO AS EMP_DNO
+  FROM SIGNLINE r
+  JOIN SIGNDOC d ON d.SIGNNO = r.SIGNNO
+  JOIN EMPLOYEE e ON e.ENO   = r.ENO
+  WHERE r.STATE = 0                 -- ★ 0=대기
+    AND r.ENO   = #{eno}
+    -- (선택) 정말 '내 차례'만 보고 싶으면 아래 조건을 추가
+    AND NOT EXISTS (
+      SELECT 1 FROM SIGNLINE p
+      WHERE p.SIGNNO = r.SIGNNO
+        AND p.SIGNRANK < r.SIGNRANK
+        AND NVL(p.STATE,0) <> 1
+    )
+  ORDER BY NVL(d.DDATE, d.EDATE) DESC, r.SIGNRANK ASC
+  ]]>
+</select>
 
 
-	<!-- 내가 결재자인 문서함 총 건수 -->
-	<select id="approveListCount" parameterType="map"
-		resultType="int">
-		SELECT COUNT(*)
-		FROM SIGNLINE l
-		JOIN SIGNDOC d ON d.SIGNNO = l.SIGNNO
-		JOIN EMPLOYEE we ON we.ENO = d.ENO
-		JOIN DEPARTMENT dd ON dd.DNO = d.DNO
-		WHERE l.ENO = #{eno}
-		<!-- 탭 필터 -->
-		<choose>
-			<when test="tab == 'wait'">
-				AND NVL(l.STATE,0) = 0
-			</when>
-			<when test="tab == 'mine'">
-				AND NVL(l.STATE,0) = 0
-				AND NOT EXISTS (
-				SELECT 1 FROM SIGNLINE l2
-				WHERE l2.SIGNNO = l.SIGNNO
-				AND l2.SIGNRANK &lt; l.SIGNRANK
-				AND NVL(l2.STATE,0) &lt;&gt; 1
-				)
-			</when>
-			<when test="tab == 'approved'">
-				AND l.STATE = 1
-			</when>
-			<when test="tab == 'rejected'">
-				AND l.STATE = 2
-			</when>
-			<!-- all: 조건 없음 -->
-		</choose>
+  <!-- ===================== 열람자(참조자) 목록 ===================== -->
 
-		<!-- 기간 필터: today, 7d, 1m, 3m, 1y, all -->
-		<choose>
-			<when test="period == 'today'">
-				AND TRUNC(d.DDATE) = TRUNC(SYSDATE)
-			</when>
-			<when test="period == '7d' or period == 'week'">
-				AND d.DDATE &gt;= TRUNC(SYSDATE) - 7
-			</when>
-			<when test="period == '1m' or period == 'month'">
-				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -1)
-			</when>
-			<when test="period == '3m'">
-				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -3)
-			</when>
-			<when test="period == '1y' or period == 'year'">
-				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -12)
-			</when>
-		</choose>
-
-		<!-- 검색: field=title|writer|dept|all, q 키워드 -->
-		<if test="q != null and q != ''">
-			<choose>
-				<when test="field == 'title'">
-					AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
-				</when>
-				<when test="field == 'writer'">
-					AND LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%'
-				</when>
-				<when test="field == 'dept'">
-					AND LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%'
-				</when>
-				<otherwise>
-					AND (
-					LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
-					OR LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%'
-					OR LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%'
-					)
-				</otherwise>
-			</choose>
-		</if>
-	</select>
-
-	<!-- 내가 결재자인 문서함 목록 -->
-	<select id="approveList" parameterType="map" resultType="map">
-		SELECT * FROM (
-		SELECT t.*, ROWNUM rn FROM (
-		SELECT
-		d.SIGNNO AS signNo,
-		d.TITLE AS title,
-		d.ENO AS docEno,
-		we.NAME AS docName,
-		dd.NAME AS docDept,
-		d.DDATE AS ddate,
-		d.EDATE AS edate,
-		l.STATE AS myState,
-		l.SIGNRANK AS myRank,
-		l.SIGNDATE AS mySignDate,
-		CASE
-		WHEN NVL(l.STATE,0)=0 AND NOT EXISTS (
-		SELECT 1 FROM SIGNLINE l2
-		WHERE l2.SIGNNO = l.SIGNNO
-		AND l2.SIGNRANK &lt; l.SIGNRANK
-		AND NVL(l2.STATE,0) &lt;&gt; 1
-		) THEN 1 ELSE 0
-		END AS myTurn
-		FROM SIGNLINE l
-		JOIN SIGNDOC d ON d.SIGNNO = l.SIGNNO
-		JOIN EMPLOYEE we ON we.ENO = d.ENO
-		JOIN DEPARTMENT dd ON dd.DNO = d.DNO
-		WHERE l.ENO = #{eno}
-
-		<!-- 탭 필터 -->
-		<choose>
-			<when test="tab == 'wait'">
-				AND NVL(l.STATE,0) = 0
-			</when>
-			<when test="tab == 'mine'">
-				AND NVL(l.STATE,0) = 0
-				AND NOT EXISTS (
-				SELECT 1 FROM SIGNLINE l2
-				WHERE l2.SIGNNO = l.SIGNNO
-				AND l2.SIGNRANK &lt; l.SIGNRANK
-				AND NVL(l2.STATE,0) &lt;&gt; 1
-				)
-			</when>
-			<when test="tab == 'approved'">
-				AND l.STATE = 1
-			</when>
-			<when test="tab == 'rejected'">
-				AND l.STATE = 2
-			</when>
-		</choose>
-
-		<!-- 기간 필터 -->
-		<choose>
-			<when test="period == 'today'">
-				AND TRUNC(d.DDATE) = TRUNC(SYSDATE)
-			</when>
-			<when test="period == '7d' or period == 'week'">
-				AND d.DDATE &gt;= TRUNC(SYSDATE) - 7
-			</when>
-			<when test="period == '1m' or period == 'month'">
-				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -1)
-			</when>
-			<when test="period == '3m'">
-				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -3)
-			</when>
-			<when test="period == '1y' or period == 'year'">
-				AND d.DDATE &gt;= ADD_MONTHS(TRUNC(SYSDATE), -12)
-			</when>
-		</choose>
-
-		<!-- 검색 -->
-		<if test="q != null and q != ''">
-			<choose>
-				<when test="field == 'title'">
-					AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
-				</when>
-				<when test="field == 'writer'">
-					AND LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%'
-				</when>
-				<when test="field == 'dept'">
-					AND LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%'
-				</when>
-				<otherwise>
-					AND (
-					LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
-					OR LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%'
-					OR LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%'
-					)
-				</otherwise>
-			</choose>
-		</if>
-
-		ORDER BY d.DDATE DESC, d.SIGNNO DESC
-		) t
-		WHERE ROWNUM &lt;= #{end}
-		)
-		WHERE rn &gt;= #{start}
-	</select>
+  <!-- count -->
+  <select id="viewerListCount" resultType="int" parameterType="map">
+  <![CDATA[
+  SELECT COUNT(*)
+  FROM SIGNREF r
+  JOIN SIGNDOC d   ON d.SIGNNO = r.SIGNNO
+  LEFT JOIN SIGNFORM f ON f.SFORMNO = d.SFORMNO
+  WHERE r.ENO = #{eno}
+  ]]>
+  <if test="q != null and q != ''">
+    <choose>
+      <when test="field == 'form'">
+        <![CDATA[ AND LOWER(f.FORMCLASS) LIKE '%' || LOWER(#{q}) || '%' ]]>
+      </when>
+      <when test="field == 'writer' or field=='drafter'">
+        <![CDATA[
+        AND EXISTS (
+          SELECT 1 FROM EMPLOYEE e
+          WHERE e.ENO = d.ENO AND LOWER(e.NAME) LIKE '%' || LOWER(#{q}) || '%'
+        )
+        ]]>
+      </when>
+      <otherwise>
+        <![CDATA[ AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%' ]]>
+      </otherwise>
+    </choose>
+  </if>
+  <if test="period != null and period != '' and period != 'all'">
+    <choose>
+      <when test="period == '1m'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-1) ]]></when>
+      <when test="period == '6m'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-6) ]]></when>
+      <when test="period == '1y'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-12) ]]></when>
+    </choose>
+  </if>
+</select>
 
 
+  <!-- page -->
+  <select id="viewerList" resultMap="ApprovalVOMap" parameterType="map">
+  <![CDATA[
+  SELECT *
+  FROM (
+    SELECT t.*, ROWNUM AS rn
+    FROM (
+      SELECT
+        d.SIGNNO,
+        d.TITLE,
+        /* ▼ 표시에 사용할 FORMCLASS를 SFORMNO 별칭으로 내려 JSP를 그대로 사용 */
+        f.FORMCLASS AS SFORMNO,
+        NVL(d.DDATE, d.EDATE) AS UPDATED_OR_END,
+        d.DDATE,
+        d.EDATE,
+        d.STATE AS DOC_STATE,
+        NVL(d.EMERGENCY,0) AS EMERGENCY,
+        CAST(NULL AS NUMBER)        AS SIGNLINENO,
+        CAST(NULL AS NUMBER)        AS APPROVER_ENO,
+        CAST(NULL AS NUMBER)        AS ORDER_SEQ,
+        CAST(NULL AS NUMBER)        AS ROUTE_STATE,
+        CAST(NULL AS DATE)          AS SIGNDATE,
+        CAST(NULL AS VARCHAR2(100)) AS EMP_NAME,
+        CAST(NULL AS NUMBER)        AS EMP_DNO
+      FROM SIGNREF r
+      JOIN SIGNDOC d      ON d.SIGNNO = r.SIGNNO
+      LEFT JOIN SIGNFORM f ON f.SFORMNO = d.SFORMNO
+      WHERE r.ENO = #{eno}
+  ]]>
+      <if test="q != null and q != ''">
+        <choose>
+          <when test="field == 'form'">
+            <![CDATA[ AND LOWER(f.FORMCLASS) LIKE '%' || LOWER(#{q}) || '%' ]]>
+          </when>
+          <when test="field == 'writer' or field=='drafter'">
+            <![CDATA[
+            AND EXISTS (
+              SELECT 1 FROM EMPLOYEE e
+              WHERE e.ENO = d.ENO AND LOWER(e.NAME) LIKE '%' || LOWER(#{q}) || '%'
+            )
+            ]]>
+          </when>
+          <otherwise>
+            <![CDATA[ AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%' ]]>
+          </otherwise>
+        </choose>
+      </if>
+      <if test="period != null and period != '' and period != 'all'">
+        <choose>
+          <when test="period == '1m'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-1) ]]></when>
+          <when test="period == '6m'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-6) ]]></when>
+          <when test="period == '1y'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-12) ]]></when>
+        </choose>
+      </if>
+  <![CDATA[
+      ORDER BY NVL(d.DDATE, d.EDATE) DESC, d.SIGNNO DESC
+    ) t
+    WHERE ROWNUM <= #{end}
+  )
+  WHERE rn >= #{start}
+  ]]>
+</select>
+
+  <!-- ===================== 내가 기안한 문서 목록 ===================== -->
+
+  <!-- count -->
+  <select id="draftListCount" resultType="int" parameterType="map">
+  <![CDATA[
+  SELECT COUNT(*)
+  FROM SIGNDOC d
+  LEFT JOIN SIGNFORM f ON f.SFORMNO = d.SFORMNO
+  WHERE d.ENO = #{eno}
+    AND NVL(d.TEMPSAVE,0) = 0
+  ]]>
+  <if test="q != null and q != ''">
+    <choose>
+      <when test="field == 'form'">
+        <![CDATA[ AND LOWER(f.FORMCLASS) LIKE '%' || LOWER(#{q}) || '%' ]]>
+      </when>
+      <when test="field == 'singno'">
+        <![CDATA[ AND TO_CHAR(d.SIGNNO) LIKE '%' || #{q} || '%' ]]>
+      </when>
+      <otherwise>
+        <![CDATA[ AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%' ]]>
+      </otherwise>
+    </choose>
+  </if>
+  <if test="period != null and period != '' and period != 'all'">
+    <choose>
+      <when test="period == '1m'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-1) ]]></when>
+      <when test="period == '6m'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-6) ]]></when>
+      <when test="period == '1y'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-12) ]]></when>
+    </choose>
+  </if>
+</select>
+
+
+  <!-- page -->
+  <select id="draftList" resultMap="ApprovalVOMap" parameterType="map">
+  <![CDATA[
+  SELECT *
+  FROM (
+    SELECT t.*, ROWNUM rn
+    FROM (
+      SELECT
+        d.SIGNNO,
+        d.TITLE,
+        /* ▼ FORMCLASS를 SFORMNO 별칭으로 */
+        f.FORMCLASS AS SFORMNO,
+        NVL(d.DDATE, d.EDATE) AS UPDATED_OR_END,
+        d.DDATE,
+        d.EDATE,
+        d.ENO AS DOC_ENO,
+        d.DNO AS DOC_DNO,
+        d.STATE AS DOC_STATE,
+        NVL(d.EMERGENCY,0) AS EMERGENCY,
+        CAST(NULL AS NUMBER)        AS SIGNLINENO,
+        CAST(NULL AS NUMBER)        AS APPROVER_ENO,
+        CAST(NULL AS NUMBER)        AS ORDER_SEQ,
+        CAST(NULL AS NUMBER)        AS ROUTE_STATE,
+        CAST(NULL AS DATE)          AS SIGNDATE,
+        CAST(NULL AS VARCHAR2(100)) AS EMP_NAME,
+        CAST(NULL AS NUMBER)        AS EMP_DNO
+      FROM SIGNDOC d
+      LEFT JOIN SIGNFORM f ON f.SFORMNO = d.SFORMNO
+      WHERE d.ENO = #{eno}
+        AND NVL(d.TEMPSAVE,0) = 0
+  ]]>
+      <if test="q != null and q != ''">
+        <choose>
+          <when test="field == 'form'">
+            <![CDATA[ AND LOWER(f.FORMCLASS) LIKE '%' || LOWER(#{q}) || '%' ]]>
+          </when>
+          <when test="field == 'singno'">
+            <![CDATA[ AND TO_CHAR(d.SIGNNO) LIKE '%' || #{q} || '%' ]]>
+          </when>
+          <otherwise>
+            <![CDATA[ AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%' ]]>
+          </otherwise>
+        </choose>
+      </if>
+      <if test="period != null and period != '' and period != 'all'">
+        <choose>
+          <when test="period == '1m'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-1) ]]></when>
+          <when test="period == '6m'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-6) ]]></when>
+          <when test="period == '1y'"><![CDATA[ AND NVL(d.DDATE, d.EDATE) >= ADD_MONTHS(SYSDATE,-12) ]]></when>
+        </choose>
+      </if>
+  <![CDATA[
+      ORDER BY NVL(d.DDATE, d.EDATE) DESC, d.SIGNNO DESC
+    ) t
+    WHERE ROWNUM <= #{end}
+  )
+  WHERE rn >= #{start}
+  ]]>
+</select>
+
+
+  <!-- ===================== 폼 선택/작성 ===================== -->
+
+  <select id="findFormClasses" resultType="map">
+    <![CDATA[
+    SELECT CLASSID, CLASSNAME
+    FROM (
+      SELECT DENSE_RANK() OVER (ORDER BY f.FORMCLASS) AS CLASSID, f.FORMCLASS AS CLASSNAME
+      FROM SIGNFORM f
+    )
+    GROUP BY CLASSID, CLASSNAME
+    ORDER BY CLASSID
+    ]]>
+  </select>
+
+  <select id="findFormsAll" resultType="map">
+    <![CDATA[
+    WITH C AS (
+      SELECT DISTINCT f.FORMCLASS, DENSE_RANK() OVER (ORDER BY f.FORMCLASS) AS CLASSID
+      FROM SIGNFORM f
+    )
+    SELECT
+      f.SFORMNO AS SFORMNO,
+      NVL('양식 ' || f.SFORMNO, f.SFORMNO) AS FORMNAME,
+      c.CLASSID AS CLASSID,
+      c.FORMCLASS AS CLASSNAME
+    FROM SIGNFORM f
+    JOIN C ON C.FORMCLASS = f.FORMCLASS
+    ORDER BY c.CLASSID, FORMNAME
+    ]]>
+  </select>
+
+  <select id="getForm" parameterType="string" resultType="map">
+    <![CDATA[
+    WITH C AS (
+      SELECT DISTINCT f.FORMCLASS, DENSE_RANK() OVER (ORDER BY f.FORMCLASS) AS CLASSID
+      FROM SIGNFORM f
+    )
+    SELECT
+      f.SFORMNO AS SFORMNO,
+      NVL('양식 ' || f.SFORMNO, f.SFORMNO) AS FORMNAME,
+      f.FORMTEXT AS FORMHTML,
+      c.CLASSID AS CLASSID,
+      c.FORMCLASS AS CLASSNAME
+    FROM SIGNFORM f
+    LEFT JOIN C ON C.FORMCLASS = f.FORMCLASS
+    WHERE f.SFORMNO = #{value}
+    ]]>
+  </select>
+
+  <select id="newDocNo" resultType="string">
+    <![CDATA[
+    SELECT TO_CHAR(SYSDATE,'YYYYMMDDHH24MISS') AS DOCNO FROM DUAL
+    ]]>
+  </select>
+
+  <!-- ===================== 임시보관(임시저장) ===================== -->
+
+  <!-- PK 생성 + INSERT (ApprovalVO) -->
+  <insert id="insertTempSave" parameterType="com.motiveon.dto.ApprovalVO">
+    <selectKey resultType="string" keyProperty="signNo" order="BEFORE">
+      <![CDATA[
+      SELECT 'SG' || TO_CHAR(SYSDATE,'YYMMDD') || LPAD(SIGNSQ.NEXTVAL,4,'0') FROM DUAL
+      ]]>
+    </selectKey>
+    <![CDATA[
+    INSERT INTO SIGNDOC
+      (SIGNNO, ENO, DNO, SFORMNO, DDATE, EMERGENCY, TITLE, EDATE, SIGNCONTENT, TEMPSAVE, STATE)
+    VALUES
+      (#{signNo, jdbcType=VARCHAR}, #{eno}, #{dno}, #{sformno, jdbcType=VARCHAR}, SYSDATE, NVL(#{emergency},0),
+       #{title}, NULL, #{signcontent}, 1, 0)
+    ]]>
+  </insert>
+
+  <!-- 임시보관함 카운트 -->
+  <select id="tempListCount" parameterType="map" resultType="int">
+    <![CDATA[
+    SELECT COUNT(*)
+    FROM SIGNDOC d
+    JOIN SIGNHISTORY h ON d.SIGNNO = h.SIGNNO
+    WHERE d.ENO = #{eno}
+      AND NVL(d.TEMPSAVE, 0) = 1
+    ]]>
+    <if test="period != null and period != '' and period != 'all'">
+      <![CDATA[ AND h.REGDATE BETWEEN #{startDate} AND #{endDate} ]]>
+    </if>
+  </select>
+
+  <!-- 임시보관함 목록 (최근순, 기간필터) -->
+  <select id="selectTempList" parameterType="map" resultType="com.motiveon.dto.ApprovalVO">
+  <![CDATA[
+  SELECT
+      d.SIGNNO,
+      d.ENO,
+      d.TITLE,
+      d.TEMPSAVE,
+      h.REGDATE,
+      /* ▼ 숫자 SFORMNO 대신 FORMCLASS를 formNo로 */
+      NVL(f.FORMCLASS, TO_CHAR(d.SFORMNO)) AS formNo
+  FROM SIGNDOC d
+  JOIN SIGNHISTORY h ON d.SIGNNO = h.SIGNNO
+  LEFT JOIN SIGNFORM f ON f.SFORMNO = d.SFORMNO
+  WHERE d.ENO = #{eno}
+    AND NVL(d.TEMPSAVE, 0) = 1
+  ]]>
+  <if test="q != null and q != ''">
+    <choose>
+      <when test="field == 'title'">
+        <![CDATA[ AND LOWER(d.TITLE) LIKE '%'||LOWER(#{q})||'%' ]]>
+      </when>
+      <when test="field == 'form'">
+        <!-- ▼ 검색도 FORMCLASS 기준 -->
+        <![CDATA[ AND LOWER(NVL(f.FORMCLASS, TO_CHAR(d.SFORMNO))) LIKE '%'||LOWER(#{q})||'%' ]]>
+      </when>
+      <when test="field == 'drafter'">
+        <![CDATA[ AND TO_CHAR(d.ENO) LIKE '%'||#{q}||'%' ]]>
+      </when>
+      <otherwise>
+        <![CDATA[
+        AND (LOWER(d.TITLE) LIKE '%'||LOWER(#{q})||'%'
+             OR LOWER(NVL(f.FORMCLASS, TO_CHAR(d.SFORMNO))) LIKE '%'||LOWER(#{q})||'%')
+        ]]>
+      </otherwise>
+    </choose>
+  </if>
+  <![CDATA[
+  ORDER BY h.REGDATE DESC
+  ]]>
+</select>
+
+
+  <!-- 임시보관함 목록 (페이징) -->
+  <select id="tempList" resultMap="ApprovalVOMap" parameterType="map">
+  <![CDATA[
+  SELECT *
+  FROM (
+    SELECT t.*, ROWNUM rnum
+    FROM (
+      SELECT
+        d.SIGNNO               AS SIGNNO,
+        d.ENO                  AS ENO,
+        d.DNO                  AS DNO,
+        /* ▼ 여기도 FORMCLASS를 SFORMNO 별칭으로 내보냅니다(기존 resultMap 재사용) */
+        NVL(f.FORMCLASS, TO_CHAR(d.SFORMNO)) AS SFORMNO,
+        d.DDATE                AS DDATE,
+        d.EDATE                AS EDATE,
+        NVL(d.EMERGENCY,0)     AS EMERGENCY,
+        d.TITLE                AS TITLE,
+        d.SIGNCONTENT          AS SIGNCONTENT,
+        d.TEMPSAVE             AS TEMPSAVE,
+        d.STATE                AS STATE,
+        CAST(NULL AS NUMBER)        AS SIGNLINENO,
+        CAST(NULL AS NUMBER)        AS APPROVER_ENO,
+        CAST(NULL AS NUMBER)        AS ORDER_SEQ,
+        CAST(NULL AS NUMBER)        AS ROUTE_STATE,
+        CAST(NULL AS DATE)          AS SIGNDATE,
+        CAST(NULL AS VARCHAR2(100)) AS EMP_NAME,
+        CAST(NULL AS NUMBER)        AS EMP_DNO
+      FROM SIGNDOC d
+      LEFT JOIN SIGNFORM f ON f.SFORMNO = d.SFORMNO
+      WHERE d.TEMPSAVE = 1
+        AND d.ENO = #{eno}
+  ]]>
+ <if test="q != null and q != ''">
+    <choose>
+      <when test="field == 'title'">
+        <![CDATA[ AND LOWER(d.TITLE) LIKE '%'||LOWER(#{q})||'%' ]]>
+      </when>
+      <when test="field == 'form'">
+        <!-- ▼ FORMCLASS 기준 검색 -->
+        <![CDATA[ AND LOWER(NVL(f.FORMCLASS, TO_CHAR(d.SFORMNO))) LIKE '%'||LOWER(#{q})||'%' ]]>
+      </when>
+      <when test="field == 'drafter'">
+        <![CDATA[ AND TO_CHAR(d.ENO) LIKE '%'||#{q}||'%' ]]>
+      </when>
+      <otherwise>
+        <![CDATA[
+        AND (LOWER(d.TITLE) LIKE '%'||LOWER(#{q})||'%'
+             OR LOWER(NVL(f.FORMCLASS, TO_CHAR(d.SFORMNO))) LIKE '%'||LOWER(#{q})||'%')
+        ]]>
+      </otherwise>
+    </choose>
+  </if>
+<if test="period != null and period != '' and period != 'all'">
+    <choose>
+      <when test="period == '1m'"><![CDATA[ AND d.DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -1) ]]></when>
+      <when test="period == '6m'"><![CDATA[ AND d.DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -6) ]]></when>
+      <when test="period == '1y'"><![CDATA[ AND d.DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -12) ]]></when>
+    </choose>
+  </if>
+  <![CDATA[
+        ORDER BY d.DDATE DESC
+    ) t
+    WHERE ROWNUM <= #{end}
+  )
+  WHERE rnum >= #{start}
+  ]]>
+</select>
+
+
+  <select id="getEmpBasic" parameterType="long" resultType="map">
+    <![CDATA[
+    SELECT e.ENO AS ENO, e.NAME AS NAME, e.DNO AS DNO, d.NAME AS DEPTNAME
+    FROM EMPLOYEE e
+    LEFT JOIN DEPARTMENT d ON d.DNO = e.DNO
+    WHERE e.ENO = #{eno}
+    ]]>
+  </select>
+
+  <insert id="insertHistory">
+    <![CDATA[
+    INSERT INTO SIGNHISTORY (HISTORYNO, REGDATE, CONTENT, SIGNNO)
+    VALUES (HISTORY_SQ.NEXTVAL, SYSDATE, #{content}, #{signno, jdbcType=VARCHAR})
+    ]]>
+  </insert>
+
+  <delete id="deleteHistoryBySignNos" parameterType="list">
+    <![CDATA[ DELETE FROM SIGNHISTORY WHERE SIGNNO IN (]]>
+    <foreach collection="ids" item="id" separator=",">
+      #{id, jdbcType=VARCHAR}
+    </foreach>
+    <![CDATA[)]]>
+  </delete>
+
+  <!-- 부모 삭제 (임시보관 한정) -->
+  <delete id="deleteTempBySignNos" parameterType="list">
+    <![CDATA[ DELETE FROM SIGNDOC WHERE TEMPSAVE = 1 AND SIGNNO IN (]]>
+    <foreach collection="ids" item="id" separator=",">
+      #{id, jdbcType=VARCHAR}
+    </foreach>
+    <![CDATA[)]]>
+  </delete>
+
+  <insert id="insertSignLine">
+    <![CDATA[
+    INSERT INTO SIGNLINE (SIGNLINENO, SIGNNO, ENO, STATE)
+    VALUES (SIGNLINE_SEQ.NEXTVAL, #{signNo, jdbcType=VARCHAR}, #{eno}, 0)
+    ]]>
+  </insert>
+
+  <insert id="insertSignRef">
+    <![CDATA[
+    INSERT INTO SIGNREF (SIGNNO, ENO)
+    VALUES (#{signNo, jdbcType=VARCHAR}, #{eno})
+    ]]>
+  </insert>
+
+  <!-- SIGNDOC 등록 : signNo가 없으면 생성, 있으면 그대로 사용 -->
+  <insert id="insertSignDoc" parameterType="com.motiveon.dto.ApprovalVO">
+    <selectKey resultType="string" keyProperty="signNo" order="BEFORE">
+      <![CDATA[
+      SELECT NVL(
+               NULLIF(#{signNo, jdbcType=VARCHAR}, ''),
+               'SG' || TO_CHAR(SYSDATE,'YYMMDD') || LPAD(SIGNSQ.NEXTVAL,4,'0')
+             )
+      FROM DUAL
+      ]]>
+    </selectKey>
+    <![CDATA[
+    INSERT INTO SIGNDOC
+      (SIGNNO, ENO, DNO, SFORMNO, TITLE, SIGNCONTENT, DDATE, EDATE, EMERGENCY, TEMPSAVE, STATE)
+    VALUES
+      (#{signNo, jdbcType=VARCHAR},
+       #{eno},
+       #{dno},
+       #{sformno, jdbcType=VARCHAR},
+       #{title},
+       #{signcontent},
+       NVL(#{ddate, jdbcType=DATE}, SYSDATE),
+       #{edate, jdbcType=DATE},
+       NVL(#{emergency, jdbcType=NUMERIC}, 0),
+       NVL(#{tempsave,  jdbcType=NUMERIC}, 0),
+       NVL(#{state,    jdbcType=NUMERIC}, 0))
+    ]]>
+  </insert>
+
+  <!-- 결재선 일괄 등록 -->
+  <insert id="insertSignLines" parameterType="com.motiveon.dto.ApprovalVO">
+    <if test="approvers != null and approvers.size() > 0">
+      <![CDATA[ INSERT ALL ]]>
+      <foreach collection="approvers" item="eno" index="idx">
+        <![CDATA[
+        INTO SIGNLINE (SIGNLINENO, SIGNNO, ENO, SIGNRANK, STATE)
+        VALUES (SIGNLINE_SEQ.NEXTVAL, #{signNo, jdbcType=VARCHAR}, #{eno}, (#{idx} + 1), 0)
+        ]]>
+      </foreach>
+      <![CDATA[ SELECT 1 FROM DUAL ]]>
+    </if>
+  </insert>
+
+  <!-- 참조자 일괄 등록 -->
+  <insert id="insertSignRefs" parameterType="com.motiveon.dto.ApprovalVO">
+    <if test="refs != null and refs.size() > 0">
+      <![CDATA[ INSERT ALL ]]>
+      <foreach collection="refs" item="eno">
+        <![CDATA[
+        INTO SIGNREF (SIGNNO, ENO)
+        VALUES (#{signNo, jdbcType=VARCHAR}, #{eno})
+        ]]>
+      </foreach>
+      <![CDATA[ SELECT 1 FROM DUAL ]]>
+    </if>
+  </insert>
+
+  <!-- 결재선 조회 -->
+  <select id="selectSignLines" parameterType="string" resultType="com.motiveon.dto.ApprovalVO">
+    <![CDATA[
+    SELECT
+      L.SIGNLINENO AS routeNo,
+      L.SIGNNO     AS signNo,
+      L.ENO        AS approverNo,
+      L.SIGNRANK   AS orderSeq,
+      L.STATE      AS routeStatus,
+      L.SIGNDATE   AS actionAt,
+      E.NAME       AS approverName,
+      E.DNO        AS approverDept
+    FROM SIGNLINE L
+    JOIN EMPLOYEE E ON L.ENO = E.ENO
+    WHERE L.SIGNNO = ]]>
+    #{value, jdbcType=VARCHAR}
+    <![CDATA[
+    ORDER BY L.SIGNRANK
+    ]]>
+  </select>
+
+  <!-- 참조자 조회 -->
+  <select id="selectSignRefs" parameterType="string" resultType="com.motiveon.dto.ApprovalVO">
+    <![CDATA[
+    SELECT
+      R.SIGNNO AS signNo,
+      R.ENO    AS approverNo,
+      E.NAME   AS approverName,
+      E.DNO    AS approverDept
+    FROM SIGNREF R
+    JOIN EMPLOYEE E ON R.ENO = E.ENO
+    WHERE R.SIGNNO = ]]>
+    #{value, jdbcType=VARCHAR}
+  </select>
+
+  <!-- 내가 결재자인 문서함 총 건수 -->
+  <select id="approveListCount" parameterType="map" resultType="int">
+  <![CDATA[
+  SELECT COUNT(*)
+  FROM SIGNLINE l
+  JOIN SIGNDOC d     ON d.SIGNNO = l.SIGNNO
+  JOIN EMPLOYEE we   ON we.ENO   = d.ENO
+  JOIN DEPARTMENT dd ON dd.DNO   = d.DNO
+  LEFT JOIN SIGNFORM f ON f.SFORMNO = d.SFORMNO
+  WHERE l.ENO = ]]>
+  #{eno}
+  <choose>
+    <when test="tab == 'wait'"><![CDATA[ AND NVL(l.STATE,0) = 0 ]]></when>
+    <when test="tab == 'mine'"><![CDATA[
+      AND NVL(l.STATE,0) = 0
+      AND NOT EXISTS (
+        SELECT 1 FROM SIGNLINE l2
+        WHERE l2.SIGNNO = l.SIGNNO
+          AND l2.SIGNRANK < l.SIGNRANK
+          AND NVL(l2.STATE,0) <> 1
+      )
+    ]]></when>
+    <when test="tab == 'approved'"><![CDATA[ AND l.STATE = 1 ]]></when>
+    <when test="tab == 'rejected'"><![CDATA[ AND l.STATE = 2 ]]></when>
+  </choose>
+  <choose>
+    <when test="period == 'today'"><![CDATA[ AND TRUNC(d.DDATE) = TRUNC(SYSDATE) ]]></when>
+    <when test="period == '7d' or period == 'week'"><![CDATA[ AND d.DDATE >= TRUNC(SYSDATE) - 7 ]]></when>
+    <when test="period == '1m' or period == 'month'"><![CDATA[ AND d.DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -1) ]]></when>
+    <when test="period == '3m'"><![CDATA[ AND d.DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -3) ]]></when>
+    <when test="period == '1y' or period == 'year'"><![CDATA[ AND d.DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -12) ]]></when>
+  </choose>
+   <if test="q != null and q != ''">
+    <choose>
+      <when test="field == 'title'">
+        <![CDATA[ AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%' ]]>
+      </when>
+      <when test="field == 'drafter' or field == 'writer'">   <!-- ★ drafter 허용 -->
+        <![CDATA[ AND LOWER(we.NAME)  LIKE '%' || LOWER(#{q}) || '%' ]]>
+      </when>
+      <when test="field == 'dept'">
+        <![CDATA[ AND LOWER(dd.NAME)  LIKE '%' || LOWER(#{q}) || '%' ]]>
+      </when>
+      <when test="field == 'form'">                           <!-- ★ 교체 -->
+        <![CDATA[ AND LOWER(f.FORMCLASS) LIKE '%' || LOWER(#{q}) || '%' ]]>
+      </when>
+      <otherwise>
+        <![CDATA[
+        AND (
+          LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%'
+          OR LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%'
+          OR LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%'
+          OR LOWER(NVL(f.FORMCLASS, TO_CHAR(d.SFORMNO))) LIKE '%' || LOWER(#{q}) || '%'
+        )
+        ]]>
+      </otherwise>
+    </choose>
+  </if>
+</select>
+
+
+  <!-- 내가 결재자인 문서함 목록 -->
+<select id="approveList" parameterType="map" resultType="map">
+  <![CDATA[
+  SELECT * FROM (
+    SELECT t.*, ROWNUM rn FROM (
+      SELECT
+        d.SIGNNO            AS "signNo",
+        d.TITLE             AS "title",
+        d.ENO               AS "docEno",
+        we.NAME             AS "docName",
+        dd.NAME             AS "docDept",
+        d.DDATE             AS "ddate",
+        d.EDATE             AS "edate",
+        NVL(f.FORMCLASS, TO_CHAR(d.SFORMNO)) AS "formNo",   -- ★ 추가
+        NVL(d.EMERGENCY,0)  AS "emergency",
+        NVL(l.STATE,0)      AS "myState",
+        l.SIGNRANK          AS "myRank",
+        l.SIGNDATE          AS "mySignDate",
+        CASE
+          WHEN NVL(l.STATE,0)=0 AND NOT EXISTS (
+            SELECT 1 FROM SIGNLINE l2
+            WHERE l2.SIGNNO = l.SIGNNO
+              AND l2.SIGNRANK < l.SIGNRANK
+              AND NVL(l2.STATE,0) <> 1
+          ) THEN 1 ELSE 0
+        END                 AS "myTurn"
+      FROM SIGNLINE l
+      JOIN SIGNDOC d     ON d.SIGNNO = l.SIGNNO
+      JOIN EMPLOYEE we   ON we.ENO   = d.ENO
+      JOIN DEPARTMENT dd ON dd.DNO   = d.DNO
+      LEFT JOIN SIGNFORM f ON f.SFORMNO = d.SFORMNO         -- ★ 추가
+      WHERE l.ENO = ]]>
+      #{eno}
+      <choose>
+        <when test="tab == 'wait'"><![CDATA[ AND NVL(l.STATE,0) = 0 ]]></when>
+        <when test="tab == 'mine'"><![CDATA[
+          AND NVL(l.STATE,0) = 0
+          AND NOT EXISTS (
+            SELECT 1 FROM SIGNLINE l2
+            WHERE l2.SIGNNO = l.SIGNNO
+              AND l2.SIGNRANK < l.SIGNRANK
+              AND NVL(l2.STATE,0) <> 1
+          )
+        ]]></when>
+        <when test="tab == 'approved'"><![CDATA[ AND l.STATE = 1 ]]></when>
+        <when test="tab == 'rejected'"><![CDATA[ AND l.STATE = 2 ]]></when>
+      </choose>
+      <choose>
+        <when test="period == 'today'"><![CDATA[ AND TRUNC(d.DDATE) = TRUNC(SYSDATE) ]]></when>
+        <when test="period == '7d' or period == 'week'"><![CDATA[ AND d.DDATE >= TRUNC(SYSDATE) - 7 ]]></when>
+        <when test="period == '1m' or period == 'month'"><![CDATA[ AND d.DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -1) ]]></when>
+        <when test="period == '3m'"><![CDATA[ AND d.DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -3) ]]></when>
+        <when test="period == '1y' or period == 'year'"><![CDATA[ AND d.DDATE >= ADD_MONTHS(TRUNC(SYSDATE), -12) ]]></when>
+      </choose>
+        <if test="q != null and q != ''">
+        <choose>
+          <when test="field == 'title'">
+            <![CDATA[ AND LOWER(d.TITLE) LIKE '%' || LOWER(#{q}) || '%' ]]>
+          </when>
+          <when test="field == 'writer' or field == 'drafter'"> <!-- ★ drafter 허용 -->
+            <![CDATA[ AND LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%' ]]>
+          </when>
+          <when test="field == 'dept'">
+            <![CDATA[ AND LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%' ]]>
+          </when>
+          <when test="field == 'form'">                         <!-- ★ 추가 -->
+            <![CDATA[ AND LOWER(f.FORMCLASS) LIKE '%' || LOWER(#{q}) || '%' ]]>
+          </when>
+          <otherwise>
+            <![CDATA[
+            AND (
+              LOWER(d.TITLE)   LIKE '%' || LOWER(#{q}) || '%'
+              OR LOWER(we.NAME) LIKE '%' || LOWER(#{q}) || '%'
+              OR LOWER(dd.NAME) LIKE '%' || LOWER(#{q}) || '%'
+              OR LOWER(NVL(f.FORMCLASS, TO_CHAR(d.SFORMNO))) LIKE '%' || LOWER(#{q}) || '%'
+            )
+            ]]>
+          </otherwise>
+        </choose>
+      </if>
+    <![CDATA[
+      ORDER BY d.DDATE DESC, d.SIGNNO DESC
+    ) t
+    WHERE ROWNUM <= #{end}
+  )
+  WHERE rn >= #{start}
+  ]]>
+</select>
+
+  
+
+  <!-- 문서 상세: SIGNDOC 단건 -->
+  <select id="getSignDoc" parameterType="string" resultMap="ApprovalVOMap">
+  <![CDATA[
+  SELECT
+    d.SIGNNO,
+    d.TITLE,
+    d.ENO AS DOC_ENO,
+    d.DNO AS DOC_DNO,
+    /* ▼ FORMCLASS로 바인딩 */
+    NVL(f.FORMCLASS, TO_CHAR(d.SFORMNO)) AS SFORMNO,
+    d.DDATE,
+    d.EDATE,
+    d.SIGNCONTENT,
+    NVL(d.TEMPSAVE,0) AS TEMPSAVE,
+    d.STATE AS DOC_STATE,
+    NVL(d.EMERGENCY,0) AS EMERGENCY,
+    CAST(NULL AS NUMBER)        AS SIGNLINENO,
+    CAST(NULL AS NUMBER)        AS APPROVER_ENO,
+    CAST(NULL AS NUMBER)        AS ORDER_SEQ,
+    CAST(NULL AS NUMBER)        AS ROUTE_STATE,
+    CAST(NULL AS DATE)          AS SIGNDATE,
+    CAST(NULL AS VARCHAR2(100)) AS EMP_NAME,
+    CAST(NULL AS NUMBER)        AS EMP_DNO
+  FROM SIGNDOC d
+  LEFT JOIN SIGNFORM f ON f.SFORMNO = d.SFORMNO     -- ★
+  WHERE d.SIGNNO = #{value}
+  ]]>
+</select>
+
+  
+  <!-- 결재(승인/반려) 수행: 내 차례 + 대기(0) 상태일 때만 갱신 -->
+<update id="actSignLine" parameterType="map">
+  <![CDATA[
+  UPDATE SIGNLINE l
+     SET l.STATE = #{state},    -- 1=승인, 2=반려
+         l.SIGNDATE = SYSDATE
+   WHERE l.SIGNNO = #{signNo}
+     AND l.ENO    = #{eno}
+     AND NVL(l.STATE,0) = 0
+     AND NOT EXISTS (
+           SELECT 1 FROM SIGNLINE p
+            WHERE p.SIGNNO = l.SIGNNO
+              AND p.SIGNRANK < l.SIGNRANK
+              AND NVL(p.STATE,0) <> 1
+         )
+  ]]>
+</update>
+
+<!-- 모두 승인되면 문서 완료 처리 -->
+<update id="completeDocIfAllApproved" parameterType="string">
+  <![CDATA[
+  UPDATE SIGNDOC d
+     SET d.STATE = 3,  -- 완료
+         d.EDATE = SYSDATE
+   WHERE d.SIGNNO = #{value}
+     AND NOT EXISTS (
+           SELECT 1 FROM SIGNLINE x
+            WHERE x.SIGNNO = d.SIGNNO
+              AND NVL(x.STATE,0) <> 1
+         )
+  ]]>
+</update>
+
+<!-- 반려 시 문서 반려 처리 -->
+<update id="rejectDoc" parameterType="string">
+  <![CDATA[
+  UPDATE SIGNDOC
+     SET STATE = 4,  -- 반려
+         EDATE = SYSDATE
+   WHERE SIGNNO = #{value}
+  ]]>
+</update>
+  
 
 </mapper>

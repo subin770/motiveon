@@ -33,21 +33,7 @@ public class WorkDAOImpl implements WorkDAO {
         sqlSession.insert(NAMESPACE + "insertWork", work);
     }
 
-    @Override
-    public WorkVO selectWorkDetail(String wcode) {
-        return sqlSession.selectOne(NAMESPACE + "selectWorkDetail", wcode);
-    }
 
-    @Override
-    public int updateApproval(String wcode, int eno) {
-        // eno까지 활용하려면 Map 전달
-        return sqlSession.update(NAMESPACE + "updateApproval", Map.of("wcode", wcode, "eno", eno));
-    }
-
-    @Override
-    public void insertObjection(ObjectionDTO dto) {
-        sqlSession.insert(NAMESPACE + "insertObjection", dto);
-    }
 
     @Override
     public List<WorkListDTO> selectMyList(Map<String, Object> params) {
@@ -64,11 +50,33 @@ public class WorkDAOImpl implements WorkDAO {
         return sqlSession.update(NAMESPACE + "updateWork", work);
     }
 
+    @Override
+    public void approveWork(Map<String,Object> param) {
+        sqlSession.update(NAMESPACE + "approveWork", param);
+    }
+
+    @Override
+    public void rejectWork(Map<String,Object> param) {
+        sqlSession.update(NAMESPACE + "rejectWork", param);
+    }
+
+    @Override
+    public void insertRejectReason(Map<String,Object> param) {
+        sqlSession.insert(NAMESPACE + "insertRejectReason", param);
+    }
+ 
     
 
     @Override
     public List<WorkListDTO> selectWorkList() {
         return sqlSession.selectList(NAMESPACE + "selectWorkList");
+    }
+    @Override
+    public int updateApproval(String wcode, int eno) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("wcode", wcode);
+        param.put("eno", eno);
+        return sqlSession.update(NAMESPACE + "updateApproval", param);
     }
 
 
@@ -78,12 +86,15 @@ public class WorkDAOImpl implements WorkDAO {
 		// TODO Auto-generated method stub
 		
 	}
-	
 	@Override
-	public void updateStatus(String wcode, String status) {
-	    sqlSession.update("Work-Mapper.updateStatus", Map.of("wcode", wcode, "status", status));
-	}
+    public List<WorkListDTO> selectMyWorkList(int eno) {
+        return sqlSession.selectList(NAMESPACE + "selectMyWorkList", eno);
+    }
 
+    @Override
+    public List<WorkListDTO> selectRequestedWorkList(int eno) {
+        return sqlSession.selectList(NAMESPACE + "selectRequestedWorkList", eno);
+    }
 
 
 	@Override
@@ -116,11 +127,7 @@ public class WorkDAOImpl implements WorkDAO {
 
 	
 
-	@Override
-	public List<WorkListDTO> selectRequestedWorkList(int requesterEno) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	 @Override
 	    public List<WorkListDTO> selectWeeklyClosingList(int eno) {
@@ -148,11 +155,6 @@ public class WorkDAOImpl implements WorkDAO {
 			return null;
 		}
 		
-		 @Override
-		    public List<WorkListDTO> selectMyWorkList(int eno) {
-		        return sqlSession.selectList(NAMESPACE + "selectMyWorkList", eno);
-		    }
-
 
 		@Override
 	    public List<WorkListDTO> selectToReqList(int eno) {
@@ -168,4 +170,54 @@ public class WorkDAOImpl implements WorkDAO {
 		    sqlSession.update(NAMESPACE + "updateWorkStatusSimple", param);
 		}
 
+	
+
+		    @Override
+		    public void insertObjection(ObjectionDTO dto) {
+		        sqlSession.insert(NAMESPACE + "insertObjection", dto);
+		    }
+
+		    
+		    @Override
+		    public WorkVO selectWorkDetail(String wcode) {
+		        return sqlSession.selectOne(NAMESPACE + "selectWorkDetail", wcode);
+		    }
+
+		    @Override
+		    public void updateStatus(String wcode, String status) {
+		        sqlSession.update(NAMESPACE + "updateStatus", 
+		            new java.util.HashMap<String, Object>() {{
+		                put("wcode", wcode);
+		                put("status", status);
+		            }}
+		        );
+		    }
+
+		    @Override
+		    public void insertRejectReason(String wcode, String reason) {
+		        sqlSession.insert(NAMESPACE + "insertRejectReason", 
+		            new java.util.HashMap<String, Object>() {{
+		                put("wcode", wcode);
+		                put("reason", reason);
+		            }}
+		        );
+		    }
+
+		    @Override
+		    public void insertObjection(String wcode, String reason) {
+		        sqlSession.insert(NAMESPACE + "insertObjection", 
+		            new java.util.HashMap<String, Object>() {{
+		                put("wcode", wcode);
+		                put("reason", reason);
+		            }}
+		        );
+		    }
+
+		    @Override
+		    public void deleteWork(String wcode) {
+		        sqlSession.delete(NAMESPACE + "deleteWork", wcode);
+		    }
+		    
+		    
+		    
 }

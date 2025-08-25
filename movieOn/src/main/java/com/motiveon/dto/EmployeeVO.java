@@ -1,5 +1,4 @@
 package com.motiveon.dto;
-import java.util.List;
 
 public class EmployeeVO {
 
@@ -17,10 +16,7 @@ public class EmployeeVO {
     private int signtype;
     private String signpath;
     private String condition;
-    
-
-
-    private String authority; // 권한
+    private String authority; 
     
     public int getEno() {
         return eno;

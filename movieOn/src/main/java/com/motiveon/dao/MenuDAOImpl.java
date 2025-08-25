@@ -32,4 +32,6 @@ public class MenuDAOImpl implements MenuDAO {
 	public MenuVO selectMenuByMname(String mName) throws SQLException {
 		return session.selectOne("Menu-Mapper.selectMenuByMname", mName);
 	}
+
+	
 }

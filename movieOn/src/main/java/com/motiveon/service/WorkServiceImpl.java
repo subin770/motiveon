@@ -67,8 +67,13 @@ public class WorkServiceImpl implements WorkService {
 
     /** ================== 상세 ================== */
     @Override
-    public WorkVO getWorkDetail(String wcode) {
-        return workDAO.selectWorkDetail(wcode);
+    public List<WorkListDTO> getMyWorkList(int eno) {
+        return workDAO.selectMyWorkList(eno);
+    }
+
+    @Override
+    public List<WorkListDTO> getRequestedWorkList(int eno) {
+        return workDAO.selectRequestedWorkList(eno);
     }
 
     @Override
@@ -76,20 +81,6 @@ public class WorkServiceImpl implements WorkService {
         return workDAO.selectWorkDetail(wcode);
     }
 
-    /** ================== 승인 ================== */
-    @Transactional
-    @Override
-    public int approveWork(String wcode) throws Exception {
-        return workDAO.updateWorkStatus(wcode, "승인", "APPROVED");
-    }
-
-    /** ================== 반려 ================== */
-    @Transactional
-    @Override
-    public int rejectWork(String wcode, String reason) throws Exception {
-        // TODO: reason 저장 필요 → DAO에서 반려 사유 컬럼이 있으면 같이 update
-        return workDAO.updateWorkStatus(wcode, "반려", "REJECT");
-    }
 
     /** ================== 이의신청 ================== */
     @Override
@@ -190,11 +181,7 @@ public class WorkServiceImpl implements WorkService {
     }
 
     /** ================== 요청자 / 담당자 ================== */
-    @Override
-    public List<WorkListDTO> getMyWorkList(int eno) {
-        return workDAO.selectMyWorkList(eno);
-    }
-    
+
     @Override
     public List<WorkListDTO> getToReqList(int eno) {
         return workDAO.selectToReqList(eno);
@@ -226,8 +213,75 @@ public class WorkServiceImpl implements WorkService {
         return workDAO.selectWaitingRequestedList(eno);
     }
 
-	
+
+
+    @Override
+    public void updateStatus(String wcode, String status) {
+        workDAO.updateStatus(wcode, status);
+    }
+
+
+    @Override
+    public WorkVO getWorkDetail(String wcode) {
+        return workDAO.selectWorkDetail(wcode);
+    }
+
+    @Override
+    @Transactional
+    public void approveWork(String wcode) {
+        workDAO.updateStatus(wcode, "ING"); // 승인 시 상태: 진행
+    }
+
+    @Override
+    @Transactional
+    public void rejectWork(String wcode, String reason) {
+        workDAO.updateStatus(wcode, "REJECT");
+        workDAO.insertRejectReason(wcode, reason);
+    }
+
+    @Override
+    @Transactional
+    public void insertObjection(String wcode, String reason) {
+        workDAO.insertObjection(wcode, reason);
+    }
+
+    @Override
+    @Transactional
+    public void deleteWork(String wcode) {
+        workDAO.deleteWork(wcode);
+    }
     
+
+
+
+
+    @Override
+    @Transactional
+    public void insertObjection(ObjectionDTO dto) {
+        workDAO.insertObjection(dto);
+        // 상태도 "OBJECTION" 으로
+        workDAO.updateStatus(dto.getWcode(), "OBJECTION");
+    }
     
+    @Override
+    public void approveWork(String wcode, int eno) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("wcode", wcode);
+        param.put("eno", eno);
+        workDAO.approveWork(param);  // Mapper의 approveWork 실행
+    }
+
+    @Override
+    public void rejectWork(String wcode, int eno, String reason) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("wcode", wcode);
+        param.put("eno", eno);
+        param.put("reason", reason);
+
+        workDAO.rejectWork(param);           // WORK 테이블 상태 REJECT
+        workDAO.insertRejectReason(param);   // 반려사유 로그 남기기
+    }
+
+
     
 }

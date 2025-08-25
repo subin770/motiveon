@@ -114,7 +114,7 @@ ul.tree {
 
 </head>
 <body>
-	<div class="wrap">
+	<div class="context-wrap">
 		<div class="h3">
 			결재 양식 선택 
 		</div>

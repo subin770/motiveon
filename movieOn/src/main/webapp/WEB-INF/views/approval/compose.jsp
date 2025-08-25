@@ -391,7 +391,15 @@ a { color: inherit; text-decoration: none; }
                     </tr>
                   </table>
 
-                  <div class="editor" contenteditable="true" aria-label="본문 작성 영역">내용을 입력하세요.</div>
+                  <div
+  class="editor"
+  contenteditable="true"
+  role="textbox"
+  aria-multiline="true"
+  aria-label="본문 작성 영역"
+  data-placeholder="내용을 입력하세요">
+</div>
+
                 </c:otherwise>
               </c:choose>
             </div>

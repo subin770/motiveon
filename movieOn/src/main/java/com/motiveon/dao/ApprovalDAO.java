@@ -83,7 +83,6 @@ public interface ApprovalDAO {
     Map<String, Object> getEmpBasic(@Param("eno") Long eno);
     
 
-    int insertHistory(@Param("signno") String signno, @Param("content") String content);
     
     int deleteHistoryBySignNos(@Param("ids") List<String> signNos);
     int deleteTempBySignNos(@Param("ids") List<String> signNos);
@@ -106,4 +105,18 @@ public interface ApprovalDAO {
 
     /** 내가 결재자인 문서함 목록 (start/end: 1-base, Oracle ROWNUM) */
     List<Map<String, Object>> approveList(Map<String, Object> p);
+
+    List<ApprovalVO> selectSignLines(@Param("signNo") String signNo);
+    List<ApprovalVO> selectSignRefs (@Param("signNo") String signNo);
+    
+    ApprovalVO getSignDoc(@Param("signNo") String signNo);
+    
+    int actSignLine(Map<String, Object> param);
+    int completeDocIfAllApproved(String signNo);
+    int rejectDoc(String signNo);
+
+ 
+    int insertHistory(@Param("signno") String signNo,
+            @Param("content") String content);
+    
 }

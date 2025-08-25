@@ -63,9 +63,19 @@
 
   <!-- 상단바 -->
   <div class="topbar">
-    <h3 class="m-0 font-weight-bold">업무 등록</h3>
+    <h3 class="m-0 font-weight-bold">
+      <c:choose>
+        <c:when test="${empty work.wcode}">업무 등록</c:when>
+        <c:otherwise>업무 수정</c:otherwise>
+      </c:choose>
+    </h3>
     <div>
-      <button type="button" class="btn btn-primary btn-sm" id="btnSubmit">등록</button>
+      <button type="button" class="btn btn-primary btn-sm" id="btnSubmit">
+        <c:choose>
+          <c:when test="${empty work.wcode}">등록</c:when>
+          <c:otherwise>수정</c:otherwise>
+        </c:choose>
+      </button>
       <button type="button" class="btn btn-default btn-sm" id="btnCancel">취소</button>
     </div>
   </div>
@@ -74,10 +84,18 @@
   <div class="split">
     <!-- 좌측 입력 -->
     <div class="left-pane">
-      <form id="workForm" action="<c:url value='/work/regist'/>" method="post" enctype="multipart/form-data">
+      <form id="workForm" 
+            action="<c:url value='${empty work.wcode ? "/work/regist" : "/work/modify"}'/>" 
+            method="post" enctype="multipart/form-data">
+
+        <!-- 수정 모드일 때만 hidden wcode -->
+        <c:if test="${not empty work.wcode}">
+          <input type="hidden" name="wcode" value="${work.wcode}">
+        </c:if>
+
         <input type="hidden" name="requesterEno" value="${loginUser.eno}">
         <input type="hidden" name="requesterDno" value="${loginUser.dno}">
-        <input type="hidden" name="ownerEno" id="ownerEno">
+        <input type="hidden" name="ownerEno" id="ownerEno" value="${work.managerEno}">
 
         <table class="form-table">
           <tr>
@@ -86,13 +104,15 @@
           </tr>
           <tr>
             <th>제목</th>
-            <td><input type="text" class="input-clean" name="wtitle" id="wtitle" placeholder="제목을 입력해주세요." maxlength="150" required></td>
+            <td><input type="text" class="input-clean" name="wtitle" id="wtitle"
+                       value="${work.wtitle}" placeholder="제목을 입력해주세요." maxlength="150" required></td>
           </tr>
           <tr>
             <th>담당자</th>
             <td>
               <div class="position-relative">
-                <input type="text" class="input-clean pr-4" name="ownerName" id="ownerName" placeholder="우측 조직도에서 선택" readonly>
+                <input type="text" class="input-clean pr-4" name="ownerName" id="ownerName" 
+                       value="${work.managerName}" placeholder="우측 조직도에서 선택" readonly>
                 <button type="button" id="btnClearOwner" class="clear-btn d-none">&times;</button>
               </div>
               <small class="text-muted">미선택 시 요청자가 자동 담당자로 지정됩니다.</small>
@@ -100,12 +120,12 @@
           </tr>
           <tr>
             <th>기한</th>
-            <td><input type="date" class="form-control" name="wend" id="wend" required></td>
+            <td><input type="date" class="form-control" name="wend" id="wend" value="${work.wend}" required></td>
           </tr>
         </table>
 
         <div class="mt-2">
-          <textarea id="editor" name="wcontent" required></textarea>
+          <textarea id="editor" name="wcontent" required>${work.wcontent}</textarea>
         </div>
 
         <div class="mt-2 file-drop" id="fileBox">
@@ -166,7 +186,7 @@ $('#btnClearOwner').on('click', function(){
   toggleOwnerClear();
 });
 
-/* 등록 버튼 */
+/* 등록/수정 버튼 */
 $('#btnSubmit').on('click', function(){
   const title = $('#wtitle').val().trim();
   const wend  = $('#wend').val().trim();
@@ -191,16 +211,20 @@ $('#btnSubmit').on('click', function(){
     processData: false,
     contentType: false,
     success: function(){
-      alert('등록이 완료되었습니다.');
+      // 등록/수정 성공 알림
+      const msg = "${empty work.wcode ? '업무가 등록되었습니다.' : '업무가 수정되었습니다.'}";
+      alert(msg);
+
+      // 부모창 새로고침 + 팝업 닫기
       if(window.opener){
         window.opener.location.reload();
         window.close();
       } else {
-        location.href = '<c:url value="/work/list"/>';
+        location.href = '<c:url value="/work/myWorkList"/>';
       }
     },
     error: function(xhr){
-      alert('등록 실패: ' + xhr.status);
+      alert('처리 실패: ' + xhr.status);
     }
   });
 });

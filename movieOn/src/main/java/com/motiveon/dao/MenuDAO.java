@@ -16,4 +16,5 @@ public interface MenuDAO {
 	MenuVO selectMenuByMcode(String mCode) throws SQLException;
 
 	MenuVO selectMenuByMname(String mName) throws SQLException;
+	
 }

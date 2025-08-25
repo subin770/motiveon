@@ -14,12 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttribute;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.motiveon.dto.EmployeeVO;
 import com.motiveon.dto.WorkListDTO;
-import com.motiveon.dto.WorkReplyVO;
 import com.motiveon.dto.WorkVO;
 import com.motiveon.service.WorkService;
 
@@ -48,15 +46,6 @@ public class WorkController {
         form.setRequesterEno(requesterEno);
         form.setManagerEno(managerEno);
 
-        // 파일 처리 (추후 구현)
-        if (form.getFiles() != null) {
-            for (MultipartFile f : form.getFiles()) {
-                if (!f.isEmpty()) {
-                    // 파일 업로드 로직
-                }
-            }
-        }
-
         workService.regist(form, requesterEno, managerEno);
 
         rttr.addFlashAttribute("message", "업무가 등록되었습니다.");
@@ -64,78 +53,85 @@ public class WorkController {
     }
 
     /** ================== 상세 ================== */
- // WorkController.java
-    @GetMapping("/detail")
-    public String workDetail(@RequestParam("wcode") String wcode, Model model) {
+    @GetMapping("/workDetail")
+    public String detail(@RequestParam("wcode") String wcode, Model model) {
+        WorkVO work = workService.getWorkDetail(wcode);  // DB에서 데이터 조회
+        model.addAttribute("work", work);
+        return "work/workDetail";
+    }
+    
+    // 내업무
+    @GetMapping("/myList")
+    public String myList(@SessionAttribute("loginUser") EmployeeVO loginUser, Model model) {
+        List<WorkListDTO> list = workService.getMyWorkList(loginUser.getEno());
+        model.addAttribute("workList", list);
+        return "work/myWorkList";  // 내업무 JSP
+    }
+
+ // 요청한 업무 상세보기
+    @GetMapping("/toReqDetail")
+    public String toReqDetail(@RequestParam("wcode") String wcode, Model model) {
         WorkVO work = workService.getWorkDetail(wcode);
         model.addAttribute("work", work);
-        return "work/workDetail"; // JSP 경로
+        return "work/toReqDetail";  // JSP 경로
     }
 
 
+    /** 요청한 업무 상세보기 */
+    @GetMapping("/workReqDetail")
+    public String workReqDetail(@RequestParam("wcode") String wcode, Model model) {
+        WorkVO work = workService.getWorkDetail(wcode);
+        model.addAttribute("work", work);
+        return "work/workReqDetail";
+    }
 
-    /** 승인 처리 */
+    /** ================== 승인/반려/이의 ================== */
     @PostMapping("/approve")
     @ResponseBody
-    public String approve(@RequestParam("wcode") String wcode) {
-        try {
-            int result = workService.approveWork(wcode);
-            return result > 0 ? "SUCCESS" : "FAIL";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "FAIL";
-        }
+    public String approve(@RequestParam String wcode,
+                          @SessionAttribute("loginUser") EmployeeVO loginUser) {
+        workService.approveWork(wcode, loginUser.getEno());
+        return "success"; // 반드시 소문자 success 리턴
     }
 
-    /** 반려 처리 */
     @PostMapping("/reject")
     @ResponseBody
-    public String reject(@RequestParam("wcode") String wcode, @RequestParam("reason") String reason) {
-        try {
-            int result = workService.rejectWork(wcode, reason);
-            return result > 0 ? "SUCCESS" : "FAIL";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "FAIL";
-        }
+    public String reject(@RequestParam String wcode,
+                         @RequestParam String reason,
+                         @SessionAttribute("loginUser") EmployeeVO loginUser) {
+        workService.rejectWork(wcode, loginUser.getEno(), reason);
+        return "success";
     }
 
-    /** 이의신청 처리 */
+
+
+
     @PostMapping("/objection")
-    public String objection(@RequestParam String content,
-                            @RequestParam String wcode,
-                            HttpSession session,
-                            RedirectAttributes rttr) throws Exception {
-        EmployeeVO loginUser = (EmployeeVO) session.getAttribute("loginUser");
+    @ResponseBody
+    public String objection(@RequestParam("wcode") String wcode,
+                            @RequestParam("reason") String reason) {
+        workService.insertObjection(wcode, reason);
+        return "OK";
+    }
 
-        WorkReplyVO reply = new WorkReplyVO();
-        reply.setWcode(wcode);
-        reply.setEno(loginUser.getEno());
-        reply.setWrcontent(content);
-
-        workService.insertObjection(reply);
-
-        rttr.addFlashAttribute("message", "이의신청이 등록되었습니다.");
-        return "redirect:/work/myWorkList";
+    /** 삭제 */
+    @PostMapping("/delete")
+    @ResponseBody
+    public String delete(@RequestParam("wcode") String wcode) {
+        workService.deleteWork(wcode);
+        return "OK";
     }
 
     /** ================== 목록 ================== */
-
-    // 내가 담당자인 업무
     @GetMapping("/myWorkList")
     public String myWorkList(HttpSession session, Model model) {
         EmployeeVO loginUser = (EmployeeVO) session.getAttribute("loginUser");
         int eno = loginUser.getEno();
-
         List<WorkListDTO> myList = workService.getMyWorkList(eno);
-
-        // JSP에서 쓸 이름을 myList 로 고정
         model.addAttribute("myList", myList);
-
         return "work/myWorkList";
     }
 
-    // 내가 요청한 업무
     @GetMapping("/toReqList")
     public String toReqList(HttpSession session, Model model) {
         int eno = ((EmployeeVO) session.getAttribute("loginUser")).getEno();
@@ -144,89 +140,65 @@ public class WorkController {
         return "work/toReqList";
     }
 
-    // 대기중 업무
-    @GetMapping("/waitDetail")
-    public String waitDetail(Model model, HttpSession session) {
-        EmployeeVO loginUser = (EmployeeVO) session.getAttribute("loginUser");
-        if (loginUser != null) {
-            List<WorkListDTO> list = workService.getWaitingRequestedList(loginUser.getEno());
-            model.addAttribute("workList", list);
-        }
-        return "work/waitDetail";
-    }
-
-    // 부서 업무
     @GetMapping("/depWorkList")
-    public String depWorkList(Model model, HttpSession session) {
+    public String depWorkList(HttpSession session, Model model) {
         EmployeeVO loginUser = (EmployeeVO) session.getAttribute("loginUser");
-        if (loginUser != null) {
-            List<WorkListDTO> list = workService.depWorkList(loginUser.getDno());
-            model.addAttribute("workList", list);
-        }
+        List<WorkListDTO> list = workService.depWorkList(loginUser.getDno());
+        model.addAttribute("workList", list);
         return "work/depWorkList";
     }
 
-    // 승인 대기 업무
     @GetMapping("/pendingApproval")
-    public String pendingApproval(Model model, HttpSession session) {
+    public String pendingApproval(HttpSession session, Model model) {
         EmployeeVO loginUser = (EmployeeVO) session.getAttribute("loginUser");
-        if (loginUser != null) {
-            List<WorkListDTO> list = workService.getPendingApprovalList(loginUser.getEno());
-            model.addAttribute("workList", list);
-        }
+        List<WorkListDTO> list = workService.getPendingApprovalList(loginUser.getEno());
+        model.addAttribute("workList", list);
         return "work/pendingApproval";
     }
 
-    /** ================== 수정 ================== */
-    @PostMapping("/modify")
-    public String modify(@ModelAttribute WorkVO form,
-                         @SessionAttribute("loginUser") EmployeeVO me,
-                         RedirectAttributes rttr) {
-        workService.modify(form, me.getEno());
-        rttr.addFlashAttribute("message", "업무가 수정되었습니다.");
-        rttr.addAttribute("wcode", form.getWcode());
-        return "redirect:/work/detail";
-    }
-
-    /** ================== 메인 대시보드 ================== */
-   
-    @GetMapping("/main")
-    public String main(Model model, HttpSession session) {
-        EmployeeVO loginUser = (EmployeeVO) session.getAttribute("loginUser");
-        int eno = loginUser.getEno();
-
-        // 금주 마감 업무
-        List<WorkListDTO> weeklyClosingList = workService.selectWeeklyClosingList(eno);
-        model.addAttribute("weeklyClosingList", weeklyClosingList);
-
-        // 금주 요청한 업무
-        List<WorkListDTO> weeklyRequestedList = workService.selectWeeklyRequestedList(eno);
-        model.addAttribute("weeklyRequestedList", weeklyRequestedList);
-
-        // 승인 대기 업무
-        List<WorkListDTO> pendingApprovalList = workService.selectPendingApprovalList(eno);
-        model.addAttribute("pendingApprovalList", pendingApprovalList);
-
-        // 대기중 요청 업무
-        List<WorkListDTO> waitingRequestedList = workService.selectWaitingRequestedList(eno);
-        model.addAttribute("waitingRequestedList", waitingRequestedList);
-
-        return "work/main";
-    }
-    @GetMapping("/workDetail")
-    public String workDetail() {
-        return "work/workDetail";
-    }
-
-
-
-    /** ================== 뷰 전용 ================== */
+    /** ================== 등록/수정 폼 ================== */
     @GetMapping("/workRegistForm")
-    public String workRegistForm() {
+    public String workRegistForm(@RequestParam(value="wcode", required=false) String wcode,
+                                 Model model,
+                                 @SessionAttribute("loginUser") EmployeeVO loginUser) {
+
+        if (wcode != null) { // 수정
+            WorkVO work = workService.getWorkDetail(wcode);
+            model.addAttribute("work", work);
+            model.addAttribute("mode", "modify");
+        } else { // 등록
+            model.addAttribute("work", new WorkVO());
+            model.addAttribute("mode", "regist");
+        }
+
+        model.addAttribute("loginUser", loginUser);
         return "work/workRegistForm";
     }
 
-    /** ================== 상태 변경 ================== */
+    /** 수정 처리 */
+    @PostMapping("/modify")
+    public String modifySubmit(@ModelAttribute WorkVO work,
+                               RedirectAttributes rttr) {
+        workService.modify(work, work.getManagerEno());
+        rttr.addFlashAttribute("message", "업무가 수정되었습니다.");
+        return "redirect:/work/myWorkList";
+    }
+
+    /** ================== 메인 ================== */
+    @GetMapping("/main")
+    public String main(HttpSession session, Model model) {
+        EmployeeVO loginUser = (EmployeeVO) session.getAttribute("loginUser");
+        int eno = loginUser.getEno();
+
+        model.addAttribute("weeklyClosingList", workService.selectWeeklyClosingList(eno));
+        model.addAttribute("weeklyRequestedList", workService.selectWeeklyRequestedList(eno));
+        model.addAttribute("pendingApprovalList", workService.selectPendingApprovalList(eno));
+        model.addAttribute("waitingRequestedList", workService.selectWaitingRequestedList(eno));
+
+        return "work/main";
+    }
+
+    /** 상태 변경 */
     @PostMapping("/updateStatus")
     @ResponseBody
     public String updateWorkStatus(@RequestParam("wcode") String wcode,

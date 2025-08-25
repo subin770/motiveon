@@ -4,20 +4,6 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="Notice-Mapper">
 
-	<!-- 🔹 resultMap 정의: VO 필드와 컬럼 매핑 -->
-	<resultMap id="noticeResult" type="com.motiveon.dto.NoticeVO">
-		<id column="nno" property="nno" />
-		<result column="title" property="title" />
-		<result column="content" property="content" />
-		<result column="regdate" property="regdate" />
-		<result column="UPDATEDATE " property="UPDATEDATE " />
-		<result column="viewcnt" property="viewcnt" />
-		<result column="eno" property="eno" />
-		<result column="dno" property="dno" />
-		<result column="fixed" property="fixed" />
-		<result column="ename" property="ename" />
-		<result column="filename" property="filename" />
-	</resultMap>
 
 	<!-- 🔍 검색 조건 SQL 공통 분리 -->
 	<sql id="search">
@@ -37,7 +23,7 @@
 	<!-- 🔹 공지사항 목록 조회 (상단고정 포함 정렬) -->
 	<select id="selectSearchNoticeList"
 		parameterType="com.motiveon.command.PageMaker"
-		resultMap="noticeResult">
+		resultType="notice">
 		SELECT *
 		FROM (
 		SELECT rownum AS rnum, SearchNoticeResult.*
@@ -75,7 +61,7 @@
 
 	<!-- 🔹 공지사항 상세 조회 -->
 	<select id="selectNoticeByNno" parameterType="int"
-		resultMap="noticeResult">
+		resultType="notice">
 		SELECT
 		n.nno, n.title, n.content, n.regdate, n.UPDATEDATE , n.viewcnt,
 		n.eno, n.dno, n.fixed,
@@ -149,12 +135,12 @@
 		WHERE nno = #{nno}
 	</update>
 
-	<select id="selectRecentNotices" resultMap="noticeResult">
+	<select id="selectRecentNotices" resultType="notice">
 <![CDATA[ SELECT * FROM ( SELECT n.nno, n.title, n.content, n.regdate, n.UPDATEDATE , n.viewcnt, n.eno, n.dno, n.fixed, e.name AS ename, a.filename FROM notice n LEFT JOIN employee e ON n.eno = e.eno LEFT JOIN nattach a ON n.nno = a.nno ORDER BY NVL(n.regdate, TO_DATE('1900-01-01', 'YYYY-MM-DD')) DESC ) WHERE ROWNUM <= 3 ]]>
 	</select>
 	
 	<!-- 중요 공지 하나만 꺼내오기 -->
-	<select id="selectFixedNotice" resultMap="noticeResult"> SELECT * FROM ( SELECT
+	<select id="selectFixedNotice" resultType="notice"> SELECT * FROM ( SELECT
 		* FROM notice WHERE fixed = '1' ORDER BY regdate DESC ) WHERE ROWNUM = 1
   </select>
 </mapper>

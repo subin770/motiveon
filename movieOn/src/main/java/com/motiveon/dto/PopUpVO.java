@@ -1,6 +1,8 @@
 package com.motiveon.dto;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -14,6 +16,16 @@ public class PopUpVO {
 	private Date deadLine;
 	public String getPopNo() {
 		return popNo;
+	}
+    private List<AttachmentVO> attachList = new ArrayList<>();
+
+	
+	
+	public List<AttachmentVO> getAttachList() {
+		return attachList;
+	}
+	public void setAttachList(List<AttachmentVO> attachList) {
+		this.attachList = attachList;
 	}
 	public void setPopNo(String popNo) {
 		this.popNo = popNo;

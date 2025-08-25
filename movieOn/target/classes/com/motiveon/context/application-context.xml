@@ -53,6 +53,12 @@
 	      class="com.motiveon.dao.WorkManagerDAOImpl">
 		<constructor-arg index="0" ref="sqlSession"/>
 	</bean>
+	
+	<bean id="accountDAO" class="com.motiveon.dao.AccountDAOImpl"
+		c:session-ref="sqlSession" />
+
+	<bean id="departmentDAO" class="com.motiveon.dao.DepartmentDAOImpl" 
+		c:session-ref="sqlSession" />
 
 <!-- MyBatis Mapper 스캔 -->
 <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
@@ -84,6 +90,14 @@
 	<bean id="popUpService"
           class="com.motiveon.service.PopUpServiceImpl"
           c:popUpDAO-ref="popUpDAO" />
+          
+    <bean id="accountService"
+		class="com.motiveon.service.AccountServiceImpl"
+		c:accountDAO-ref="accountDAO" />
+		
+	<bean id="departmentService" 
+		class="com.motiveon.service.DepartmentServiceImpl" 
+		c:departmentDAO-ref="departmentDAO" />
 
 
 

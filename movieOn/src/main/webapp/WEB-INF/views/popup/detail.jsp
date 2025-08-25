@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
 
 
 <body>
@@ -54,14 +56,34 @@
 
 							</div>
 
-							
-
-
 						</div>
 						<div class="form-group col-sm-12">
 							<label for="content">내 용</label>
 							<div id="content">${popup.content}</div>
 						</div>
+						
+						<div class="card card-outline card-success">
+    <div class="card-header">
+        <h5>첨부파일</h5>
+    </div>
+    <div class="card-body">
+        <c:if test="${not empty attachList}">
+            <ul>
+                <c:forEach var="file" items="${attachList}">
+                    <li>
+                        <a href="<%=request.getContextPath()%>/uploads/${file.fileName}" target="_blank">
+                            ${file.fileName}
+                        </a>
+                        <span> (${file.fileType})</span>
+                    </li>
+                </c:forEach>
+            </ul>
+        </c:if>
+        <c:if test="${empty attachList}">
+            <p>첨부파일이 없습니다.</p>
+        </c:if>
+    </div>
+</div>
 					</div>
 				</div>
 				<!-- end card -->

@@ -170,13 +170,6 @@ public class ApprovalDAOImpl implements ApprovalDAO {
     }
     
 
-    @Override
-    public int insertHistory(String signNo, String content) {
-        Map<String, Object> p = new HashMap<>();
-        p.put("signNo", signNo);   // ✅ 카멜케이스로 통일
-        p.put("content", content);
-        return session.insert(NS + "insertHistory", p);
-    }
     
     
     @Override
@@ -227,7 +220,54 @@ public class ApprovalDAOImpl implements ApprovalDAO {
     public List<Map<String, Object>> approveList(Map<String, Object> p) {
         return session.selectList(NS + "approveList", p);
     }
+    
+    public ApprovalVO getDoc(String signNo) {
+        return session.selectOne("Approval-Mapper.getSignDoc", signNo);
+    }
+    public List<ApprovalVO> getLines(String signNo) {
+        return session.selectList("Approval-Mapper.selectSignLines", signNo);
+    }
+    public List<ApprovalVO> getRefs(String signNo) {
+        return session.selectList("Approval-Mapper.selectSignRefs", signNo);
+    }
+    
+    @Override
+    public ApprovalVO getSignDoc(String signNo) {
+        return session.selectOne("Approval-Mapper.getSignDoc", signNo);
+    }
 
+    @Override
+    public List<ApprovalVO> selectSignLines(String signNo) {
+        return session.selectList("Approval-Mapper.selectSignLines", signNo);
+    }
+
+    @Override
+    public List<ApprovalVO> selectSignRefs(String signNo) {
+        return session.selectList("Approval-Mapper.selectSignRefs", signNo);
+    }
+    
+    @Override
+    public int actSignLine(Map<String, Object> param) {
+        return session.update("Approval-Mapper.actSignLine", param);
+    }
+
+    @Override
+    public int completeDocIfAllApproved(String signNo) {
+        return session.update("Approval-Mapper.completeDocIfAllApproved", signNo);
+    }
+
+    @Override
+    public int rejectDoc(String signNo) {
+        return session.update("Approval-Mapper.rejectDoc", signNo);
+    }
+
+    @Override
+    public int insertHistory(String signNo, String content) {
+        Map<String, Object> p = new HashMap<>();
+        p.put("signno", signNo);   // ✅ 매퍼의 #{signno}와 1:1 매칭
+        p.put("content", content); // ✅ #{content}
+        return session.insert(NS + "insertHistory", p);
+    }
 
     /* ===== 정리 메모 =====
        - 모든 쿼리 파라미터에서 사번 키는 'eno'로 통일.

@@ -2,6 +2,7 @@
     pageEncoding="UTF-8"%>
 
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <head>
 	<!-- summernote -->
@@ -69,6 +70,35 @@
 								<textarea class="form-control" name="content" id="content" rows="3"
 									placeholder="500자 내외로 작성하세요.">${fn:escapeXml(popup.content) }</textarea>						
 							</div>
+							<div class="form-group">								
+								<div class="card card-outline card-success">
+									<div class="card-header">
+										<h3 style="display:inline;line-height:40px;">첨부파일 : </h3>
+										&nbsp;&nbsp;
+										<button class="btn btn-primary"	onclick="addFile_go()" type="button" id="addFileBtn">Add File</button>
+									</div>									
+							
+									<div class="card-footer fileInput">
+										<ul class="mailbox-attachments d-flex align-items-stretch clearfix">
+											<!-- 첨부파일 썸네일 -->											
+											<c:forEach items="${poopup.attachList}" var="attach" >
+												<li class="attach-item thumb${attach.ano}" file-name="${attach.fileName.split('\\$\\$')[1] }" target-ano="${attach.ano }">																			
+													<div>
+														<a class="mailbox-attachment-name" href="getFile.do?ano=${attach.ano} " >													
+															<i class="fas fa-paperclip"></i>${attach.fileName.split('\\$\\$')[1] }&nbsp;&nbsp;
+															<button type="button" onclick="removeFile_go('thumb${attach.ano}');return false;"
+																style="border:0;outline:0;" class="badge bg-red">X</button>																									
+														</a>													
+													</div>
+												</li>												
+											</c:forEach>								
+										</ul>
+										<br/>														
+									</div>
+								</div>
+							</div>
+							
+							
 						</form>
 					</div><!--end card-body  -->
 					

@@ -60,5 +60,9 @@ public interface ApprovalService {
     int approveListCount(Long eno, String tab, String period, String field, String q);
     List<?> approveList(Long eno, String tab, String period, String field, String q, int start, int end);
 
+	Map<String, Object> getDetail(String signNo);
+	
+	  void actLine(String signNo, long eno, String action, String comment);
+
 
 }

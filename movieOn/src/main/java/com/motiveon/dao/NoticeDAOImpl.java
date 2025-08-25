@@ -2,6 +2,8 @@ package com.motiveon.dao;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.motiveon.command.PageMaker;
 import com.motiveon.dto.NoticeVO;
@@ -24,6 +26,7 @@ public class NoticeDAOImpl implements NoticeDAO {
 
     @Override
     public List<NoticeVO> selectSearchNoticeList(PageMaker pageMaker) throws SQLException {
+    	
         return sqlSession.selectList(NAMESPACE + "selectSearchNoticeList", pageMaker);
     }
 

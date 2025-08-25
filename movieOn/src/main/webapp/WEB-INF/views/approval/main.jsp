@@ -13,7 +13,6 @@
 }
 
 body {
-	margin: 0;
 	font-family: "Pretendard", "맑은 고딕", system-ui, -apple-system, Segoe UI,
 		Roboto, Apple SD Gothic Neo, sans-serif;
 	background: #fffff;
@@ -25,9 +24,6 @@ a {
 	text-decoration: none;
 }
 
-.wrap {
-	padding: 0 20px;
-}
 
 /* 검색/필터 바 (KPI 위) */
 .toolbar {
@@ -220,7 +216,7 @@ tbody tr:hover {
 </style>
 </head>
 <body>
-	<div class="wrap">
+	<div class="context-wrap">
 		<!-- 제목: 요청한 h3 스타일 -->
 		<h3 class="font-weight-bold"
 			style="padding-left: 10px; margin-left: 20px; margin-top: 10px; font-size: 22px;">
@@ -269,9 +265,7 @@ tbody tr:hover {
 				<div class="count">${urgentCount}</div>
 				<div class="title">긴급 결재 문서</div>
 				<div class="go">
-					<a
-						href="${pageContext.request.contextPath}/approval/list?filter=urgent"
-						class="btn btn-ghost">바로가기</a>
+					<a href="<c:url value='/approval/approveList'/>?tab=mine&urgent=1" class="btn btn-ghost">바로가기</a>
 				</div>
 			</article>
 
@@ -279,9 +273,7 @@ tbody tr:hover {
 				<div class="count">${returnedCount}</div>
 				<div class="title">기안 반려 문서</div>
 				<div class="go">
-					<a
-						href="${pageContext.request.contextPath}/approval/list?filter=returned"
-						class="btn btn-ghost">바로가기</a>
+					<a href="<c:url value='/approval/approveList'/>?tab=rejected" class="btn btn-ghost">바로가기</a>
 				</div>
 			</article>
 
@@ -289,9 +281,7 @@ tbody tr:hover {
 				<div class="count">${holdCount}</div>
 				<div class="title">결재 보류 문서</div>
 				<div class="go">
-					<a
-						href="${pageContext.request.contextPath}/approval/list?filter=hold"
-						class="btn btn-ghost">바로가기</a>
+					<a href="<c:url value='/approval/approveList'/>?tab=hold" class="btn btn-ghost">바로가기</a>
 				</div>
 			</article>
 
@@ -299,9 +289,7 @@ tbody tr:hover {
 				<div class="count">${waitingCount}</div>
 				<div class="title">결재 대기 문서</div>
 				<div class="go">
-					<a
-						href="${pageContext.request.contextPath}/approval/list?filter=waiting"
-						class="btn btn-ghost">바로가기</a>
+					<a href="<c:url value='/approval/approveList'/>?tab=mine" class="btn btn-ghost">바로가기</a>
 				</div>
 			</article>
 		</section>
@@ -322,7 +310,8 @@ tbody tr:hover {
 						</tr>
 					</thead>
 					<tbody>
-						<c:forEach var="row" items="${recentDrafts}">
+						<c:forEach var="row" items="${recentDrafts}" end="4">
+
 							<tr>
 								<td><fmt:formatDate value="${row.draftAt}"
 										pattern="yyyy-MM-dd" /></td>

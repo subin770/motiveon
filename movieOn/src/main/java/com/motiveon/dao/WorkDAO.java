@@ -16,11 +16,7 @@ public interface WorkDAO {
 
 	void insertWork(WorkVO work);
 
-	WorkVO selectWorkDetail(String wcode);
-
 	int updateApproval(String wcode, int eno);
-
-	void insertObjection(ObjectionDTO dto);
 
 	List<WorkListDTO> selectMyList(Map<String, Object> params);
 
@@ -38,11 +34,9 @@ public interface WorkDAO {
 
 	void updateWorkStatusApproved(String wcode);
 
-	void updateStatus(@Param("wcode") String wcode, @Param("status") String status);
-
 	void updateManagerAnswer(Map<String, Object> param);
 
-	List<WorkListDTO> selectRequestedWorkList(int requesterEno);
+
 
 	public int updateWorkStatus(String wcode, String status, String state);
 
@@ -56,8 +50,25 @@ public interface WorkDAO {
 
 	List<WorkListDTO> selectWaitingRequestedList(int eno);
 
-	List<WorkListDTO> selectMyWorkList(int eno);
+
 
 	List<WorkListDTO> selectToReqList(int eno);
 
+	List<WorkListDTO> selectMyWorkList(int eno);        // 내가 담당자인 업무
+    List<WorkListDTO> selectRequestedWorkList(int eno); // 내가 요청한 업무
+
+	void insertObjection(ObjectionDTO dto);
+	 void approveWork(Map<String,Object> param) ;
+	    void rejectWork(Map<String,Object> param)  ;
+	    void insertRejectReason(Map<String,Object> param)  ;
+
+    WorkVO selectWorkDetail(String wcode);
+
+    void updateStatus(String wcode, String status);
+
+    void insertRejectReason(String wcode, String reason);
+
+    void insertObjection(String wcode, String reason);
+
+    void deleteWork(String wcode);
 }

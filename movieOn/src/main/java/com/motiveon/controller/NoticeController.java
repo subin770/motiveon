@@ -33,6 +33,7 @@ public class NoticeController {
 		int totalCount = noticeService.getNoticeCount(pageMaker);
 		NoticeVO fixedNotice = noticeService.getFixedNotice();
 
+		System.out.println(noticeList);
 		model.addAttribute("notices", noticeList);
 		model.addAttribute("totalCount", totalCount);
 		model.addAttribute("pageCount", pageMaker.getRealEndPage());

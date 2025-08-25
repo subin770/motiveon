@@ -16,12 +16,10 @@ public interface WorkService {
     String regist(WorkVO work, int requesterEno, int ownerEno);
 
     // ================== 상세 ==================
-    WorkVO getWorkDetail(String wcode);
+  
     WorkVO getWorkByWcode(String wcode) throws Exception; // 필요 시 하나만 사용 가능
 
     // ================== 승인 / 반려 / 이의신청 ==================
-    int approveWork(String wcode) throws Exception;                  // 승인
-    int rejectWork(String wcode, String reason) throws Exception;    // 반려
 
     void objection(ObjectionDTO dto) throws Exception;               // 이의신청 등록
     List<WorkReplyVO> selectObjectionList(String wcode) throws Exception; // 이의신청 목록
@@ -56,7 +54,7 @@ public interface WorkService {
     // ================== 요청자 / 담당자 ==================
     
     List<WorkListDTO> getToReqList(int eno);
-    List<WorkListDTO> getMyWorkList(int eno);
+
     
     
     List<WorkListDTO> getWaitingRequestedList(int requesterEno) ;
@@ -66,4 +64,27 @@ public interface WorkService {
     List<WorkListDTO> selectWeeklyRequestedList(int eno);
     List<WorkListDTO> selectPendingApprovalList(int eno);
     List<WorkListDTO> selectWaitingRequestedList(int eno);
+    
+    
+    List<WorkListDTO> getMyWorkList(int eno);
+    List<WorkListDTO> getRequestedWorkList(int eno);
+   
+
+    void updateStatus(String wcode, String status);
+
+
+    void approveWork(String wcode, int eno); // 승인
+    void rejectWork(String wcode, int eno, String reason); // 반려
+    void insertObjection(ObjectionDTO dto); // 이의신청
+    
+    WorkVO getWorkDetail(String wcode);
+
+    void approveWork(String wcode);
+
+    void rejectWork(String wcode, String reason);
+
+    void insertObjection(String wcode, String reason);
+
+    void deleteWork(String wcode);
+    
 }

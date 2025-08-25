@@ -23,6 +23,9 @@ public class WorkVO {
 	private String wstate; // 상태 코드 (WAIT / ING / DONE / REJECT / DELEGATE)
 	private String wstatus; // 상태 한글명 (대기 / 진행 / 완료 / 반려 / 대리)
 	private int dno; // 부서코드
+	
+	private String catedetail;
+
 
 	// 요청자 / 담당자
 	private int requesterEno;
@@ -187,6 +190,14 @@ public class WorkVO {
 
 	public void setOriginalFilename(String originalFilename) {
 		this.originalFilename = originalFilename;
+	}
+
+	public String getCatedetail() {
+		return catedetail;
+	}
+
+	public void setCatedetail(String catedetail) {
+		this.catedetail = catedetail;
 	}
 
 	// === 헬퍼 메서드: 상태 코드 → 한글 라벨 변환 ===

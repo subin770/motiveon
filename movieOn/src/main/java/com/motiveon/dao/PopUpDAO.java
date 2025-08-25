@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.motiveon.command.PageMaker;  // PageMaker는 별도 정의 필요
+import com.motiveon.dto.AttachmentVO;
 import com.motiveon.dto.PopUpVO;
 
 public interface PopUpDAO {
@@ -20,4 +21,8 @@ public interface PopUpDAO {
     void updatePopup(PopUpVO popup) throws SQLException;
 
     void deletePopup(String popNo) throws SQLException;
+    
+    // 첨부파일 관련
+    void insertAttachment(AttachmentVO attach) throws SQLException;
+    List<AttachmentVO> selectAttachmentsByPopNo(int popNo) throws SQLException;
 }

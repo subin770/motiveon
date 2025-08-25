@@ -159,12 +159,62 @@ public class ApprovalServiceImpl implements ApprovalService {
         p.put("end", end);
         return approvalDAO.approveList(p);
     }
+    
 
 	@Override
 	public int deleteTempDocs(List<String> signNos) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-    
+	
+	@Override
+	public Map<String,Object> getDetail(String signNo) {
+	    ApprovalVO doc = approvalDAO.getSignDoc(signNo);
+	    if (doc == null) return null;
+	    List<ApprovalVO> lines = approvalDAO.selectSignLines(signNo);
+	    List<ApprovalVO> refs  = approvalDAO.selectSignRefs(signNo);
+	    Map<String,Object> res = new HashMap<>();
+	    res.put("doc", doc);
+	    res.put("lines", lines);
+	    res.put("refs", refs);
+	    return res;
+	}
+
+	@Transactional
+	@Override
+	public void actLine(String signNo, long eno, String action, String comment) {
+	    int state; // 1=approve, 2=reject
+	    if ("approve".equalsIgnoreCase(action)) state = 1;
+	    else if ("reject".equalsIgnoreCase(action)) state = 2;
+	    else throw new IllegalArgumentException("action must be approve/reject");
+
+	    Map<String,Object> p = new HashMap<>();
+	    p.put("signNo", signNo);
+	    p.put("eno", eno);
+	    p.put("state", state);
+
+	    // ✅ 여기서 approvalDAO 사용
+	    int updated = approvalDAO.actSignLine(p);
+	    if (updated == 0) {
+	        // 내 차례가 아니거나 이미 처리됨
+	        throw new IllegalStateException("내 차례가 아니거나 이미 처리된 문서입니다.");
+	    }
+
+	    // 히스토리 남기기: 기존 방식과 동일하게
+	    String msg = (state==1 ? "[승인]" : "[반려]") 
+	               + (comment != null && !comment.isBlank() ? " " + comment : "");
+	    approvalDAO.insertHistory(signNo, msg);
+
+	    if (state == 1) {
+	        // 모두 승인됐는지 체크 후 완료 처리
+	        approvalDAO.completeDocIfAllApproved(signNo);
+	    } else {
+	        // 반려면 즉시 문서 반려 처리
+	        approvalDAO.rejectDoc(signNo);
+	    }
+	}
+
+	
+	
     
 }

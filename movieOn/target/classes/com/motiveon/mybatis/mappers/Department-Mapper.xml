@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Department-Mapper">
+
+	<!-- 부서 목록 조회 -->
+	<select id="list" parameterType="map" resultType="department">
+		SELECT d.dno,
+		d.name,
+		d.manager,
+		e.name AS managerName,
+		e.job AS managerPosition,
+		d.createDate,
+		d.enabled,
+		(SELECT COUNT(*)
+		FROM employee e2
+		WHERE e2.dno = d.dno) AS memberCount
+		FROM department d
+		LEFT JOIN employee e ON d.manager = e.eno
+		WHERE 1=1
+		<if test="name != null and name != ''">
+			AND d.name LIKE '%' || #{name} || '%'
+		</if>
+		<if test="enabled != null">
+			AND d.enabled = #{enabled}
+		</if>
+		ORDER BY d.dno DESC
+	</select>
+
+	<!-- 부서 수 조회 (페이징용) -->
+	<select id="getDepartmentCount" parameterType="map"
+		resultType="int">
+		SELECT COUNT(*) FROM department
+		WHERE 1=1
+		<if test="name != null and name != ''">
+			AND name LIKE '%' || #{name} || '%'
+		</if>
+		<if test="enabled != null">
+			AND enabled = #{enabled}
+		</if>
+	</select>
+
+	<!-- dno로 부서 단건 조회 -->
+	<select id="getDepartmentByDno" parameterType="int"
+		resultType="department">
+		SELECT d.dno,
+		d.name,
+		d.manager,
+		e.name AS managerName,
+		e.job AS managerPosition,
+		d.createDate,
+		d.enabled,
+		(SELECT COUNT(*)
+		FROM employee e2
+		WHERE e2.dno = d.dno) AS memberCount
+		FROM department d
+		LEFT JOIN employee e ON d.manager = e.eno
+		WHERE d.dno = #{dno}
+	</select>
+
+	<!-- 신규 부서 등록 -->
+	<insert id="addDepartment" parameterType="department">
+		INSERT INTO department
+		(dno, name, manager, createDate, enabled)
+		VALUES (#{dno}, #{name},
+		#{manager}, #{createDate, jdbcType=DATE},
+		#{enabled})
+	</insert>
+
+	<!-- 부서 수정 -->
+	<update id="updateDepartment" parameterType="department">
+		UPDATE department
+		SET name = #{name},
+		manager = #{manager},
+		enabled = #{enabled},
+		WHERE dno
+		= #{dno}
+	</update>
+
+	<!-- 부서 삭제 -->
+	<delete id="removeDepartment" parameterType="int">
+		DELETE FROM
+		department WHERE dno = #{dno}
+	</delete>
+
+
+</mapper>
